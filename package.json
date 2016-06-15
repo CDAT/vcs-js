@@ -6,7 +6,7 @@
   "scripts": {
     "build": "webpack",
     "lint": "eslint --cache .",
-    "test": "npm run test"
+    "test": "npm run lint"
   },
   "author": "",
   "license": "Apache-2.0",
