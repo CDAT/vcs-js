@@ -1,7 +1,8 @@
+var webpack = require('webpack');
+
+var loaders = require('./config/webpack.loaders.js');
 var entry = require.resolve('./src/index.js');
 
-var webpack = require('webpack');
-var loaders = require('./config/webpack.loaders.js');
 var pluginList = [];
 
 if (process.env.NODE_ENV === 'production') {
@@ -20,11 +21,22 @@ module.exports = {
     path: './dist',
     filename: 'vcs.js',
   },
+  isparta: {
+    embedSource: true,
+    noAutoWrap: true,
+    babel: {
+      presets: ['es2015'],
+    },
+  },
   module: {
     preLoaders: [{
       test: /\.js$/,
       loader: 'eslint-loader',
       exclude: /node_modules/,
+    }, {
+      test: /.js$/,
+      include: /src\/*\.js/,
+      loader: 'isparta',
     }],
     loaders: [
       { test: entry, loader: 'expose?vcs' },

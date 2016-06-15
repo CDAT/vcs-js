@@ -6,11 +6,25 @@
   "scripts": {
     "build": "webpack",
     "lint": "eslint --cache .",
-    "test": "npm run lint"
+    "karma": "karma start --single-run",
+    "test": "npm run lint && npm run karma"
   },
   "author": "",
   "license": "Apache-2.0",
   "devDependencies": {
-    "kw-web-suite": "^2.0.1"
+    "chai": "^3.5.0",
+    "eslint-plugin-chai-expect": "^1.1.1",
+    "karma": "^0.13.22",
+    "karma-chai": "^0.1.0",
+    "karma-chai-plugins": "^0.7.0",
+    "karma-coverage": "^1.0.0",
+    "karma-mocha": "^1.0.1",
+    "karma-phantomjs-launcher": "^1.0.0",
+    "karma-sinon": "^1.0.5",
+    "karma-spec-reporter": "0.0.26",
+    "karma-webpack": "^1.7.0",
+    "kw-web-suite": "^2.0.1",
+    "mocha": "^2.5.3",
+    "phantomjs-prebuilt": "^2.1.7"
   }
 }
