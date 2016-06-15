@@ -2,10 +2,14 @@
   "name": "vcs-js",
   "version": "0.1.0",
   "description": "Javascript interface for vcs.",
-  "main": "index.js",
+  "main": "dist/vcs.js",
   "scripts": {
+    "lint": "eslint --cache .",
     "test": "npm run test"
   },
   "author": "",
-  "license": "Apache-2.0"
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "kw-web-suite": "^2.0.1"
+  }
 }
