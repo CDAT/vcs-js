@@ -4,6 +4,7 @@
   "description": "Javascript interface for vcs.",
   "main": "dist/vcs.js",
   "scripts": {
+    "build": "webpack",
     "lint": "eslint --cache .",
     "test": "npm run test"
   },
