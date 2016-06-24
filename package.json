@@ -31,5 +31,8 @@
     "kw-web-suite": "^2.0.1",
     "mocha": "^2.5.3",
     "phantomjs-prebuilt": "^2.1.7"
+  },
+  "dependencies": {
+    "bluebird": "^3.4.1"
   }
 }
