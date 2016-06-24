@@ -1,3 +1,5 @@
+var path = require('path');
+var isparta = require('isparta');
 var webpackLoaders = require('./webpack.loaders');
 var webpackResolve = require('./webpack.resolve');
 
@@ -22,24 +24,63 @@ module.exports = {
     'coverage',
   ],
   frameworks: [
-    'mocha', 'sinon', 'chai',
+    'mocha', 'sinon', 'chai-as-promised', 'chai',
   ],
   webpack: {
     cache: true,
     devtool: 'inline-source-map',
     resolve: webpackResolve,
+    bable: {
+      presets: ['es2015'],
+    },
+    isparta: {
+      embedSource: true,
+      babel: {
+        presets: ['es2015'],
+      },
+    },
     module: {
       loaders: webpackLoaders,
+      preLoaders: [
+        {
+          test: /\.js$/,
+          exclude: [
+            path.resolve('./src/'),
+            path.resolve('./node_modules/'),
+          ],
+          loader: 'babel?presets[]=es2015',
+        },
+        {
+          test: /\.js$/,
+          include: path.resolve('src/'),
+          loader: 'isparta',
+        },
+      ],
     },
   },
   preprocessors: {
-    './test/entry.js': ['webpack'],
-    './src/**/*.js': ['webpack'],
+    './test/entry.js': ['webpack', 'sourcemap'],
   },
   coverageReporter: {
+    instrumenters: {
+      isparta: isparta,
+    },
+    instrumenter: {
+      'src/**/*.js': 'isparta',
+    },
     reporters: [
+      { type: 'text-summary' },
       { type: 'html', dir: 'dist/coverage/', subdir: browser },
       { type: 'lcovonly', dir: 'dist/lcov/', subdir: browser },
     ],
+    check: {
+      global: {
+        statements: 100,
+        branches: 100,
+        functions: 100,
+        lines: 100,
+      },
+    },
+    includeAllSources: true,
   },
 };

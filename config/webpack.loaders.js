@@ -30,7 +30,10 @@ module.exports = [
     loader: 'html-loader',
   }, {
     test: /\.js$/,
-    exclude: /node_modules/,
+    exclude: [
+      /node_modules/,
+      /test/,
+    ],
     loader: 'babel?presets[]=es2015',
   },
 ];

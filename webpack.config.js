@@ -1,7 +1,8 @@
 var webpack = require('webpack');
 
-var loaders = require('./config/webpack.loaders.js');
-var entry = require.resolve('./src/index.js');
+var loaders = require('./config/webpack.loaders');
+var resolve = require('./config/webpack.resolve');
+var entry = require.resolve('./src/index');
 
 var pluginList = [];
 
@@ -15,6 +16,8 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 module.exports = {
+  cache: true,
+  devtool: 'source-map',
   plugins: pluginList,
   entry: entry,
   output: {
@@ -28,6 +31,7 @@ module.exports = {
       presets: ['es2015'],
     },
   },
+  resolve: resolve,
   module: {
     preLoaders: [{
       test: /\.js$/,
