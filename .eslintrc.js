@@ -9,5 +9,5 @@ module.exports = {
     'no-multi-spaces': [2, { exceptions: { "ImportDeclaration": true } }],
     'no-param-reassign': [2, { props: false }],
     'no-unused-vars': [2, { args: 'none' }],
-  }
+  },
 };

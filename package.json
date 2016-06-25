@@ -14,6 +14,7 @@
   "devDependencies": {
     "chai": "^3.5.0",
     "chai-as-promised": "^5.3.0",
+    "eslint-import-resolver-webpack": "^0.3.1",
     "eslint-plugin-chai-expect": "^1.1.1",
     "isparta": "^4.0.0",
     "isparta-loader": "^2.0.0",
@@ -33,6 +34,12 @@
     "phantomjs-prebuilt": "^2.1.7"
   },
   "dependencies": {
-    "bluebird": "^3.4.1"
+    "bluebird": "^3.4.1",
+    "isndarray": "^1.0.0",
+    "ndarray": "^1.0.18",
+    "ndarray-linspace": "^1.0.4",
+    "ndarray-pack": "^1.2.0",
+    "ndarray-unpack": "^1.0.0",
+    "plotly.js": "^1.14.0"
   }
 }
