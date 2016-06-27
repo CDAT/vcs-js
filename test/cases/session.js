@@ -4,9 +4,6 @@ import createSession from 'vcs/session';
 
 describe('session', () => {
   describe('createSession', () => {
-
-    // install a mocking interface...
-    
     it('successful connection', () => {
       return createSession('myserver', 'auser', 'thepassword')
         .should.eventually.be.an('object');
@@ -27,13 +24,17 @@ describe('session', () => {
         warnings: false,
       });
       return createSession('usr', 'user', 'pass')
-        .then((_session) => session = _session);
+        .then((_session) => {
+          session = _session;
+          return session;
+        });
     });
 
     afterEach(() => {
       Promise.config({
         warnings: true,
       });
+      session = null;
     });
 
     it('close a session', () => {
@@ -54,7 +55,7 @@ describe('session', () => {
 
     it('list files in a disconnected session', () => {
       session.status().connected.should.equal(true);
-      return session.close().then(() => { session.files() })
+      return session.close().then(() => { session.files(); })
         .should.be.rejectedWith(/Session is not connected/);
     });
   });

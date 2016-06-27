@@ -1,7 +1,13 @@
-window.Promise = require('../src/promise');
+var context;
+var srcContext;
 
-var context = require.context('./cases', true, /.*\.js$/);
+import Promise from '../src/promise';
+Promise.onPossiblyUnhandledRejection((e) => {
+  throw e;
+});
+
+context = require.context('./cases', true, /.*\.js$/);
 context.keys().forEach(context);
 
-var srcContext = require.context('../src', true, /.*\.js$/);
+srcContext = require.context('../src', true, /.*\.js$/);
 srcContext.keys().forEach(srcContext);
