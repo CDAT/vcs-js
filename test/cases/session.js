@@ -8,11 +8,6 @@ describe('session', () => {
       return createSession('myserver', 'auser', 'thepassword')
         .should.eventually.be.an('object');
     });
-
-    it('unauthorized connection', () => {
-      return createSession('myserver')
-        .should.be.rejectedWith(/Authentication required/);
-    });
   });
 
   describe('session methods', () => {

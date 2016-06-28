@@ -29,8 +29,5 @@ export default (url, username, password) => {
     connected = true;
   }).then(() => session);
 
-  if (!username || !password) {
-    return Promise.reject(new Error('Authentication required'));
-  }
   return promise;
 };
