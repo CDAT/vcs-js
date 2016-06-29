@@ -30,16 +30,16 @@ export default (apiroot) => ({
         ));
         return Promise.all(requests);
       }).then((files) => {
-        const ids = [];
+        const all = [];
         files.forEach((file) => {
           if (file.length) {
-            ids.push.apply(ids, file);
+            all.push.apply(all, file);
           }
         });
-        return ids;
+        return all;
       });
   },
-  getFile(id, opts) {
+  downloadFile(id, opts) {
     return this.request(
       `/file/${id}/download`,
       opts

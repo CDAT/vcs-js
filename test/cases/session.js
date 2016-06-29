@@ -1,6 +1,8 @@
 import Promise from 'vcs/promise';
 import createSession from 'vcs/session';
 
+const sessionInjector = require('inject!vcs/session');
+
 
 describe('session', () => {
   describe('createSession', () => {
@@ -52,6 +54,76 @@ describe('session', () => {
       session.status().connected.should.equal(true);
       return session.close().then(() => { session.files(); })
         .should.be.rejectedWith(/Session is not connected/);
+    });
+  });
+
+  describe('girder session', () => {
+    it('list files', () => {
+      const girderStub = sinon.stub();
+
+      const sessionModule = sessionInjector({
+        './girder': () => ({ listFiles: girderStub }),
+      }).default;
+
+      girderStub.returns(
+        Promise.resolve([{ name: 'data.json', _id: '0' }])
+      );
+
+      return sessionModule({
+        girder: '/api/v1',
+        folder: 'abcdef',
+      }).then((session) => session.files())
+        .then((files) => {
+          files.should.have.lengthOf(1);
+          files[0].should.have.property('fileName', 'data.json');
+        });
+    });
+
+    it('list variables', () => {
+      const girderStub = sinon.stub();
+
+      const sessionModule = sessionInjector({
+        './girder': () => ({ listFiles: girderStub }),
+      }).default;
+
+      girderStub.returns(
+        Promise.resolve([{ name: 'data.json', _id: '0' }])
+      );
+
+      return sessionModule({
+        girder: '/api/v1',
+        folder: 'abcdef',
+      }).then((session) => session.files())
+        .then((files) => files[0].variables())
+        .then((variables) => {
+          variables.should.eql(['data']);
+        });
+    });
+
+    it('createData', () => {
+      const girderStub = sinon.stub();
+      const downloadStub = sinon.stub();
+
+      const sessionModule = sessionInjector({
+        './girder': () => ({ listFiles: girderStub, downloadFile: downloadStub }),
+      }).default;
+
+      girderStub.returns(
+        Promise.resolve([{ name: 'data.json', _id: '0' }])
+      );
+
+      downloadStub.returns(
+        Promise.resolve({ data: [] })
+      );
+
+      return sessionModule({
+        girder: '/api/v1',
+        folder: 'abcdef',
+      }).then((session) => session.files())
+        .then((files) => files[0].createData('data'))
+        .then((data) => {
+          data.should.eql({ data: [] });
+        });
     });
   });
 });

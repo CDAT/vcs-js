@@ -124,11 +124,11 @@ describe('girder', () => {
     });
   });
 
-  it('getFile', () => {
+  it('downloadFile', () => {
     $.ajax.returns(Promise.resolve({ mydata: true }));
 
     girder('/api/v1')
-      .getFile('abcdef')
+      .downloadFile('abcdef')
       .then((data) => {
         data.should.eql({ mydata: true });
       });

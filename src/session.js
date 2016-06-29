@@ -1,28 +1,56 @@
 import Promise from './promise';
+import girder from './girder';
 
 export default (url, username, password) => {
   let connected = false;
   const session = {
-    assertConnected: function assertConnected() {
-      if (!session.status().connected) {
+    assertConnected() {
+      if (!this.status().connected) {
         throw new Error('Session is not connected');
       }
     },
-    close: function close() {
+    close() {
       connected = false;
       return Promise.resolve(session);
     },
-    status: function status() {
+    status() {
       return {
         connected,
         url,
       };
     },
-    files: function files() {
-      session.assertConnected();
+    files() {
+      this.assertConnected();
       return Promise.delay(0, []);
     },
   };
+
+  // Get a girder version of the file object.
+  // It is still unresolved where the code should diverge
+  // for different session types.  Should file/canvas objects
+  // delegate to a private session interface or should sessions
+  // construct different kinds of objects according to the
+  // session properties.
+  //
+  // This is a temporary hack.
+  function girderFile(fileModel) {
+    return {
+      session,
+      fileName: fileModel.name,
+      variables() {
+        return Promise.resolve([fileModel.name.replace(/\.[^.]*$/, '')]);
+      },
+      createData() {
+        return session.girder.downloadFile(fileModel._id);
+      },
+    };
+  }
+
+  // warning: extreme hackery
+  if (url.girder) {
+    session.girder = girder(url.girder);
+    session.files = () => session.girder.listFiles(url.folder).map(girderFile);
+  }
 
   // fake an async connection
   const promise = Promise.delay(0).then(() => {

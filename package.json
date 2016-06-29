@@ -32,7 +32,8 @@
     "karma-webpack": "^1.7.0",
     "kw-web-suite": "^2.0.1",
     "mocha": "^2.5.3",
-    "phantomjs-prebuilt": "^2.1.7"
+    "phantomjs-prebuilt": "^2.1.7",
+    "webpack-dev-server": "^1.14.1"
   },
   "dependencies": {
     "bluebird": "^3.4.1",

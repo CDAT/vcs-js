@@ -44,6 +44,7 @@ module.exports = {
     }],
     loaders: [
       { test: entry, loader: 'expose?vcs' },
+      { test: require.resolve('jquery'), loader: 'expose?$!expose?jQuery' },
     ].concat(loaders),
   },
   eslint: {
