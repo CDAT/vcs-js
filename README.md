@@ -1,4 +1,4 @@
-vcs.js
+vcs.js [![Build Status](https://travis-ci.org/UV-CDAT/vcs-js.svg?branch=master)](https://travis-ci.org/UV-CDAT/vcs-js) [![codecov](https://codecov.io/gh/UV-CDAT/vcs-js/branch/master/graph/badge.svg)](https://codecov.io/gh/UV-CDAT/vcs-js)
 ======
 
 For documentation see the [interface document](https://docs.google.com/a/kitware.com/document/d/1pY-C4o3JRejKyTja-ScLdx4U9pHFxcWzeptT32KOVgY/edit?usp=sharing).
