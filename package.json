@@ -9,7 +9,7 @@
     "karma": "karma start --single-run",
     "test": "npm run lint && npm run karma",
     "test:serve": "karma start --auto-watch",
-    "serve": "webpack-dev-server"
+    "demo": "webpack-dev-server"
   },
   "author": "",
   "license": "Apache-2.0",

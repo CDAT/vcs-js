@@ -16,7 +16,7 @@ module.exports = {
     './test/entry.js',
     './node_modules/phantomjs-polyfill-object-assign/object-assign-polyfill.js',
     { pattern: 'test/**/*.js', included: false, served: false, watched: true },
-    { pattern: 'dist/coverage/phantomjs/**/*', included: false },
+    { pattern: 'dist/coverage/phantomjs/**/*', included: false, watched: false },
   ],
   browsers: [
     'PhantomJS',
