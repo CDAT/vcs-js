@@ -1,3 +1,5 @@
+import ndarray from 'ndarray';
+
 import Promise from './promise';
 import girder from './girder';
 
@@ -41,7 +43,10 @@ export default (url, username, password) => {
         return Promise.resolve([fileModel.name.replace(/\.[^.]*$/, '')]);
       },
       createData() {
-        return session.girder.downloadFile(fileModel._id);
+        // This converts from the source data format to the data format
+        // accepted by plot method both of which are not yet defined explicitly.
+        return session.girder.downloadFile(fileModel._id)
+          .then((spec) => ({ z: ndarray(spec.data, spec.shape) }));
       },
     };
   }
@@ -49,7 +54,7 @@ export default (url, username, password) => {
   // warning: extreme hackery
   if (url.girder) {
     session.girder = girder(url.girder);
-    session.files = () => session.girder.listFiles(url.folder).map(girderFile);
+    session.files = () => session.girder.listFiles(url.folder).then((files) => files.map(girderFile));
   }
 
   // fake an async connection

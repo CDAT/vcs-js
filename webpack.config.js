@@ -23,6 +23,9 @@ module.exports = {
   output: {
     path: './dist',
     filename: 'vcs.js',
+    library: 'vcs',
+    libraryTarget: 'umd',
+    publicPath: '/dist/'
   },
   isparta: {
     embedSource: true,
@@ -43,7 +46,6 @@ module.exports = {
       loader: 'isparta',
     }],
     loaders: [
-      { test: entry, loader: 'expose?vcs' },
       { test: require.resolve('jquery'), loader: 'expose?$!expose?jQuery' },
     ].concat(loaders),
   },

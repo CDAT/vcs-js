@@ -21,7 +21,7 @@ export default (spec) => {
     title,
   };
 
-  const plot = Plotly.newPlot(el, data, layout);
+  const plot = Plotly.newPlot(el, [data], layout);
   return Object.create(spec, {
     plotly: {
       plot,

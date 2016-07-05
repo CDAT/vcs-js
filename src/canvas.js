@@ -5,13 +5,15 @@ export default (el, session) => {
   const canvas = {
     el,
     session,
-    create: function create(graphicsMethodType, graphicsMethodName) {
+    create(graphicsMethodType, graphicsMethodName) {
       return Promise.delay(0, {
         type: graphicsMethodType,
         name: graphicsMethodName,
+        session: this.session,
+        canvas: this,
       });
     },
-    plot: function plot(dataObject, graphicsMethod, template, renderingType) {
+    plot(dataObject, graphicsMethod, template, renderingType) {
       let plotMethod;
 
       switch (renderingType) {
@@ -21,7 +23,7 @@ export default (el, session) => {
         default:
           return Promise.reject(new Error('Invalid renderingType'));
       }
-      return plotMethod(dataObject, graphicsMethod, template);
+      return plotMethod(this, dataObject, graphicsMethod, template);
     },
   };
 

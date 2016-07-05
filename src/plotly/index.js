@@ -1,12 +1,16 @@
 import Promise from '../promise';
 import isofill from './isofill';
 
-function asyncPlot(dataObject, graphicsMethod, template) {
+function asyncPlot(canvas, dataObject, graphicsMethod, template) {
   let plotObject;
+  const spec = Object.assign(
+    { el: canvas.el },
+    dataObject
+  );
   switch (graphicsMethod.type) {
     case 'isofill':
       // this interface should be defined concretely somewhere...
-      plotObject = isofill(dataObject);
+      plotObject = isofill(spec);
       break;
     default:
       throw new Error('Invalid graphicsMethod type.');
