@@ -121,8 +121,8 @@ describe('session', () => {
         folder: 'abcdef',
       }).then((session) => session.files())
         .then((files) => files[0].createData('data'))
-        .then((data) => {
-          data.should.eql({ data: [] });
+        .then((spec) => {
+          spec.data.shape.should.eql([0]);
         });
     });
   });

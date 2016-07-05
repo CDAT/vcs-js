@@ -19,7 +19,7 @@ describe('plotly', () => {
   });
   describe('dispatch', () => {
     it('error', () => {
-      return plotly({}, { type: 'invalid type' }, {})
+      return plotly({}, {}, { type: 'invalid type' }, {})
         .should.be.rejectedWith(Error, /Invalid graphicsMethod type/);
     });
     it('isofill', () => {
@@ -27,18 +27,19 @@ describe('plotly', () => {
       const plotlyModule = plotlyInjector({
         './isofill': isofillStub,
       }).default;
-      const data = {};
+      const data = { data: [] };
       const gm = {
         type: 'isofill',
         name: 'default',
       };
       const template = {};
-      return plotlyModule(data, gm, template)
+      const canvas = { el: 'plot' };
+      return plotlyModule(canvas, data, gm, template)
         .then(() => {
           sinon.assert.calledOnce(isofillStub);
           sinon.assert.calledWith(
             isofillStub,
-            data
+            sinon.match({ data: [], el: 'plot' })
           );
         });
     });
@@ -57,9 +58,13 @@ describe('plotly', () => {
     });
 
     it('z - array data', () => {
+      const x = [];
+      const y = [];
       const z = [];
       const spec = {
         el,
+        x,
+        y,
         z,
       };
 
@@ -68,10 +73,12 @@ describe('plotly', () => {
       sinon.assert.calledWith(
         plotlyStub.newPlot,
         el,
-        sinon.match({
+        [sinon.match({
           type: 'contour',
+          x,
+          y,
           z,
-        }),
+        })],
         sinon.match({})
       );
     });
@@ -88,10 +95,12 @@ describe('plotly', () => {
       sinon.assert.calledWith(
         plotlyStub.newPlot,
         el,
-        sinon.match({
+        [sinon.match({
           type: 'contour',
+          x: undefined,
+          y: undefined,
           z: [0, 1, 2, 3],
-        }),
+        })],
         sinon.match({})
       );
     });
@@ -111,10 +120,10 @@ describe('plotly', () => {
       sinon.assert.calledWith(
         plotlyStub.newPlot,
         el,
-        sinon.match({
+        [sinon.match({
           type: 'contour',
           x: [0, 1, 2, 3],
-        }),
+        })],
         sinon.match({})
       );
     });
@@ -134,10 +143,10 @@ describe('plotly', () => {
       sinon.assert.calledWith(
         plotlyStub.newPlot,
         el,
-        sinon.match({
+        [sinon.match({
           type: 'contour',
           y: [0, 1, 2, 3],
-        }),
+        })],
         sinon.match({})
       );
     });

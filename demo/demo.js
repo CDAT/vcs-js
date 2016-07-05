@@ -62,8 +62,8 @@ $(function () {
     var canvas = arg[0];
     var gm = arg[1];
     var clt = arg[2];
-    var latitude = arg[3].z;
-    var longitude = arg[4].z;
+    var latitude = arg[3].data;
+    var longitude = arg[4].data;
     var timeStep = 0;
 
     data = {
@@ -73,9 +73,9 @@ $(function () {
 
     // draw a time slice of the data
     function draw() {
-      data.z = clt.z.pick(timeStep, null, null);
+      data.z = clt.data.pick(timeStep, null, null);
       canvas.plot(data, gm, 'default', 'webgl');
-      timeStep = (timeStep + 1) % clt.z.shape[0];
+      timeStep = (timeStep + 1) % clt.data.shape[0];
     }
 
     // extract time slices and animate the plot

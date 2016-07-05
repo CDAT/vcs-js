@@ -8,6 +8,7 @@
     "lint": "eslint --cache .",
     "karma": "karma start --single-run",
     "test": "npm run lint && npm run karma",
+    "test:serve": "karma start --auto-watch",
     "serve": "webpack-dev-server"
   },
   "author": "",
@@ -33,6 +34,7 @@
     "karma-webpack": "^1.7.0",
     "kw-web-suite": "^2.0.1",
     "mocha": "^2.5.3",
+    "phantomjs-polyfill-object-assign": "0.0.2",
     "phantomjs-prebuilt": "^2.1.7",
     "webpack-dev-server": "^1.14.1"
   },

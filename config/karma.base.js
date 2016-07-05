@@ -14,7 +14,9 @@ module.exports = {
   autoWatch: false,
   files: [
     './test/entry.js',
+    './node_modules/phantomjs-polyfill-object-assign/object-assign-polyfill.js',
     { pattern: 'test/**/*.js', included: false, served: false, watched: true },
+    { pattern: 'dist/coverage/phantomjs/**/*', included: false },
   ],
   browsers: [
     'PhantomJS',
@@ -82,5 +84,8 @@ module.exports = {
       },
     },
     includeAllSources: true,
+  },
+  proxies: {
+    '/coverage/': '/base/dist/coverage/phantomjs/',
   },
 };

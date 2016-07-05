@@ -46,7 +46,7 @@ export default (url, username, password) => {
         // This converts from the source data format to the data format
         // accepted by plot method both of which are not yet defined explicitly.
         return session.girder.downloadFile(fileModel._id)
-          .then((spec) => ({ z: ndarray(spec.data, spec.shape) }));
+          .then((spec) => ({ data: ndarray(spec.data, spec.shape) }));
       },
     };
   }
