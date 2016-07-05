@@ -46,5 +46,12 @@
     "ndarray-pack": "^1.2.0",
     "ndarray-unpack": "^1.0.0",
     "plotly.js": "^1.14.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/UV-CDAT/vcs-js"
+  },
+  "bugs": {
+    "url": "https://github.com/UV-CDAT/vcs-js/issues"
   }
 }
