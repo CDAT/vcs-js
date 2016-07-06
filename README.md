@@ -3,6 +3,8 @@ vcs.js [![Build Status](https://travis-ci.org/UV-CDAT/vcs-js.svg?branch=master)]
 
 For documentation see the [interface document](https://docs.google.com/a/kitware.com/document/d/1pY-C4o3JRejKyTja-ScLdx4U9pHFxcWzeptT32KOVgY/edit?usp=sharing).
 
+To get started, first run `npm install`.
+
 Useful npm commands:
 ```bash
 npm run build      # build the library to dist/vcs.js
