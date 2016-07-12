@@ -4,6 +4,7 @@
   "description": "Javascript interface for vcs.",
   "main": "dist/vcs.js",
   "scripts": {
+    "postinstall": "fix-autobahn",
     "build": "webpack --progress --colors",
     "lint": "eslint --cache .",
     "karma": "karma start --single-run",
