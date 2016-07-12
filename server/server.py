@@ -28,11 +28,27 @@
 """
 
 import argparse
+from autobahn.wamp import register
 
 # import vtk modules.
 import vtk
 from vtk.web import protocols, server
 from vtk.web import wamp as vtk_wamp
+
+from netCDF4 import Dataset
+
+
+class NetCDFFileHandler(protocols.vtkWebProtocol):
+    """List variables from a given netcdf file.
+
+    This is just an example protocol... need to rewrite with cdms2, support
+    caching, etc.
+    """
+
+    @register('file.netcdf.variables')
+    def variables(self, file_name):
+        nc = Dataset(file_name)
+        return nc.variables.keys()
 
 
 class _VCSApp(vtk_wamp.ServerProtocol):
@@ -50,6 +66,7 @@ class _VCSApp(vtk_wamp.ServerProtocol):
         self.registerVtkWebProtocol(protocols.vtkWebViewPort())
         self.registerVtkWebProtocol(protocols.vtkWebViewPortImageDelivery())
         self.registerVtkWebProtocol(protocols.vtkWebFileBrowser(self.rootDir, 'Home'))
+        self.registerVtkWebProtocol(NetCDFFileHandler())
 
         # Create default pipeline (Only once for all the session)
         if not _VCSApp.view:

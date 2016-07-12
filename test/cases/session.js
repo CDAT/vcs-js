@@ -1,14 +1,56 @@
 import Promise from 'vcs/promise';
-import createSession from 'vcs/session';
 
 const sessionInjector = require('inject!vcs/session');
 
-
 describe('session', () => {
+  let createSession;
+  let fakeSession;
+  let fakeClient;
+  let fakeConnection;
+  let fakeCreateClient;
+  let fakeCreateFile;
+
+  beforeEach(() => {
+    fakeSession = {
+      onConnectionReady: sinon.stub(),
+      onConnectionError: sinon.stub(),
+      connect: sinon.stub(),
+    };
+
+    fakeConnection = {
+      destroy: sinon.stub(),
+    };
+
+    fakeClient = {};
+
+    fakeCreateFile = sinon.stub();
+
+    fakeCreateClient = sinon.stub().returns(fakeClient);
+
+    createSession = sessionInjector({
+      'ParaViewWeb/IO/WebSocket/SmartConnect': sinon.stub().returns(fakeSession),
+      'ParaViewWeb/IO/WebSocket/ParaViewWebClient': { createClient: fakeCreateClient },
+      './file': fakeCreateFile,
+    }).default;
+  });
+
   describe('createSession', () => {
     it('successful connection', () => {
-      return createSession('myserver', 'auser', 'thepassword')
-        .should.eventually.be.an('object');
+      const sessionPromise = createSession('myserver', 'auser', 'thepassword');
+
+      sinon.assert.calledOnce(fakeSession.onConnectionReady);
+      sinon.assert.calledOnce(fakeSession.connect);
+
+      fakeSession.onConnectionReady.getCall(0).args[0](Promise.resolve(fakeConnection));
+
+      return sessionPromise.then((session) => {
+        sinon.assert.calledOnce(fakeCreateClient);
+        sinon.assert.calledWith(fakeCreateClient, fakeConnection, ['MouseHandler', 'ViewPort', 'ViewPortImageDelivery', 'FileListing']);
+
+        return session.close();
+      }).then(() => {
+        sinon.assert.calledOnce(fakeConnection.destroy);
+      });
     });
   });
 
@@ -20,11 +62,14 @@ describe('session', () => {
       Promise.config({
         warnings: false,
       });
-      return createSession('usr', 'user', 'pass')
+      const sessionPromise = createSession('usr', 'user', 'pass')
         .then((_session) => {
           session = _session;
           return session;
         });
+
+      fakeSession.onConnectionReady.getCall(0).args[0](Promise.resolve(fakeConnection));
+      return sessionPromise;
     });
 
     afterEach(() => {
@@ -36,94 +81,24 @@ describe('session', () => {
 
     it('close a session', () => {
       return session.close()
-        .should.eventually.be.fulfilled
-        .then(() => {
-          session.status().connected.should.equal(false);
-        });
-    });
-
-    it('status of a started session', () => {
-      return session.status().connected.should.equal(true);
+        .should.eventually.be.fulfilled;
     });
 
     it('list files in a fake session', () => {
-      return session.files().should.eventually.eql([]);
+      fakeClient.FileListing = {
+        listServerDirectory() {
+          return Promise.resolve({
+            files: [{ label: 'a' }, { label: 'b' }],
+          });
+        },
+      };
+
+      fakeCreateFile.returnsArg(1);
+      return session.files().should.eventually.eql(['a', 'b']);
     });
 
-    it('list files in a disconnected session', () => {
-      session.status().connected.should.equal(true);
-      return session.close().then(() => { session.files(); })
-        .should.be.rejectedWith(/Session is not connected/);
-    });
-  });
-
-  describe('girder session', () => {
-    it('list files', () => {
-      const girderStub = sinon.stub();
-
-      const sessionModule = sessionInjector({
-        './girder': () => ({ listFiles: girderStub }),
-      }).default;
-
-      girderStub.returns(
-        Promise.resolve([{ name: 'data.json', _id: '0' }])
-      );
-
-      return sessionModule({
-        girder: '/api/v1',
-        folder: 'abcdef',
-      }).then((session) => session.files())
-        .then((files) => {
-          files.should.have.lengthOf(1);
-          files[0].should.have.property('fileName', 'data.json');
-        });
-    });
-
-    it('list variables', () => {
-      const girderStub = sinon.stub();
-
-      const sessionModule = sessionInjector({
-        './girder': () => ({ listFiles: girderStub }),
-      }).default;
-
-      girderStub.returns(
-        Promise.resolve([{ name: 'data.json', _id: '0' }])
-      );
-
-      return sessionModule({
-        girder: '/api/v1',
-        folder: 'abcdef',
-      }).then((session) => session.files())
-        .then((files) => files[0].variables())
-        .then((variables) => {
-          variables.should.eql(['data']);
-        });
-    });
-
-    it('createData', () => {
-      const girderStub = sinon.stub();
-      const downloadStub = sinon.stub();
-
-      const sessionModule = sessionInjector({
-        './girder': () => ({ listFiles: girderStub, downloadFile: downloadStub }),
-      }).default;
-
-      girderStub.returns(
-        Promise.resolve([{ name: 'data.json', _id: '0' }])
-      );
-
-      downloadStub.returns(
-        Promise.resolve({ data: [] })
-      );
-
-      return sessionModule({
-        girder: '/api/v1',
-        folder: 'abcdef',
-      }).then((session) => session.files())
-        .then((files) => files[0].createData('data'))
-        .then((spec) => {
-          spec.data.shape.should.eql([0]);
-        });
+    it('get the client object', () => {
+      return session.client().should.eventually.eql(fakeClient);
     });
   });
 });

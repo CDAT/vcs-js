@@ -1,3 +1,4 @@
 dist/**/*.js
 demo/**/*.js
+cone/**/*.js
 node_modules/**

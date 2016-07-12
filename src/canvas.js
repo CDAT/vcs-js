@@ -1,5 +1,6 @@
 import Promise from './promise';
 import plotly from './plotly';
+import vtkweb from './vtkweb';
 
 export default (el, session) => {
   const canvas = {
@@ -19,6 +20,9 @@ export default (el, session) => {
       switch (renderingType) {
         case 'webgl': // not really webgl... plotly?, client?,
           plotMethod = plotly;
+          break;
+        case 'vtkweb':
+          plotMethod = vtkweb;
           break;
         default:
           return Promise.reject(new Error('Invalid renderingType'));

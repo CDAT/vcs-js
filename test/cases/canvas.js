@@ -1,7 +1,7 @@
 import Promise from 'vcs/promise';
 import createCanvas from 'vcs/canvas';
 
-const plotlyInjector = require('inject!vcs/canvas');
+const canvasInjector = require('inject!vcs/canvas');
 
 describe('canvas', () => {
   let el;
@@ -39,7 +39,7 @@ describe('canvas', () => {
 
     it('plotly', () => {
       const plot = sinon.stub().returns(Promise.resolve({}));
-      const plotlyInjectedCanvas = plotlyInjector({
+      const plotlyInjectedCanvas = canvasInjector({
         './plotly': plot,
       }).default;
       const data = {};
@@ -48,6 +48,22 @@ describe('canvas', () => {
 
       return plotlyInjectedCanvas(el, session)
         .plot(data, gm, template, 'webgl')
+        .then((plt) => {
+          plt.should.eql({});
+        });
+    });
+
+    it('vtkweb', () => {
+      const plot = sinon.stub().returns(Promise.resolve({}));
+      const vtkwebInjectedCanvas = canvasInjector({
+        './vtkweb': plot,
+      }).default;
+      const data = {};
+      const gm = {};
+      const template = {};
+
+      return vtkwebInjectedCanvas(el, session)
+        .plot(data, gm, template, 'vtkweb')
         .then((plt) => {
           plt.should.eql({});
         });

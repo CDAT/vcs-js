@@ -6,15 +6,24 @@ export default (session, fileName) => {
     session,
     fileName,
     variables() {
-      return Promise.delay(0, []);
+      return this.session.client()
+        .then((client) => client.session.call('file.netcdf.variables', [fileName]));
     },
     createData(variable, subset) {
-      return Promise.delay(0, {});
+      // This should be some object that unifies client/server rendering
+      // methods...  For now, the interface is undefined.
+      const data = {
+        session,
+        file: this,
+        variable,
+        subset,
+      };
+      return Promise.delay(0, data);
     },
     set(data) { // ?
-      return Promise.delay(0, true);
+      return Promise.reject('Not implemented');
     },
   };
 
-  return Promise.delay(0, file);
+  return file;
 };

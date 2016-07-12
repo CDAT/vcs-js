@@ -1,66 +1,44 @@
-import ndarray from 'ndarray';
+import SmartConnect from 'ParaViewWeb/IO/WebSocket/SmartConnect';
+import { createClient } from 'ParaViewWeb/IO/WebSocket/ParaViewWebClient';
 
 import Promise from './promise';
-import girder from './girder';
+import createFile from './file';
 
 export default (url, username, password) => {
-  let connected = false;
+  // vtkweb launcher uses a "secret" key rather than user/pass
+  // For security we will need to proxy to the launcher through
+  // an authenticated service
+
+  const smartConnect = new SmartConnect({
+    sessionURL: url,
+  });
+
+  const connectionPromise = new Promise((resolve, reject) => {
+    smartConnect.onConnectionReady(resolve);
+    smartConnect.onConnectionError(reject);
+  });
+
+  // create a pvw client object after the session is ready
+  const pvw = connectionPromise.then((connection) => {
+    return createClient(connection, ['MouseHandler', 'ViewPort', 'ViewPortImageDelivery', 'FileListing']);
+  });
+
   const session = {
-    assertConnected() {
-      if (!this.status().connected) {
-        throw new Error('Session is not connected');
-      }
-    },
     close() {
-      connected = false;
-      return Promise.resolve(session);
+      return connectionPromise.then((connection) => connection.destroy());
     },
-    status() {
-      return {
-        connected,
-        url,
-      };
+    files(path) {
+      return pvw
+        .then((client) => client.FileListing.listServerDirectory(path))
+        .then((filesObject) => {
+          return filesObject.files.map((file) => createFile(session, file.label));
+        });
     },
-    files() {
-      this.assertConnected();
-      return Promise.delay(0, []);
+    client() {
+      return pvw;
     },
   };
 
-  // Get a girder version of the file object.
-  // It is still unresolved where the code should diverge
-  // for different session types.  Should file/canvas objects
-  // delegate to a private session interface or should sessions
-  // construct different kinds of objects according to the
-  // session properties.
-  //
-  // This is a temporary hack.
-  function girderFile(fileModel) {
-    return {
-      session,
-      fileName: fileModel.name,
-      variables() {
-        return Promise.resolve([fileModel.name.replace(/\.[^.]*$/, '')]);
-      },
-      createData() {
-        // This converts from the source data format to the data format
-        // accepted by plot method both of which are not yet defined explicitly.
-        return session.girder.downloadFile(fileModel._id)
-          .then((spec) => ({ data: ndarray(spec.data, spec.shape) }));
-      },
-    };
-  }
-
-  // warning: extreme hackery
-  if (url.girder) {
-    session.girder = girder(url.girder);
-    session.files = () => session.girder.listFiles(url.folder).then((files) => files.map(girderFile));
-  }
-
-  // fake an async connection
-  const promise = Promise.delay(0).then(() => {
-    connected = true;
-  }).then(() => session);
-
-  return promise;
+  smartConnect.connect();
+  return pvw.then(() => session);
 };

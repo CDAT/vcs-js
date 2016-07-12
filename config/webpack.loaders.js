@@ -30,9 +30,9 @@ module.exports = [
     loader: 'html-loader',
   }, {
     test: /\.js$/,
-    exclude: [
-      /node_modules/,
-      /test/,
+    include: [
+      /src/,
+      /node_modules\/paraviewweb/,
     ],
     loader: 'babel?presets[]=es2015',
   },
