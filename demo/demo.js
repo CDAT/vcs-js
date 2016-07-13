@@ -4,10 +4,7 @@ $(function () {
   // Here we short circuit that code to generate a simulated
   // session connecting to pregenerated files through
   // Girder's rest interface.
-  var url = {
-    girder: 'https://data.kitware.com/api/v1',
-    folder: '576aa3958d777f1ecd6701a7'
-  };
+  var url = 'ws://garant:8080/ws';
 
   // create the session
   var sessionPromise = vcs.createSession(url);
@@ -27,58 +24,31 @@ $(function () {
   var cltPromise = sessionPromise.then(function (session) {
     return session.files();
   }).then(function (files) {
-    // get the file object for clt
-    var clt = files.filter(function (f) { return f.fileName === 'clt.json'; })[0];
+    // print the list of files
+    console.log(files.map((f) => f.fileName));
 
-    // read the data from clt.json
-    return clt.createData();
-  });
+    // get the file object for a netcdf variable
+    var nc = files.filter(function (f) { return f.fileName.match(/\.nc$/); })[0];
 
-  // get the data object for the latitude variable
-  var latitudePromise = sessionPromise.then(function (session) {
-    return session.files();
-  }).then(function (files) {
-    var latitude = files.filter(function (f) { return f.fileName === 'latitude.json'; })[0];
+    if (!nc) {
+      console.log('No netcdf variables found');
+      return;
+    }
 
-    // read the data from clt.json
-    return latitude.createData();
-  });
-
-  // get the data object for the longitude variable
-  var longitudePromise = sessionPromise.then(function (session) {
-    return session.files();
-  }).then(function (files) {
-    // get the file object for longitude
-    var longitude = files.filter(function (f) { return f.fileName === 'longitude.json'; })[0];
-
-    // read the data from clt.json
-    return longitude.createData();
+    // get a list of variables
+    return nc.variables();
+  }).then(function (variables) {
+    console.log(variables);
   });
 
   // generate the plot when all of the promises resolve
   Promise.all([
-   canvasPromise, gmPromise, cltPromise, latitudePromise, longitudePromise
+   canvasPromise, gmPromise, cltPromise
   ]).then(function (arg) {
     var canvas = arg[0];
     var gm = arg[1];
     var clt = arg[2];
-    var latitude = arg[3].data;
-    var longitude = arg[4].data;
-    var timeStep = 0;
 
-    data = {
-      x: longitude,
-      y: latitude
-    };
-
-    // draw a time slice of the data
-    function draw() {
-      data.z = clt.data.pick(timeStep, null, null);
-      canvas.plot(data, gm, 'default', 'webgl');
-      timeStep = (timeStep + 1) % clt.data.shape[0];
-    }
-
-    // extract time slices and animate the plot
-    window.setInterval(() => draw(), 2000);
+    canvas.plot(clt, gm, 'default', 'vtkweb');
   });
 });
