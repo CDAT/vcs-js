@@ -16,6 +16,7 @@ export default (url, username, password) => {
   const connectionPromise = new Promise((resolve, reject) => {
     smartConnect.onConnectionReady(resolve);
     smartConnect.onConnectionError(reject);
+    smartConnect.onConnectionClose(reject);
   });
 
   // create a pvw client object after the session is ready

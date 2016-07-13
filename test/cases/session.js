@@ -14,6 +14,7 @@ describe('session', () => {
     fakeSession = {
       onConnectionReady: sinon.stub(),
       onConnectionError: sinon.stub(),
+      onConnectionClose: sinon.stub(),
       connect: sinon.stub(),
     };
 

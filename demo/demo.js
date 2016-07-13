@@ -4,10 +4,14 @@ $(function () {
   // Here we short circuit that code to generate a simulated
   // session connecting to pregenerated files through
   // Girder's rest interface.
-  var url = 'ws://garant:8080/ws';
+  var url = 'ws://localhost:8080/ws';
 
   // create the session
   var sessionPromise = vcs.createSession(url);
+
+  sessionPromise.catch(() => {
+    console.log('Could not connect to ' + url);
+  });
   
   // create the canvas
   var canvasPromise = sessionPromise.then(function (session) {

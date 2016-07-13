@@ -15,3 +15,11 @@ npm run demo       # serve the demo page at http://localhost:8080/demo/
 
 While serving tests, you can debug them in the browser at [http://localhost:9876/debug.html](http://localhost:9876/debug.html).
 This will also serve the coverage results at [http://localhost:9876/coverage/index.html](http://localhost:9876/coverage/index.html).
+
+Running the demo
+----------------
+
+Executing the demo requires a running vtkweb service, which is assumed to exist at <ws://localhost:8080/ws>.
+A basic protocol implementation for demo purposes exists in this repository at `server/server.py`.
+You can start the server with the command `vtkpython server/server.py`.  Use the `--help` argument
+for a list of options.
