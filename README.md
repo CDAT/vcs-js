@@ -19,12 +19,13 @@ This will also serve the coverage results at [http://localhost:9876/coverage/ind
 Running the demo
 ----------------
 
-Executing the demo requires a running vtkweb service, which is assumed to exist at <ws://localhost:8080/ws>.
+Executing the demo requires a running vtkweb service, which is assumed to exist at <ws://localhost:9000/ws>.
 A basic protocol implementation for demo purposes exists in this repository at `server/server.py`.
-You can start the server with the command `vtkpython server/server.py`.  Use the `--help` argument
-for a list of options.
+You can start the server with the command `vtkpython server/server.py -p 9000`.  Use the `--help` argument
+for a list of options.  After starting the server, you can execute the demo using `npm run demo` and
+browsing to <http://localhost:8080/demo>.
 
-If you get an error message refering to `WAMP_FEATURES`, try running the following:
+If you get an error message refering to `WAMP_FEATURES` while building, try running the following:
 ```
 npm run fix-autobahn
 ```

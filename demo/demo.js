@@ -4,7 +4,7 @@ $(function () {
   // Here we short circuit that code to generate a simulated
   // session connecting to pregenerated files through
   // Girder's rest interface.
-  var url = 'ws://localhost:8080/ws';
+  var url = 'ws://localhost:9000/ws';
 
   // create the session
   var sessionPromise = vcs.createSession(url);
