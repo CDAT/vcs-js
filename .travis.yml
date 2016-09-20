@@ -20,6 +20,7 @@ before_install:
   - npm install -g npm
 
 before_script:
+  - npm run fix-autobahn
   - npm run lint
   - npm run build
 
