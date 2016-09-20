@@ -23,3 +23,8 @@ Executing the demo requires a running vtkweb service, which is assumed to exist 
 A basic protocol implementation for demo purposes exists in this repository at `server/server.py`.
 You can start the server with the command `vtkpython server/server.py`.  Use the `--help` argument
 for a list of options.
+
+If you get an error message refering to `WAMP_FEATURES`, try running the following:
+```
+npm run fix-autobahn
+```
