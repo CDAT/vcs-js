@@ -1,4 +1,5 @@
 import Promise from 'vcs/promise';
+
 const vtkwebInjector = require('inject!vcs/vtkweb');
 
 describe('vtkweb', () => {

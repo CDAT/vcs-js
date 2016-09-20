@@ -1,7 +1,8 @@
+import Promise from '../src/promise';
+
 var context;
 var srcContext;
 
-import Promise from '../src/promise';
 Promise.onPossiblyUnhandledRejection((e) => {
   throw e;
 });

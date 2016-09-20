@@ -15,5 +15,6 @@ module.exports = {
   },
   globals: {
     sinon: true,
+    document: true,
   },
 };

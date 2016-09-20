@@ -2,6 +2,7 @@ var webpack = require('webpack');
 
 var loaders = require('./config/webpack.loaders');
 var resolve = require('./config/webpack.resolve');
+
 var entry = require.resolve('./src/index');
 
 var pluginList = [];

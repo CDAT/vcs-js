@@ -9,6 +9,7 @@ module.exports = {
     'no-unused-vars': [2, { args: 'none' }],
     'no-underscore-dangle': 0,
     'arrow-body-style': 0,
+    'import/no-extraneous-dependencies': 0,
   },
   settings: {
     'import/resolver': 'webpack',
