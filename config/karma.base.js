@@ -33,12 +33,12 @@ module.exports = {
     devtool: 'inline-source-map',
     resolve: webpackResolve,
     bable: {
-      presets: ['es2015'],
+      presets: ['es2015-nostrict'],
     },
     isparta: {
       embedSource: true,
       babel: {
-        presets: ['es2015'],
+        presets: ['es2015-nostrict'],
       },
     },
     module: {
@@ -50,7 +50,7 @@ module.exports = {
             path.resolve('./src/'),
             path.resolve('./node_modules/'),
           ],
-          loader: 'babel?presets[]=es2015',
+          loader: 'babel?presets[]=es2015-nostrict',
         },
         {
           test: /\.js$/,

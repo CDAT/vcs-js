@@ -32,7 +32,7 @@ module.exports = {
     embedSource: true,
     noAutoWrap: true,
     babel: {
-      presets: ['es2015'],
+      presets: ['es2015-nostrict'],
     },
   },
   resolve: resolve,

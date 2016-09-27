@@ -34,6 +34,6 @@ module.exports = [
       /src/,
       /node_modules\/paraviewweb/,
     ],
-    loader: 'babel?presets[]=es2015',
+    loader: 'babel?presets[]=es2015-nostrict',
   },
 ];
