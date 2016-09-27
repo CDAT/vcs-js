@@ -48,6 +48,7 @@ module.exports = {
     }],
     loaders: [
       { test: require.resolve('jquery'), loader: 'expose?$!expose?jQuery' },
+      { test: require.resolve('ndarray'), loader: 'expose?ndarray' },
     ].concat(loaders),
   },
   eslint: {

@@ -1,4 +1,5 @@
 import 'jquery';
+import 'ndarray';
 import createSession from './session';
 import init from './canvas';
 
