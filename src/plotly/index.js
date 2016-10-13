@@ -1,4 +1,3 @@
-import Promise from '../promise';
 import isofill from './isofill';
 
 function asyncPlot(canvas, dataObject, template,

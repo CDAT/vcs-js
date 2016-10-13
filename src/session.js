@@ -1,9 +1,7 @@
 import SmartConnect from 'ParaViewWeb/IO/WebSocket/SmartConnect';
 import { createClient } from 'ParaViewWeb/IO/WebSocket/ParaViewWebClient';
 
-import Promise from './promise';
 import createFile from './file';
-import plotly from './plotly';
 import vtkweb from './vtkweb';
 
 export default (url, username, password) => {
@@ -68,10 +66,6 @@ export default (url, username, password) => {
         plot(dataSpec, template,
              graphicsMethodType, graphicsMethodName, renderingType) {
           switch (renderingType) {
-            case 'client': {
-              return plotly(this, dataSpec, template,
-                            graphicsMethodType, graphicsMethodName);
-            }
             case 'server':
               return vtkweb(this, dataSpec, template,
                             graphicsMethodType, graphicsMethodName);

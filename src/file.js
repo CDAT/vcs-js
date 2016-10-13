@@ -1,5 +1,3 @@
-import Promise from './promise';
-
 export default (session, fileName) => {
   // file prototype
   const file = {
