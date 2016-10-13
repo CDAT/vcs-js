@@ -1,4 +1,4 @@
-import Promise from '../src/promise';
+import Promise from 'bluebird';
 
 var context;
 var srcContext;

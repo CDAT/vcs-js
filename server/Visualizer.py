@@ -46,11 +46,9 @@ class Visualizer(protocols.vtkWebProtocol):
         return False
 
     @register('cdat.view.create')
-    def create(self, variable, template, methodtype, methodname, opts={}):
+    def create(self, variable, template, method, opts={}):
         vis = VcsPlot()
-        vis.setPlotMethod(
-            methodtype, methodname
-        )
+        vis.setGraphicsMethod(method)
         vis.setTemplate(template)
         all_vars = []
         for obj in variable:

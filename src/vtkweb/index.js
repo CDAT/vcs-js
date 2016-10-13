@@ -16,8 +16,7 @@ import { onSizeChange, startListening } from 'ParaViewWeb/Common/Misc/SizeHelper
  *              - name: index variable name
  *              - range: list with lower and upper range for the index varia
  */
-export default function remoteRender(canvas, dataSpec, template,
-                                     graphicsMethodType, graphicsMethodName) {
+export default function remoteRender(canvas, dataSpec, template, method) {
   return canvas.session.client()
     .then((client) => {
       // dataSpec is either one or more variable objects (if more, they're in an array)
@@ -28,17 +27,15 @@ export default function remoteRender(canvas, dataSpec, template,
       } else {
         spec = dataSpec;
       }
-
       client.session.call(
         'cdat.view.create',
-        [spec, template,
-         graphicsMethodType, graphicsMethodName]).then((windowId) => {
-           canvas.windowId = windowId;
-           const renderer = new RemoteRenderer(client, canvas.el, windowId);
-           onSizeChange(() => {
-             renderer.resize();
-           });
-           startListening();
-         });
+        [spec, template, method]).then((windowId) => {
+          canvas.windowId = windowId;
+          const renderer = new RemoteRenderer(client, canvas.el, windowId);
+          onSizeChange(() => {
+            renderer.resize();
+          });
+          startListening();
+        });
     });
 }

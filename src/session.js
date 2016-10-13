@@ -29,14 +29,6 @@ export default (url, username, password) => {
       return connectionPromise.then((connection) => { connection.destroy(); });
     },
 
-    getgraphicsmethod(methodtype, methodname) {
-      return Promise.delay(0, {
-        type: methodtype,
-        name: methodname,
-        session: this,
-      });
-    },
-
     client() {
       return pvw;
     },
@@ -52,12 +44,10 @@ export default (url, username, password) => {
         windowId: 0,
         session: outerSession,
 
-        plot(dataSpec, template,
-             graphicsMethodType, graphicsMethodName, renderingType) {
+        plot(dataSpec, template, method, renderingType) {
           switch (renderingType) {
             case 'server':
-              return vtkweb(this, dataSpec, template,
-                            graphicsMethodType, graphicsMethodName);
+              return vtkweb(this, dataSpec, template, method);
 
             default:
               return Promise.reject(new Error('Invalid renderingType'));
