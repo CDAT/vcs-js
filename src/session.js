@@ -1,7 +1,5 @@
 import SmartConnect from 'ParaViewWeb/IO/WebSocket/SmartConnect';
 import { createClient } from 'ParaViewWeb/IO/WebSocket/ParaViewWebClient';
-
-import createFile from './file';
 import vtkweb from './vtkweb';
 
 export default (url, username, password) => {
@@ -29,15 +27,6 @@ export default (url, username, password) => {
   const session = {
     close() {
       return connectionPromise.then((connection) => { connection.destroy(); });
-    },
-
-    files(path) {
-      return pvw
-        .then((client) => { client.FileListing.listServerDirectory(path); })
-        .then((filesObject) => {
-          return filesObject.files.map(
-            (file) => { return createFile(session, file.label); });
-        });
     },
 
     getgraphicsmethod(methodtype, methodname) {

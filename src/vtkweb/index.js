@@ -20,33 +20,18 @@ export default function remoteRender(canvas, dataSpec, template,
                                      graphicsMethodType, graphicsMethodName) {
   return canvas.session.client()
     .then((client) => {
-      // simplified interface
-      if (dataSpec.file && dataSpec.variable) {
-        if (typeof dataSpec.variable === 'string') {
-          dataSpec.variables = [{
-            name: dataSpec.variable,
-            file: dataSpec.file,
-          }];
-        } else {
-          dataSpec.variables = [];
-          for (let i = 0; i < dataSpec.variable.length; i += 1) {
-            dataSpec.variables.push({
-              name: dataSpec.variable[i],
-              file: dataSpec.file,
-            });
-          }
-        }
-        if (dataSpec.subset) {
-          for (let i = 0; i < dataSpec.variables.length; i += 1) {
-            const v = dataSpec.variables[i];
-            v.subset = dataSpec.subset;
-          }
-        }
+      // dataSpec is either one or more variable objects (if more, they're in an array)
+      let spec = [];
+
+      if (!Array.isArray(dataSpec)) {
+        spec.push(dataSpec);
+      } else {
+        spec = dataSpec;
       }
 
       client.session.call(
         'cdat.view.create',
-        [dataSpec.variables, template,
+        [spec, template,
          graphicsMethodType, graphicsMethodName]).then((windowId) => {
            canvas.windowId = windowId;
            const renderer = new RemoteRenderer(client, canvas.el, windowId);
