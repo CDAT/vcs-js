@@ -22,7 +22,7 @@ module.exports = {
   plugins: pluginList,
   entry: entry,
   output: {
-    path: './dist',
+    path: './vcs_server/js',
     filename: 'vcs.js',
     library: 'vcs',
     libraryTarget: 'umd',

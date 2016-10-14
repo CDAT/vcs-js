@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 """
     This module is a VTK Web server application.
     The following command line illustrate how to use it::
@@ -36,20 +38,25 @@ from vtk.web import protocols, server
 from vtk.web import wamp as vtk_wamp
 
 # import protocols
-from Visualizer import Visualizer
+import vcs_server
+from vcs_server.Visualizer import Visualizer
+import pkg_resources
+import tempfile
+import os
+import shutil
+
 
 class _VCSApp(vtk_wamp.ServerProtocol):
 
     # Application configuration
-    rootDir = '.'
     authKey = "vtkweb-secret"
 
     def initialize(self):
         self.registerVtkWebProtocol(protocols.vtkWebMouseHandler())
         self.registerVtkWebProtocol(protocols.vtkWebViewPort())
         self.registerVtkWebProtocol(protocols.vtkWebViewPortImageDelivery())
-        self.registerVtkWebProtocol(protocols.vtkWebFileBrowser(self.rootDir, 'Home'))
         self.registerVtkWebProtocol(Visualizer())
+
 
 if __name__ == "__main__":
     # Create argument parser
@@ -57,14 +64,25 @@ if __name__ == "__main__":
 
     # Add default arguments
     server.add_arguments(parser)
-    parser.add_argument("--data-dir", help="Base directory to list", dest="basedir", default=".")
 
     # Exctract arguments
     args = parser.parse_args()
 
     # Configure our current application
     _VCSApp.authKey = args.authKey
-    _VCSApp.rootDir = args.basedir
-
+    # Create a temp directory for the server to host its translated JS out of
+    args.content = tempfile.mkdtemp()
+    # Retrieve the JS contents to transform and cache in the tempdir
+    js_file = pkg_resources.resource_string(vcs_server.__name__, "js/vcs.js")
+    with open(os.path.join(args.content, "vcs.js"), "w") as f:
+        if args.sslKey and args.sslCert:
+            # Use wss
+            protocol = "wss://"
+        else:
+            protocol = "ws://"
+        url = protocol + args.host + ":%d" % args.port
+        f.write(js_file.replace("@@@URL@@@", url))
     # Start server
     server.start_webserver(options=args, protocol=_VCSApp)
+    # Once we're done serving, clean up the cached JS
+    shutil.rmtree(args.content)
