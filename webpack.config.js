@@ -25,7 +25,7 @@ module.exports = {
     path: './vcs_server/js',
     filename: 'vcs.js',
     library: 'vcs',
-    libraryTarget: 'umd',
+    libraryTarget: 'var',
     publicPath: '/dist/',
   },
   isparta: {

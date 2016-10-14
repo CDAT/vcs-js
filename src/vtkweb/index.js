@@ -19,16 +19,14 @@ const backend = {
     // create a pvw client object after the session is ready
     const pvw = connectionPromise.then((connection) => {
       const handlers = ['MouseHandler', 'ViewPort', 'ViewPortImageDelivery', 'FileListing'];
-      return new Promise((resolve, reject) => {
-        return {
-          pvw: createClient(connection, handlers).then(resolve),
-          close: (canvas) => {
-            if (canvas.windowId !== undefined) {
-              this.pvw.session.call('cdat.view.close', [canvas.windowId]);
-            }
-          },
-        };
-      });
+      return {
+        pvw: createClient(connection, handlers),
+        close: (canvas) => {
+          if (canvas.windowId !== undefined) {
+            this.pvw.session.call('cdat.view.close', [canvas.windowId]);
+          }
+        },
+      };
     });
     smartConnect.connect();
     return pvw;
@@ -57,4 +55,4 @@ const backend = {
   },
 };
 
-export { backend };
+export { backend as default };
