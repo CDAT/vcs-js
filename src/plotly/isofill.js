@@ -1,4 +1,4 @@
-import Plotly from 'plotly';
+import Plotly from 'plotly.js/dist/plotly-cartesian';
 import unpack from 'ndarray-unpack';
 import isnd from 'isndarray';
 

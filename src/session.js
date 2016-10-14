@@ -1,6 +1,7 @@
 import SmartConnect from 'ParaViewWeb/IO/WebSocket/SmartConnect';
 import { createClient } from 'ParaViewWeb/IO/WebSocket/ParaViewWebClient';
 import vtkweb from './vtkweb';
+import plotly from './plotly';
 
 export default (url, username, password) => {
   // vtkweb launcher uses a "secret" key rather than user/pass
@@ -46,6 +47,9 @@ export default (url, username, password) => {
 
         plot(dataSpec, template, method, renderingType) {
           switch (renderingType) {
+            case 'client': {
+              return plotly(this, dataSpec, template, method);
+            }
             case 'server':
               return vtkweb(this, dataSpec, template, method);
 
