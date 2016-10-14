@@ -1,24 +1,40 @@
 import RemoteRenderer from 'ParaViewWeb/NativeUI/Canvas/RemoteRenderer';
 import SizeHelper from 'ParaViewWeb/Common/Misc/SizeHelper';
-/**
- * BEGIN simplified interface
- * @param {string} dataSpec.file  data file where to read the variables from
- * @param {string} dataSpec.variable variable or list of variables to plot (from dataSpec.file)
- * @param {object} dataSpec.subset same as subset in dataSpec.variables.
- *                 Subset is applied to all variables, so we assume
- *                 all variables have the same grid.
- * END simplified interface
- * @param {object[]} dataSpec.variables       The variable from the file to display
- *        A variable contains:
- *          - name: the name of the attribute to plot
- *          - file: the data file where to read the variable from
- *          - subset: a list of dictionary elements, each element has
- *              - name: index variable name
- *              - range: list with lower and upper range for the index varia
- */
-export default function remoteRender(canvas, dataSpec, template, method) {
-  return canvas.session.client()
-    .then((client) => {
+import SmartConnect from 'ParaViewWeb/IO/WebSocket/SmartConnect';
+import { createClient } from 'ParaViewWeb/IO/WebSocket/ParaViewWebClient';
+
+
+const backend = {
+  connect: (url) => {
+    const smartConnect = new SmartConnect({
+      sessionURL: url,
+    });
+
+    const connectionPromise = new Promise((resolve, reject) => {
+      smartConnect.onConnectionReady(resolve);
+      smartConnect.onConnectionError(reject);
+      smartConnect.onConnectionClose(reject);
+    });
+
+    // create a pvw client object after the session is ready
+    const pvw = connectionPromise.then((connection) => {
+      const handlers = ['MouseHandler', 'ViewPort', 'ViewPortImageDelivery', 'FileListing'];
+      return new Promise((resolve, reject) => {
+        return {
+          pvw: createClient(connection, handlers).then(resolve),
+          close: (canvas) => {
+            if (canvas.windowId !== undefined) {
+              this.pvw.session.call('cdat.view.close', [canvas.windowId]);
+            }
+          },
+        };
+      });
+    });
+    smartConnect.connect();
+    return pvw;
+  },
+  plot: (canvas, dataSpec, template, method) => {
+    return canvas.clients.vtkweb.then((client) => {
       // dataSpec is either one or more variable objects (if more, they're in an array)
       let spec = [];
 
@@ -27,11 +43,11 @@ export default function remoteRender(canvas, dataSpec, template, method) {
       } else {
         spec = dataSpec;
       }
-      client.session.call(
+      client.pvw.session.call(
         'cdat.view.create',
         [spec, template, method]).then((windowId) => {
           canvas.windowId = windowId;
-          const renderer = new RemoteRenderer(client, canvas.el, windowId);
+          const renderer = new RemoteRenderer(client.pvw, canvas.el, windowId);
           SizeHelper.onSizeChange(() => {
             renderer.resize();
           });
@@ -39,4 +55,7 @@ export default function remoteRender(canvas, dataSpec, template, method) {
           return renderer;
         });
     });
-}
+  },
+};
+
+export { backend };

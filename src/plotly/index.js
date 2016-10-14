@@ -17,8 +17,14 @@ function asyncPlot(canvas, dataObject, template, method) {
   return plotObject;
 }
 
-export default function dispatch(dataObject, template, method) {
+function plot(dataObject, template, method) {
   return new Promise((resolve, reject) => {
-    resolve(asyncPlot(dataObject, template, method));
+              resolve(asyncPlot(dataObject, template, method));
   });
 }
+
+const o = {
+  plot,
+};
+
+export { o };
