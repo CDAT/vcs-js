@@ -36,7 +36,6 @@ from vtk.web import protocols, server
 from vtk.web import wamp as vtk_wamp
 
 # import protocols
-from FileLoader import FileLoader
 from Visualizer import Visualizer
 
 class _VCSApp(vtk_wamp.ServerProtocol):
@@ -50,7 +49,6 @@ class _VCSApp(vtk_wamp.ServerProtocol):
         self.registerVtkWebProtocol(protocols.vtkWebViewPort())
         self.registerVtkWebProtocol(protocols.vtkWebViewPortImageDelivery())
         self.registerVtkWebProtocol(protocols.vtkWebFileBrowser(self.rootDir, 'Home'))
-        self.registerVtkWebProtocol(FileLoader())
         self.registerVtkWebProtocol(Visualizer())
 
 if __name__ == "__main__":
