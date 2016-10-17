@@ -9,9 +9,17 @@ $(function () {
   var url = 'ws://localhost:9000/ws';
 
   var variables = {
-    "clt": {"id": "clt", "derivation": [{"type": "file", "uri": "clt.nc"}, {"parents": [0], "operation": {"type": "get", "id": "clt"}, "type": "variable"}, {"parents": [1], "operation": {"squeeze": 0, "type": "subset", "axes": {"longitude": [-180, 180], "latitude": [-90, 90]]}}, "type": "variable"}]},
-    "u": {"id": "u", "derivation": [{"type": "file", "uri": "clt.nc"}, {"parents": [0], "operation": {"type": "get", "id": "u"}, "type": "variable"}, {"parents": [1], "operation": {"squeeze": 0, "type": "subset", "axes": {"longitude": [-180, 180], "latitude": [-90, 90]}}, "type": "variable"}]},
-    "v": {"id": "v", "derivation": [{"type": "file", "uri": "clt.nc"}, {"parents": [0], "operation": {"type": "get", "id": "v"}, "type": "variable"}, {"parents": [1], "operation": {"squeeze": 0, "type": "subset", "axes": {"longitude": [-180, 180], "latitude": [-90, 90]}}, "type": "variable"}]}
+    "clt": {
+      "id": "clt",
+      "derivation":
+      [
+        {"type": "file", "uri": "clt.nc"},
+        {"parents": [0], "operation": {"type": "get", "id": "clt"}, "type": "variable"},
+        {"parents": [1], "operation": {"squeeze": 0, "type": "subset", "axes": {"longitude": [-180, 180], "latitude": [-90, 90]}}, "type": "variable"}
+      ]
+    },
+    "u": {"id": "u", "derivation": [{"type": "file", "uri": "clt.nc"}, {"parents": [0], "operation": {"type": "get", "id": "u"}, "type": "variable"}]},
+    "v": {"id": "v", "derivation": [{"type": "file", "uri": "clt.nc"}, {"parents": [0], "operation": {"type": "get", "id": "v"}, "type": "variable"}]}
   }
 
   var boxfill = {"fillareaopacity": [], "datawc_timeunits": "days since 2000", "projection": "linear", "xticlabels1": "*", "xticlabels2": "*", "ymtics1": "", "ymtics2": "", "datawc_x1": 1e+20, "datawc_x2": 1e+20, "boxfill_type": "linear", "xmtics1": "", "fillareacolors": null, "xmtics2": "", "color_2": 255, "datawc_calendar": 135441, "fillareaindices": [1], "color_1": 0, "colormap": null, "missing": [0.0, 0.0, 0.0, 100.0], "xaxisconvert": "linear", "level_2": 1e+20, "ext_1": false, "ext_2": false, "datawc_y2": 1e+20, "datawc_y1": 1e+20, "yaxisconvert": "linear", "legend": null, "name": "__boxfill_717978942019492", "yticlabels1": "*", "yticlabels2": "*", "fillareastyle": "solid", "levels": [1e+20, 1e+20], "g_name": "Gfb", "level_1": 1e+20};
@@ -33,6 +41,52 @@ $(function () {
   canvasPromise.then(function (canvas) {
     var dataSpec = variables.clt;
     canvas.plot(dataSpec, 'no_legend', boxfill, 'server');
+  });
+
+   // generate another plot using client side rendering
+  // we don't have an api for getting data yet, so we'll
+  // just use an ajax request to data.kitware.com
+  var cltPromise = $.ajax('https://data.kitware.com/api/v1/file/576aa3c08d777f1ecd6701ae/download');
+  var latPromise = $.ajax('https://data.kitware.com/api/v1/item/576aa3c08d777f1ecd6701b0/download');
+  var lonPromise = $.ajax('https://data.kitware.com/api/v1/item/576aa3c08d777f1ecd6701b9/download');
+  var canvasPromise2 = sessionPromise.then(function (session) {
+    return session.init(document.getElementById('plotly-isofill'));
+  });
+
+
+  // This is all very rough, likely much of this should be wrapped inside the api
+  Promise.all([
+    canvasPromise2, cltPromise, latPromise, lonPromise
+  ]).then(function (arg) {
+    console.log("1")
+    var canvas = arg[0];
+    console.log("2")
+    var clt = arg[1];
+    console.log("3")
+    var lat = arg[2];
+    console.log("4")
+    var lon = arg[3];
+    console.log("5")
+    var timestep = 0;
+    console.log("6")
+
+    var data = {
+      x: lon.data,
+      y: lat.data
+    };
+    console.log("7")
+
+    function draw() {
+      console.log("8")
+      data.z = ndarray(clt.data, clt.shape).pick(timestep, null, null);
+      console.log("9")
+      canvas.plot(data, 'default', { "g_type": "Gfi" }, 'client');
+      console.log("10")
+      timestep = (timestep + 1) % clt.shape[0];
+    }
+    console.log("11")
+    // call again for the next time step
+    draw();
   });
 
   var canvasPromise3 = sessionPromise.then(function (session) {

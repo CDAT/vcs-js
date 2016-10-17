@@ -18,5 +18,7 @@ function asyncPlot(canvas, dataObject, template, method) {
 }
 
 export default function dispatch(dataObject, template, method) {
-  return Promise.method(asyncPlot)(dataObject, template, method);
+  return new Promise((resolve, reject) => {
+    resolve(asyncPlot(dataObject, template, method));
+  });
 }

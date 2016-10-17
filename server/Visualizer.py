@@ -52,7 +52,7 @@ class Visualizer(protocols.vtkWebProtocol):
         vis.setTemplate(template)
         all_vars = []
         for obj in variable:
-            all_vars.append(cdms2.open(json.dumps(obj)))
+            all_vars.append(cdms2.open(obj))
         vis.loadVariable(all_vars)
         window = vis.getWindow()
         id = self.getGlobalId(window)
