@@ -1,4 +1,4 @@
-import Promise from 'vcs/promise';
+import Promise from 'bluebird';
 
 const sessionInjector = require('inject!vcs/session');
 
@@ -83,19 +83,6 @@ describe('session', () => {
     it('close a session', () => {
       return session.close()
         .should.eventually.be.fulfilled;
-    });
-
-    it('list files in a fake session', () => {
-      fakeClient.FileListing = {
-        listServerDirectory() {
-          return Promise.resolve({
-            files: [{ label: 'a' }, { label: 'b' }],
-          });
-        },
-      };
-
-      fakeCreateFile.returnsArg(1);
-      return session.files().should.eventually.eql(['a', 'b']);
     });
 
     it('get the client object', () => {

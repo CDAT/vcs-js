@@ -1,5 +1,6 @@
-import Plotly from 'plotly';
+import Plotly from 'plotly.js/dist/plotly-cartesian';
 import unpack from 'ndarray-unpack';
+import ndarray from 'ndarray';
 import isnd from 'isndarray';
 
 export default (spec) => {
