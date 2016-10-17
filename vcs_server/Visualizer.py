@@ -1,52 +1,66 @@
 """This module exposes methods for finding and creating visualizations."""
 
 import json
-from autobahn.wamp import register
 # import vtk modules.
 import vtk
-from vtk.web import protocols, server
 # vcs modules
 import vcs
 import cdms2
 from VcsPlot import VcsPlot
+import tornado
+import tornado.websocket
 
 
-class Visualizer(protocols.vtkWebProtocol):
+class Visualizer(tornado.websocket.WebSocketHandler):
 
-    _active = {}
+    def open(self):
+        self.canvas = vcs.init()
+        self.canvas.open()
 
-    @register('cdat.view.create')
-    def create(self, variable, template, method, opts={}):
-        vis = VcsPlot()
+    def write_canvas(self):
+        w, h = self.canvas.backend.renWin.GetSize()
+        pixels = vtk.vtkUnsignedCharArray()
+
+        self.canvas.backend.renWin.GetRGBACharPixelData(0, 0, w - 1, h - 1, 1, pixels)
+        pixel_arr = numpy.zeros((h, w, pixels.GetNumberOfComponents()), dtype="b")
+        for i in range(pixels.GetNumberOfTuples()):
+            for j in range(pixels.GetNumberOfComponents()):
+                pixel_arr[i / w, i % w, j] = pixels.GetTuple(i)[j]
+        flipped = numpy.flipud(pixel_arr)
+        self.write_message(flipped.tobytes(), binary=True)
+
+    def plot(self, variable, template, method, opts={}):
+        vis = VcsPlot(self.canvas)
         vis.setGraphicsMethod(method)
         vis.setTemplate(template)
         all_vars = []
         for obj in variable:
             all_vars.append(cdms2.open(obj))
         vis.loadVariable(all_vars)
-        window = vis.getWindow()
-        id = self.getGlobalId(window)
-        self._active[id] = vis
-        return id
 
-    @register('cdat.view.update')
-    def render_view(self, id, opts={}):
-        if id in self._active:
-            return self._active[id].render(opts)
-        return False
+    def resize(self, width, height):
+        self.canvas.geometry(width, height)
 
-    @register('cdat.view.close')
-    def remove_view(self, id):
-        print 'close window %s' % id
-        vis = self._active.pop(id)
-        if vis:
-            vis.close()
-            del vis
-            return True
-        return False
+    def on_message(self, message):
+        msg = json.loads(message)
+        if msg["event"] == "resize":
+            self.resize(msg["width"], msg["height"])
+        elif msg["event"] == "plot":
+            msg_keys = set(msg.keys())
+            variables = msg["data"]
+            gm = msg.get("gm", None)
+            template = msg.get("tmpl", None)
+            options = {}
+            for k in msg_keys - set(("data", "gm", "tmpl")):
+                options[k] = msg[k]
+            self.plot(variables, template, gm, opts=options)
+        self.write_canvas()
+
+    def on_close(self):
+        self.canvas.close()
 
 
-def detect_nvars(cls, g_type, g_method, g_obj):
+def detect_nvars(g_type, g_method, g_obj):
     """Try to return the number of variables required for the plot method.
 
     Returns the number of variables required by the plot type.
@@ -99,5 +113,5 @@ for t in vcs.graphicsmethodlist():
     _methods[t] = {}
     for m in vcs.elements[t].keys():
         _methods[t][m] = {
-            'nvars': Visualizer.detect_nvars(t, m, vcs.elements[t][m])
+            'nvars': detect_nvars(t, m, vcs.elements[t][m])
         }
