@@ -30,59 +30,59 @@
 """
 
 import argparse
-from autobahn.wamp import register
 
 # import vtk modules.
 import vtk
-from vtk.web import protocols, server
-from vtk.web import wamp as vtk_wamp
-
-# import protocols
+import tornado
 import vcs_server
 from vcs_server.Visualizer import Visualizer
+from vcs_server.DataReader import DataReader
 import pkg_resources
 import tempfile
 import os
 import shutil
 
 
-class _VCSApp(vtk_wamp.ServerProtocol):
-
-    # Application configuration
-    authKey = "vtkweb-secret"
-
-    def initialize(self):
-        self.registerVtkWebProtocol(protocols.vtkWebMouseHandler())
-        self.registerVtkWebProtocol(protocols.vtkWebViewPort())
-        self.registerVtkWebProtocol(protocols.vtkWebViewPortImageDelivery())
-        self.registerVtkWebProtocol(Visualizer())
-
-
 if __name__ == "__main__":
     # Create argument parser
     parser = argparse.ArgumentParser(description="Demo VCS application")
 
-    # Add default arguments
-    server.add_arguments(parser)
+    # Add arguments
+    parser.add_argument("--ssl", help="Whether to use SSL for communication or not.", default=False, action="store_true", dest="ssl")
+    parser.add_argument("--host", help="Hostname to use", default="localhost", dest="host")
+    parser.add_argument("--port", help="Port to use", default="8888", dest="port", type=int)
 
     # Exctract arguments
     args = parser.parse_args()
 
-    # Configure our current application
-    _VCSApp.authKey = args.authKey
     # Create a temp directory for the server to host its translated JS out of
-    args.content = tempfile.mkdtemp()
+    js_dir = tempfile.mkdtemp()
     # Retrieve the JS contents to transform and cache in the tempdir
     js_file = pkg_resources.resource_string(vcs_server.__name__, "js/vcs.js")
-    with open(os.path.join(args.content, "vcs.js"), "w") as f:
-        if args.sslKey and args.sslCert:
-            # Use wss
-            protocol = "wss://"
-        else:
-            protocol = "ws://"
-        url = protocol + args.host + ":%d" % args.port
-        f.write(js_file.replace("@@@URL@@@", url))
+    map_file = pkg_resources.resource_string(vcs_server.__name__, "js/vcs.js.map")
+
+    replacements = {
+        "@@@SECURE@@@": "s" if args.ssl else "",
+        "@@@URL@@@": args.host + ":%d" % args.port
+    }
+
+    for r in replacements:
+        js_file = js_file.replace(r, replacements[r])
+        map_file = map_file.replace(r, replacements[r])
+
+    with open(os.path.join(js_dir, "vcs.js"), "w") as jsfile:
+        jsfile.write(js_file)
+    with open(os.path.join(js_dir, "vcs.js.map"), "w") as mapfile:
+        mapfile.write(map_file)
+
     # Start server
-    server.start_webserver(options=args, protocol=_VCSApp)
+    application = tornado.web.Application([
+        (r"/scripts/(.*)", tornado.web.StaticFileHandler, {"path": js_dir}),
+        (r"/ws", Visualizer),
+        (r"/data", DataReader),
+    ], default_host=args.host)
+    application.listen(args.port)
+    tornado.ioloop.IOLoop.current().start()
+
     # Once we're done serving, clean up the cached JS
-    shutil.rmtree(args.content)
+    shutil.rmtree(js_dir)
