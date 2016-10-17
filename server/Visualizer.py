@@ -1,14 +1,15 @@
 """This module exposes methods for finding and creating visualizations."""
 
+import json
 from autobahn.wamp import register
 # import vtk modules.
 import vtk
 from vtk.web import protocols, server
 # vcs modules
 import vcs
-
-from FileLoader import FileLoader
+import cdms2
 from VcsPlot import VcsPlot
+
 
 class Visualizer(protocols.vtkWebProtocol):
 
@@ -45,20 +46,13 @@ class Visualizer(protocols.vtkWebProtocol):
         return False
 
     @register('cdat.view.create')
-    def create(self, variable, template, methodtype, methodname, opts={}):
+    def create(self, variable, template, method, opts={}):
         vis = VcsPlot()
-        vis.setPlotMethod(
-            methodtype, methodname
-        )
+        vis.setGraphicsMethod(method)
         vis.setTemplate(template)
         all_vars = []
         for obj in variable:
-            f = FileLoader().get_reader(obj['file'])
-            var = f[obj['name']]
-            if ('subset' in obj):
-                kargs = obj['subset']
-                var = var(**kargs)
-            all_vars.append(var)
+            all_vars.append(cdms2.open(obj))
         vis.loadVariable(all_vars)
         window = vis.getWindow()
         id = self.getGlobalId(window)

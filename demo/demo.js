@@ -1,107 +1,30 @@
 var sessionPromise;
 
-/**
- * Returns a promise object to the variables stored in a file
- */
-function get_variables(fileName) {
-  // get the promise for the data object for the variables
-  return sessionPromise.then(function (session) {
-    return session.files();
-  }).then(function (files) {
-    // get the file object for a netcdf variable
-      var nc = files.filter(function (f) {
-        var re = new RegExp(fileName);
-        return f.fileName.match(re);
-      })[0];
-
-    if (!nc) {
-      console.log('No netcdf variables found');
-      return;
-    }
-
-    // get a list of variables
-    return nc.variables();
-  });
-}
-
-/**
- * Prints the result from get_variables to the console.
- * @param {string? filename An absolute path to a netcdf file
- */
-function print_variables (filename) {
-    var fileVars = get_variables(filename);
-    var vars, axes, shape, axisList, lonLat, logString, boundsString,
-        gridType;
-    var v, i, al;
-    fileVars.then(
-        function (varsAxes) {
-            // variables
-            vars = varsAxes[0];
-            for (v in vars) {
-                // shape of the variable
-                shape = '(' + vars[v].shape[0];
-                for (i = 1; i < vars[v].shape.length; ++i) {
-                    shape += (',' + vars[v].shape[i]);
-                }
-                shape += ')';
-                // axes for the variable
-                al = vars[v].axisList;
-                axisList = '(' + al[0];
-                for (i = 1; i < al.length; ++i) {
-                    axisList += (', ' + al[i]);
-                }
-                axisList += ')';
-                // bounds are received for longitude and latitude
-                boundsString = '';
-                if (vars[v].bounds) {
-                    boundsString += ': (' + vars[v].bounds[0] + ', ' +
-                        vars[v].bounds[1] + ')';
-                }
-                // longitude, latitude for the variable
-                // these are different than the axes for the curvilinear or
-                // generic grids
-                lonLat = null;
-                if (vars[v].lonLat) {
-                    lonLat = '(' + vars[v].lonLat[0] + ', ' +
-                        vars[v].lonLat[1] + ')';
-                }
-                logString = v + shape + '[' + vars[v].name + ', ' +
-                    vars[v].units + boundsString + ']' + ': ' + axisList;
-                if (lonLat) {
-                    logString += (', ' + lonLat);
-                }
-                if (vars[v].gridType) {
-                    logString += (', ' + vars[v].gridType);
-                }
-                console.log(logString);
-            }
-            // all axes in the file
-            axes = varsAxes[1];
-            for (v in axes) {
-                shape = '(' + axes[v].shape[0];
-                for (i = 1; i < axes[v].shape.length; ++i) {
-                    shape += (',' + axes[v].shape[i]);
-                }
-                shape += ')';
-                console.log(v + shape + '[' + axes[v].name + ', ' +
-                            axes[v].units + ': (' +
-                            axes[v].data[0] + ', ' +
-                            axes[v].data[axes[v].data.length - 1] + ')]');
-            }
-        },
-        function (reason) {
-            console.log(reason);
-        }
-    );
-}
-
-$(function () {    
+$(function () {
   // Ordinarily this would be a URL string of a rest
   // interface for generating a new server side connection.
   // Here we short circuit that code to generate a simulated
   // session connecting to pregenerated files through
   // Girder's rest interface.
   var url = 'ws://localhost:9000/ws';
+
+  var variables = {
+    "clt": {
+      "id": "clt",
+      "derivation":
+      [
+        {"type": "file", "uri": "clt.nc"},
+        {"parents": [0], "operation": {"type": "get", "id": "clt"}, "type": "variable"},
+        {"parents": [1], "operation": {"squeeze": 0, "type": "subset", "axes": {"longitude": [-180, 180], "latitude": [-90, 90]}}, "type": "variable"}
+      ]
+    },
+    "u": {"id": "u", "derivation": [{"type": "file", "uri": "clt.nc"}, {"parents": [0], "operation": {"type": "get", "id": "u"}, "type": "variable"}]},
+    "v": {"id": "v", "derivation": [{"type": "file", "uri": "clt.nc"}, {"parents": [0], "operation": {"type": "get", "id": "v"}, "type": "variable"}]}
+  }
+
+  var boxfill = {"fillareaopacity": [], "datawc_timeunits": "days since 2000", "projection": "linear", "xticlabels1": "*", "xticlabels2": "*", "ymtics1": "", "ymtics2": "", "datawc_x1": 1e+20, "datawc_x2": 1e+20, "boxfill_type": "linear", "xmtics1": "", "fillareacolors": null, "xmtics2": "", "color_2": 255, "datawc_calendar": 135441, "fillareaindices": [1], "color_1": 0, "colormap": null, "missing": [0.0, 0.0, 0.0, 100.0], "xaxisconvert": "linear", "level_2": 1e+20, "ext_1": false, "ext_2": false, "datawc_y2": 1e+20, "datawc_y1": 1e+20, "yaxisconvert": "linear", "legend": null, "name": "__boxfill_717978942019492", "yticlabels1": "*", "yticlabels2": "*", "fillareastyle": "solid", "levels": [1e+20, 1e+20], "g_name": "Gfb", "level_1": 1e+20};
+  var vector = {"datawc_timeunits": "days since 2000", "projection": "linear", "reference": 1e+20, "xticlabels1": "*", "xticlabels2": "*", "linecolor": null, "ymtics1": "", "ymtics2": "", "linewidth": null, "datawc_x1": 1e+20, "datawc_x2": 1e+20, "xmtics1": "", "xmtics2": "", "datawc_calendar": 135441, "alignment": "center", "type": "arrows", "colormap": null, "xaxisconvert": "linear", "scale": 1.0, "linetype": null, "datawc_y2": 1e+20, "datawc_y1": 1e+20, "yaxisconvert": "linear", "name": "vector_full", "yticlabels1": "*", "yticlabels2": "*", "scalerange": [0.1, 1.0], "scaleoptions": ["off", "constant", "normalize", "linear", "constantNNormalize", "constantNLinear"], "g_name": "Gv", "scaletype": "constantNNormalize"};
+  var vector_subview = {"datawc_timeunits": "days since 2000", "projection": "linear", "reference": 1e+20, "xticlabels1": "*", "xticlabels2": "*", "linecolor": null, "ymtics1": "", "ymtics2": "", "linewidth": null, "datawc_x1": 60, "datawc_x2": 180, "xmtics1": "", "xmtics2": "", "datawc_calendar": 135441, "alignment": "center", "type": "arrows", "colormap": null, "xaxisconvert": "linear", "scale": 1.0, "linetype": null, "datawc_y2": 90, "datawc_y1": 0, "yaxisconvert": "linear", "name": "subset_vector", "yticlabels1": "*", "yticlabels2": "*", "scalerange": [0.1, 1.0], "scaleoptions": ["off", "constant", "normalize", "linear", "constantNNormalize", "constantNLinear"], "g_name": "Gv", "scaletype": "constantNNormalize"};
 
   // create the session
   sessionPromise = vcs.createSession(url);
@@ -113,17 +36,14 @@ $(function () {
   var canvasPromise = sessionPromise.then(function (session) {
     return session.init(document.getElementById('vcs-isofill'));
   });
-    
+
   // generate the plot when all of the promises resolve
   canvasPromise.then(function (canvas) {
-    var dataSpec = {
-      file: 'coads_climatology.nc',
-      variable: 'SST',
-    };
-    canvas.plot(dataSpec, 'no_legend', 'isofill', 'robinson', 'server');
+    var dataSpec = variables.clt;
+    canvas.plot(dataSpec, 'no_legend', boxfill, 'server');
   });
-  
-  // generate another plot using client side rendering
+
+   // generate another plot using client side rendering
   // we don't have an api for getting data yet, so we'll
   // just use an ajax request to data.kitware.com
   var cltPromise = $.ajax('https://data.kitware.com/api/v1/file/576aa3c08d777f1ecd6701ae/download');
@@ -138,23 +58,33 @@ $(function () {
   Promise.all([
     canvasPromise2, cltPromise, latPromise, lonPromise
   ]).then(function (arg) {
+    console.log("1")
     var canvas = arg[0];
+    console.log("2")
     var clt = arg[1];
+    console.log("3")
     var lat = arg[2];
+    console.log("4")
     var lon = arg[3];
+    console.log("5")
     var timestep = 0;
+    console.log("6")
 
     var data = {
       x: lon.data,
       y: lat.data
     };
+    console.log("7")
 
     function draw() {
+      console.log("8")
       data.z = ndarray(clt.data, clt.shape).pick(timestep, null, null);
-      canvas.plot(data, 'default', 'isofill', 'quick', 'client');
+      console.log("9")
+      canvas.plot(data, 'default', { "g_type": "Gfi" }, 'client');
+      console.log("10")
       timestep = (timestep + 1) % clt.shape[0];
     }
-
+    console.log("11")
     // call again for the next time step
     draw();
   });
@@ -162,35 +92,26 @@ $(function () {
   var canvasPromise3 = sessionPromise.then(function (session) {
     return session.init(document.getElementById('vcs-vector'));
   });
-    
     // generate the plot when all of the promises resolve
   canvasPromise3.then(function (canvas) {
-    var dataSpec = {
-      file: 'coads_climatology.nc',
-      variable: ['UWND', 'VWND'],
-    };
-    canvas.plot(dataSpec, 'default', 'vector', 'default', 'server');
+    var dataSpec = [variables.u, variables.v];
+    canvas.plot(dataSpec, 'default', vector, 'server');
   });
 
   var canvasPromise4 = sessionPromise.then(function (session) {
     return session.init(document.getElementById('vcs-vector-subset'));
   });
-    
-    // generate the plot when all of the promises resolve
+
+  // generate the plot when all of the promises resolve
   canvasPromise4.then(function (canvas) {
-    var dataSpec = {
-      file: 'coads_climatology.nc',
-      variable: ['UWND', 'VWND'],
-      subset: {'COADSX': [60, 180], 'COADSY': [0, 90]}
-    };
-    canvas.plot(dataSpec, 'default', 'vector', 'default', 'server');
+    var dataSpec = [variables.u, variables.v];
+    canvas.plot(dataSpec, 'default', vector_subview, 'server');
   });
 
   $(window).on('beforeunload', function() {
     canvasPromise.then((canvas) => canvas.close());
-    canvasPromise2.then((canvas) => canvas.close());
     canvasPromise3.then((canvas) => canvas.close());
-    canvasPromise4.then((canvas) => canvas.close());        
+    canvasPromise4.then((canvas) => canvas.close());
     return 'Your own message goes here...';
   });
 });

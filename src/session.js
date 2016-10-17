@@ -1,10 +1,7 @@
 import SmartConnect from 'ParaViewWeb/IO/WebSocket/SmartConnect';
 import { createClient } from 'ParaViewWeb/IO/WebSocket/ParaViewWebClient';
-
-import Promise from './promise';
-import createFile from './file';
-import plotly from './plotly';
 import vtkweb from './vtkweb';
+import plotly from './plotly';
 
 export default (url, username, password) => {
   // vtkweb launcher uses a "secret" key rather than user/pass
@@ -33,23 +30,6 @@ export default (url, username, password) => {
       return connectionPromise.then((connection) => { connection.destroy(); });
     },
 
-    files(path) {
-      return pvw
-        .then((client) => { client.FileListing.listServerDirectory(path); })
-        .then((filesObject) => {
-          return filesObject.files.map(
-            (file) => { return createFile(session, file.label); });
-        });
-    },
-
-    getgraphicsmethod(methodtype, methodname) {
-      return Promise.delay(0, {
-        type: methodtype,
-        name: methodname,
-        session: this,
-      });
-    },
-
     client() {
       return pvw;
     },
@@ -65,16 +45,13 @@ export default (url, username, password) => {
         windowId: 0,
         session: outerSession,
 
-        plot(dataSpec, template,
-             graphicsMethodType, graphicsMethodName, renderingType) {
+        plot(dataSpec, template, method, renderingType) {
           switch (renderingType) {
             case 'client': {
-              return plotly(this, dataSpec, template,
-                            graphicsMethodType, graphicsMethodName);
+              return plotly(this, dataSpec, template, method);
             }
             case 'server':
-              return vtkweb(this, dataSpec, template,
-                            graphicsMethodType, graphicsMethodName);
+              return vtkweb(this, dataSpec, template, method);
 
             default:
               return Promise.reject(new Error('Invalid renderingType'));
