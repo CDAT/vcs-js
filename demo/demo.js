@@ -14,14 +14,13 @@ var sessionPromise;
   var isofill = {"g_name": "Gfi"};
 
   // create the session
-  //var canvas = vcs.init(document.getElementById('vcs-boxfill'));
+  var canvas = vcs.init(document.getElementById('vcs-boxfill'));
   var dataSpec = variables.clt;
-  //canvas.plot(dataSpec, boxfill, 'no_legend', 'server');
+  canvas.plot(dataSpec, boxfill, 'no_legend');
 
-  var canvas2 = vcs.init(document.getElementById('plotly-isofill'));
-  canvas2.plot(dataSpec, isofill, 'no_legend', 'client');
+  var canvas2 = vcs.init(document.getElementById('plotly-isofill'), 'client');
+  canvas2.plot(dataSpec, isofill);
 
-  /*
   var canvas3 = vcs.init(document.getElementById('vcs-vector'));
     // generate the plot when all of the promises resolve
   var dataSpec = [variables.u, variables.v];
@@ -31,11 +30,4 @@ var sessionPromise;
   var dataSpec = [variables.u, variables.v];
   canvas4.plot(dataSpec, vector_subview);
 
-  $(window).on('beforeunload', function() {
-    canvas.close();
-    canvas3.close();
-    canvas4.close();
-    return 'Your own message goes here...';
-  });
-  */
 })();
