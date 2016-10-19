@@ -4,10 +4,12 @@ import json
 # import vtk modules.
 import vtk
 # vcs modules
+import datetime
 import vcs
 import cdms2
 from VcsPlot import VcsPlot
 import tornado
+import numpy
 import tornado.websocket
 
 
@@ -17,10 +19,12 @@ class Visualizer(tornado.websocket.WebSocketHandler):
         self.canvas = vcs.init()
         self.canvas.open()
 
+    def check_origin(self, origin):
+        return True
+
     def write_canvas(self):
         w, h = self.canvas.backend.renWin.GetSize()
         pixels = vtk.vtkUnsignedCharArray()
-
         self.canvas.backend.renWin.GetRGBACharPixelData(0, 0, w - 1, h - 1, 1, pixels)
         pixel_arr = numpy.zeros((h, w, pixels.GetNumberOfComponents()), dtype="b")
         for i in range(pixels.GetNumberOfTuples()):

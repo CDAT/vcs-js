@@ -1,16 +1,38 @@
 import 'jquery';
-import vtkweb from './vtkweb';
+import vtk from './vtk';
 import plotly from './plotly';
 import cdms from './cdms';
 
 
-const clients = {};
+const globalClients = {};
 
-function init(el) {
+function init(el, renderingType) {
+  const clients = {};
+  let backend = null;
+
+  switch (renderingType) {
+    case 'client':
+      if (globalClients.data === undefined) {
+        globalClients.data = cdms.connect('http@@@SECURE@@@://@@@URL@@@');
+      }
+      clients.data = globalClients.data;
+      backend = plotly;
+      break;
+    case 'server':
+      clients.vtk = vtk.init(el, 'ws@@@SECURE@@@://@@@URL@@@/ws');
+      backend = vtk;
+      break;
+    default:
+      // Fallback to vtk if they pass a bad renderingType.
+      clients.vtk = vtk.init(el, 'ws@@@SECURE@@@://@@@URL@@@/ws');
+      backend = vtk;
+  }
+
   const canvas = {
     el,
-    clients: {},
-    plot(dataSpec, method, template, renderingType) {
+    clients,
+    backend,
+    plot(dataSpec, method, template) {
       // Clean up inputs
 
       let spec = [];
@@ -19,34 +41,13 @@ function init(el) {
       } else {
         spec = dataSpec;
       }
-      console.log(renderingType);
-      let type = renderingType;
-      if (renderingType === undefined) {
-        type = 'server';
-      }
 
       let tmpl = template;
       if (template === undefined) {
         tmpl = 'default';
       }
 
-      switch (type) {
-        case 'client': {
-          if (clients.data === undefined) {
-            clients.data = cdms.connect('http@@@SECURE@@@://@@@URL@@@');
-          }
-          this.clients.data = clients.data;
-          return plotly.plot(this, spec, tmpl, method);
-        }
-        case 'server':
-          if (clients.vtkweb === undefined) {
-            clients.vtkweb = vtkweb.connect('ws@@@SECURE@@@://@@@URL@@@/ws');
-          }
-          this.clients.vtkweb = clients.vtkweb;
-          return vtkweb.plot(this, spec, tmpl, method);
-        default:
-          return Promise.reject(new Error('Invalid renderingType'));
-      }
+      this.backend.plot(this, spec, tmpl, method);
     },
     close() {
       Object.keys(this.clients).map((k) => { return this.clients[k].then((c) => { c.close(this); }); });
