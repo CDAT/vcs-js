@@ -30,17 +30,17 @@ const backend = {
     };
 
     const resize = (width, height) => {
-      const int_w = Math.floor(width);
-      const int_h = Math.floor(height);
-      targetDims.push({ width: int_w, height: int_h });
-      send({ event: 'resize', width: int_w, height: int_h });
+      const intWidth = Math.floor(width);
+      const intHeight = Math.floor(height);
+      targetDims.push({ width: intWidth, height: intHeight });
+      send({ event: 'resize', width: intWidth, height: intHeight });
     };
 
     socket.then((ws) => {
       ws.onmessage = (evt) => {
         let dims = targetDims.shift();
         if (dims === undefined) {
-          dims = {width: c.width, height: c.height};
+          dims = { width: c.width, height: c.height };
         }
         const buffer = new Uint8ClampedArray(evt.data);
         const img = new ImageData(buffer, dims.width, dims.height);
@@ -48,6 +48,27 @@ const backend = {
         c.height = dims.height;
         context.putImageData(img, 0, 0);
       };
+    });
+
+    $(c).mousedown((ev) => {
+      const { left, top } = $(c).offset();
+      const evY = Math.floor(c.height - (ev.pageY - top));
+      const evX = Math.floor(ev.pageX - left);
+      send({ event: 'mouseDown', x: evX, y: evY });
+    });
+
+    $(c).mouseup((ev) => {
+      const { left, top } = $(c).offset();
+      const evY = Math.floor(c.height - (ev.pageY - top));
+      const evX = Math.floor(ev.pageX - left);
+      send({ event: 'mouseUp', x: evX, y: evY });
+    });
+
+    $(c).mousemove((ev) => {
+      const { left, top } = $(c).offset();
+      const evY = Math.floor(c.height - (ev.pageY - top));
+      const evX = Math.floor(ev.pageX - left);
+      send({ event: 'mouseMove', x: evX, y: evY });
     });
 
     // Sync initial canvas size
