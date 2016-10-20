@@ -3,6 +3,7 @@
 import json
 # import vtk modules.
 import vtk
+from vtk.util import numpy_support as vtk_numpy
 # vcs modules
 import datetime
 import vcs
@@ -26,12 +27,9 @@ class Visualizer(tornado.websocket.WebSocketHandler):
         w, h = self.canvas.backend.renWin.GetSize()
         pixels = vtk.vtkUnsignedCharArray()
         self.canvas.backend.renWin.GetRGBACharPixelData(0, 0, w - 1, h - 1, 1, pixels)
-        pixel_arr = numpy.zeros((h, w, pixels.GetNumberOfComponents()), dtype="b")
-        for i in range(pixels.GetNumberOfTuples()):
-            for j in range(pixels.GetNumberOfComponents()):
-                pixel_arr[i / w, i % w, j] = pixels.GetTuple(i)[j]
-        flipped = numpy.flipud(pixel_arr)
-        self.write_message(flipped.tobytes(), binary=True)
+        arr = vtk_numpy.vtk_to_numpy(pixels)
+        arr = arr.reshape((h, w, pixels.GetNumberOfComponents()))
+        self.write_message(numpy.flipud(arr).tobytes(), binary=True)
 
     def plot(self, variable, template, method, opts={}):
         vis = VcsPlot(self.canvas)
