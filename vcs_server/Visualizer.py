@@ -19,14 +19,16 @@ class Visualizer(tornado.websocket.WebSocketHandler):
     def open(self):
         self.canvas = vcs.init()
         self.canvas.open()
+        self.renWin = self.canvas.backend.renWin
+        self.interactor = self.canvas.backend.renWin.GetInteractor()
 
     def check_origin(self, origin):
         return True
 
     def write_canvas(self):
-        w, h = self.canvas.backend.renWin.GetSize()
+        w, h = self.renWin.GetSize()
         pixels = vtk.vtkUnsignedCharArray()
-        self.canvas.backend.renWin.GetRGBACharPixelData(0, 0, w - 1, h - 1, 1, pixels)
+        self.renWin.GetRGBACharPixelData(0, 0, w - 1, h - 1, 1, pixels)
         arr = vtk_numpy.vtk_to_numpy(pixels)
         arr = arr.reshape((h, w, pixels.GetNumberOfComponents()))
         self.write_message(numpy.flipud(arr).tobytes(), binary=True)
@@ -39,6 +41,18 @@ class Visualizer(tornado.websocket.WebSocketHandler):
         for obj in variable:
             all_vars.append(cdms2.open(obj))
         vis.loadVariable(all_vars)
+
+    def mouseDown(self, x, y):
+        self.interactor.SetEventPosition(x, y, 0)
+        self.interactor.LeftButtonPressEvent()
+
+    def mouseUp(self, x, y):
+        self.interactor.SetEventPosition(x, y, 0)
+        self.interactor.LeftButtonReleaseEvent()
+
+    def mouseMove(self, x, y):
+        self.interactor.SetEventPosition(x, y, 0)
+        self.interactor.MouseMoveEvent()
 
     def resize(self, width, height):
         self.canvas.geometry(width, height)
@@ -56,6 +70,15 @@ class Visualizer(tornado.websocket.WebSocketHandler):
             for k in msg_keys - set(("data", "gm", "tmpl")):
                 options[k] = msg[k]
             self.plot(variables, template, gm, opts=options)
+        elif msg["event"].startswith("mouse"):
+            x, y = msg["x"], msg["y"]
+            if msg["event"] == "mouseDown":
+                self.mouseDown(x, y)
+            elif msg["event"] == "mouseUp":
+                self.mouseUp(x, y)
+            elif msg["event"] == "mouseMove":
+                self.mouseMove(x, y)
+
         self.write_canvas()
 
     def on_close(self):
