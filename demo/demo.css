@@ -1,5 +1,14 @@
-.plot {
-    height: 600px;
-    width: 800px;
+body, html {
+	width:100%;
+	height:100%;
 }
 
+* {
+	box-sizing: border-box;
+}
+
+div.plot {
+	width: 50%;
+	height: 50%;
+	float: left;
+}
