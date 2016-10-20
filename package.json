@@ -44,7 +44,7 @@
   "dependencies": {
     "autobahn": "github:crossbario/autobahn-js-built#v0.10.1",
     "axios": "^0.15.1",
-    "element-resize-event": "^2.0.7",
+    "css-element-queries": "^0.3.2",
     "hammerjs": "^2.0.8",
     "isndarray": "^1.0.0",
     "jquery": "^3.0.0",
