@@ -4,7 +4,7 @@ import $ from 'jquery';
 
 const backend = {
   plot: (canvas, data, tmpl, gm) => {
-    canvas.clients.vtk.send({ event: 'plot', data, gm, tmpl });
+    return canvas.clients.vtk.send({ event: 'plot', data, gm, tmpl });
   },
   clear: (canvas) => {
     canvas.clients.vtk.send({ event: 'clear' });
@@ -25,10 +25,20 @@ const backend = {
 
     const context = c.getContext('2d');
     const targetDims = [];
+    // Used to queue resolve functions to let outside users know the render is complete.
+    const resolutionFunctions = [];
 
     const send = (obj) => {
-      socket.then((ws) => {
+      return socket.then((ws) => {
+        let resolve;
+        let reject;
+        const p = new Promise((res, rej) => {
+          resolve = res;
+          reject = rej;
+        });
         ws.send(JSON.stringify(obj));
+        resolutionFunctions.push({ resolve, reject });
+        return p;
       });
     };
 
@@ -45,11 +55,16 @@ const backend = {
         if (dims === undefined) {
           dims = { width: c.width, height: c.height };
         }
+
+        const { resolve, reject } = resolutionFunctions.shift();
+
         const buffer = new Uint8ClampedArray(evt.data);
         const img = new ImageData(buffer, dims.width, dims.height);
         c.width = dims.width;
         c.height = dims.height;
         context.putImageData(img, 0, 0);
+
+        resolve();
       };
     });
 

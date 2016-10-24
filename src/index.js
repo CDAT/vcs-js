@@ -1,3 +1,5 @@
+/* global document */
+
 import 'jquery';
 import vtk from './vtk';
 import plotly from './plotly';
@@ -28,6 +30,19 @@ function init(el, renderingType) {
       backend = vtk;
   }
 
+  // Emit events about plot status
+  function plotStarted() {
+    const ev = document.createEvent('Event');
+    ev.initEvent('vcsPlotStart', true, true);
+    el.dispatchEvent(ev);
+  }
+
+  function plotFinished() {
+    const ev = document.createEvent('event');
+    ev.initEvent('vcsPlotEnd', true, true);
+    el.dispatchEvent(ev);
+  }
+
   const canvas = {
     el,
     clients,
@@ -46,8 +61,10 @@ function init(el, renderingType) {
       if (template === undefined) {
         tmpl = 'default';
       }
-
-      this.backend.plot(this, spec, tmpl, method);
+      plotStarted();
+      const p = this.backend.plot(this, spec, tmpl, method);
+      p.then(() => { plotFinished(); });
+      return p;
     },
     clear() {
       this.backend.clear(this);

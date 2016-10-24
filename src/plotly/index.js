@@ -1,6 +1,5 @@
-import isofill from './isofill';
 import Plotly from 'plotly.js/dist/plotly-cartesian';
-
+import isofill from './isofill';
 
 function asyncPlot(canvas, dataSpec, template, method) {
   const variable = dataSpec[0];
@@ -47,7 +46,7 @@ function plot(canvas, dataSpec, template, method) {
 }
 
 function clear(canvas) {
-  Plotly.purge(canvas.el);
+  Plotly.purge(canvas.el)
 }
 
 const o = {
