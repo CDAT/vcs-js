@@ -42,18 +42,15 @@
     "webpack-dev-server": "^1.14.1"
   },
   "dependencies": {
-    "autobahn": "github:crossbario/autobahn-js-built#v0.10.1",
     "axios": "^0.15.1",
     "css-element-queries": "^0.3.2",
     "hammerjs": "^2.0.8",
     "isndarray": "^1.0.0",
     "jquery": "^3.0.0",
-    "monologue.js": "^0.3.5",
     "mout": "^1.0.0",
     "ndarray": "^1.0.18",
     "ndarray-pack": "^1.2.0",
     "ndarray-unpack": "^1.0.0",
-    "paraviewweb": "^1.10.0",
     "plotly.js": "^1.14.0"
   },
   "repository": {

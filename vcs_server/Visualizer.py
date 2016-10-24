@@ -78,6 +78,8 @@ class Visualizer(tornado.websocket.WebSocketHandler):
                 self.mouseUp(x, y)
             elif msg["event"] == "mouseMove":
                 self.mouseMove(x, y)
+        elif msg["event"] == "clear":
+            self.canvas.clear()
 
         self.write_canvas()
 

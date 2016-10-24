@@ -6,6 +6,9 @@ const backend = {
   plot: (canvas, data, tmpl, gm) => {
     canvas.clients.vtk.send({ event: 'plot', data, gm, tmpl });
   },
+  clear: (canvas) => {
+    canvas.clients.vtk.send({ event: 'clear' });
+  },
   init: (el, url) => {
     const parent = el;
     const c = document.createElement('canvas');

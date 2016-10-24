@@ -49,6 +49,9 @@ function init(el, renderingType) {
 
       this.backend.plot(this, spec, tmpl, method);
     },
+    clear() {
+      this.backend.clear(this);
+    },
     close() {
       Object.keys(this.clients).map((k) => { return this.clients[k].then((c) => { c.close(this); }); });
     },
