@@ -22,7 +22,6 @@
     "bluebird": "^3.4.6",
     "chai": "^3.5.0",
     "chai-as-promised": "^5.3.0",
-    "eslint": "^2.0.0",
     "eslint-import-resolver-webpack": "^0.3.1",
     "eslint-plugin-chai-expect": "^1.1.1",
     "inject-loader": "^2.0.1",
@@ -42,7 +41,10 @@
     "kw-web-suite": "^2.0.1",
     "mocha": "^2.5.3",
     "phantomjs-prebuilt": "^2.1.7",
-    "webpack-dev-server": "^1.14.1"
+    "webpack-dev-server": "^1.14.1",
+    "eslint": "^3.6.0",
+    "eslint-plugin-import": "^1.16.0",
+    "eslint-config-airbnb": "^12.0.0"
   },
   "dependencies": {
     "axios": "^0.15.1",
