@@ -46,7 +46,7 @@ function plot(canvas, dataSpec, template, method) {
 }
 
 function clear(canvas) {
-  Plotly.purge(canvas.el)
+  Plotly.purge(canvas.el);
 }
 
 const o = {

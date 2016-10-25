@@ -103,11 +103,12 @@ const backend = {
         const height = $(parent).height();
         resize(width, height);
         resizeTimer = null;
-      }, 500);
+      }, 100);
     });
 
     return {
       send,
+      c,
     };
   },
 };
