@@ -70,7 +70,7 @@ function init(el, renderingType) {
       this.backend.clear(this);
     },
     close() {
-      Object.keys(this.clients).map((k) => { return this.clients[k].then((c) => { c.close(this); }); });
+      Object.keys(this.clients).map((k) => { return Promise.resolve(this.clients[k]).then((c) => { c.close(this); }); });
     },
   };
   return canvas;
