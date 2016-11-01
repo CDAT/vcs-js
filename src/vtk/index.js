@@ -109,6 +109,11 @@ const backend = {
     return {
       send,
       c,
+      close: (canvas) => {
+        socket.then((s)=> {
+          s.close();
+        });
+      }
     };
   },
 };
