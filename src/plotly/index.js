@@ -52,7 +52,7 @@ function clear(canvas) {
 const o = {
   plot,
   clear,
-  close: (canvas) => {};
+  close: (canvas) => {},
 };
 
 export { o as default };

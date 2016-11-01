@@ -110,10 +110,10 @@ const backend = {
       send,
       c,
       close: (canvas) => {
-        socket.then((s)=> {
+        socket.then((s) => {
           s.close();
         });
-      }
+      },
     };
   },
 };
