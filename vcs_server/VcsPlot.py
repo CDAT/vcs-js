@@ -63,7 +63,6 @@ class VcsPlot(object):
 
     def setTemplate(self, template):
         my_tmpl = vcs.createtemplate()
-        print template
         for attr in template:
             if attr == "name":
                 continue
