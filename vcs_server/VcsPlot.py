@@ -42,11 +42,15 @@ class VcsPlot(object):
                 continue
             if gm[k] == 100000000000000000000L:
                 gm[k] = 1e20
+            if gm[k] == -100000000000000000000L:
+                gm[k] = -1e20
             if isinstance(gm[k], list):
                 conv = []
                 for v in gm[k]:
                     if v == 100000000000000000000L:
                         conv.append(1e20)
+                    elif v == -100000000000000000000L:
+                        conv.append(-1e20)
                     else:
                         conv.append(v)
                 gm[k] = conv
@@ -58,11 +62,19 @@ class VcsPlot(object):
         self._plot.graphics_method = my_gm
 
     def setTemplate(self, template):
-        if template in vcs.elements['template']:
-            self._plot.template = vcs.elements['template'][template]
-            return True
-        else:
-            return False
+        my_tmpl = vcs.createtemplate()
+        for attr in template:
+            if attr == "name":
+                continue
+            if attr == "p_name":
+                continue
+            for key in template[attr]:
+                if key == "member":
+                    continue
+                tmpl_attr = getattr(my_tmpl, attr)
+                new_val = template[attr][key]
+                setattr(tmpl_attr, key, new_val)
+        self._plot.template = my_tmpl
 
     def loadVariable(self, var, opts={}):
         """Load a variable into the visualization.
