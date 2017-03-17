@@ -67,18 +67,21 @@ class VcsPlot(object):
         self._plot.graphics_method = my_gm
 
     def setTemplate(self, template):
-        my_tmpl = vcs.createtemplate()
-        for attr in template:
-            if attr == "name":
-                continue
-            if attr == "p_name":
-                continue
-            for key in template[attr]:
-                if key == "member":
+        if isinstance(template, dict):
+            my_tmpl = vcs.createtemplate()
+            for attr in template:
+                if attr == "name":
                     continue
-                tmpl_attr = getattr(my_tmpl, attr)
-                new_val = template[attr][key]
-                setattr(tmpl_attr, key, new_val)
+                if attr == "p_name":
+                    continue
+                for key in template[attr]:
+                    if key == "member":
+                        continue
+                    tmpl_attr = getattr(my_tmpl, attr)
+                    new_val = template[attr][key]
+                    setattr(tmpl_attr, key, new_val)
+        else:
+            my_tmpl = vcs.gettemplate(str(template))
         self._plot.template = my_tmpl
 
     def loadVariable(self, var, opts={}):
