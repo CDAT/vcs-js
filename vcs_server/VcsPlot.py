@@ -40,16 +40,16 @@ class VcsPlot(object):
         for k in gm:
             if k == "name":
                 continue
-            if gm[k] == 100000000000000000000L:
+            if gm[k] == 100000000000000000000:
                 gm[k] = 1e20
-            if gm[k] == -100000000000000000000L:
+            if gm[k] == -100000000000000000000:
                 gm[k] = -1e20
             if isinstance(gm[k], list):
                 conv = []
                 for v in gm[k]:
-                    if v == 100000000000000000000L:
+                    if v == 100000000000000000000:
                         conv.append(1e20)
-                    elif v == -100000000000000000000L:
+                    elif v == -100000000000000000000:
                         conv.append(-1e20)
                     else:
                         conv.append(v)
