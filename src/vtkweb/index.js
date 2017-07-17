@@ -1,5 +1,5 @@
 import RemoteRenderer from 'ParaViewWeb/NativeUI/Canvas/RemoteRenderer';
-import { onSizeChange, startListening } from 'ParaViewWeb/Common/Misc/SizeHelper';
+import SizeHelper from 'ParaViewWeb/Common/Misc/SizeHelper';
 /**
  * BEGIN simplified interface
  * @param {string} dataSpec.file  data file where to read the variables from
@@ -50,10 +50,11 @@ export default function remoteRender(canvas, dataSpec, template,
          graphicsMethodType, graphicsMethodName]).then((windowId) => {
            canvas.windowId = windowId;
            const renderer = new RemoteRenderer(client, canvas.el, windowId);
-           onSizeChange(() => {
+           SizeHelper.onSizeChange(() => {
+             console.log('remoteRender onSizeChange');
              renderer.resize();
            });
-           startListening();
+           SizeHelper.startListening();
          });
     });
 }

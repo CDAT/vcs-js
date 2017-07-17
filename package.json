@@ -10,6 +10,7 @@
     "test": "npm run lint && npm run karma",
     "test:serve": "karma start --auto-watch",
     "demo": "webpack-dev-server",
+    "demo1": "webpack-dev-server",
     "fix-autobahn": "fix-kw-web-suite; fix-autobahn"
   },
   "author": "",
@@ -41,7 +42,6 @@
     "webpack-dev-server": "^1.14.1"
   },
   "dependencies": {
-    "autobahn": "github:crossbario/autobahn-js-built#v0.10.1",
     "bluebird": "^3.4.1",
     "hammerjs": "^2.0.8",
     "isndarray": "^1.0.0",
@@ -51,7 +51,7 @@
     "ndarray": "^1.0.18",
     "ndarray-pack": "^1.2.0",
     "ndarray-unpack": "^1.0.0",
-    "paraviewweb": "^1.10.0",
+    "paraviewweb": "^2.4.3",
     "plotly.js": "^1.14.0"
   },
   "repository": {
