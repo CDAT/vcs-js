@@ -6,6 +6,9 @@ import vtk
 from vtk.web import protocols, server
 # vcs modules
 import vcs
+import sys
+import traceback
+import gc
 
 from FileLoader import FileLoader
 from VcsPlot import VcsPlot
@@ -46,24 +49,30 @@ class Visualizer(protocols.vtkWebProtocol):
 
     @register('cdat.view.create')
     def create(self, variable, template, methodtype, methodname, opts={}):
-        vis = VcsPlot()
-        vis.setPlotMethod(
-            methodtype, methodname
-        )
-        vis.setTemplate(template)
-        all_vars = []
-        for obj in variable:
-            f = FileLoader().get_reader(obj['file'])
-            var = f[obj['name']]
-            if ('subset' in obj):
-                kargs = obj['subset']
-                var = var(**kargs)
-            all_vars.append(var)
-        vis.loadVariable(all_vars)
-        window = vis.getWindow()
-        id = self.getGlobalId(window)
-        self._active[id] = vis
-        return id
+        try:
+            vis = VcsPlot()
+            vis.setPlotMethod(
+                methodtype, methodname
+            )
+            vis.setTemplate(template)
+            all_vars = []
+            for obj in variable:
+                f = FileLoader().get_reader(obj['file'])
+                var = f[obj['name']]
+                if ('subset' in obj):
+                    kargs = obj['subset']
+                    var = var(**kargs)
+                all_vars.append(var)
+            vis.loadVariable(all_vars)
+            window = vis.getWindow()
+            id = self.getGlobalId(window)
+            self._active[id] = vis
+            return id
+        except:
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+            print ''.join('!! ' + line for line in lines)  # Log it or whatever here
+            return 0
 
     @register('cdat.view.update')
     def render_view(self, id, opts={}):

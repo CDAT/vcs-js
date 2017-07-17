@@ -35,7 +35,7 @@ export default (url, username, password) => {
 
     files(path) {
       return pvw
-        .then((client) => { client.FileListing.listServerDirectory(path); })
+        .then((client) => { return client.FileListing.listServerDirectory(path); })
         .then((filesObject) => {
           return filesObject.files.map(
             (file) => { return createFile(session, file.label); });
