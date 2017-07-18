@@ -120,7 +120,7 @@ $(function () {
       file: 'coads_climatology.nc',
       variable: 'SST',
     };
-    canvas.plot(dataSpec, 'default', 'isofill', 'robinson', 'server');
+    canvas.plot(dataSpec, 'default', 'isofill', 'robinson', 'server', window);
   });
   
   // // generate another plot using client side rendering
