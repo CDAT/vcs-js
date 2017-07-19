@@ -29,15 +29,14 @@ export default function remoteRender(canvas, dataSpec, template, method) {
       }
       client.session.call(
         'cdat.view.create',
-        [dataSpec.variables, template,
-         graphicsMethodType, graphicsMethodName]).then((windowId) => {
-           canvas.windowId = windowId;
-           const renderer = new RemoteRenderer(client, canvas.el, windowId);
-           SizeHelper.onSizeChange(() => {
-             renderer.resize();
-           });
-           SizeHelper.startListening();
-           return renderer;
-         });
+        [dataSpec.variables, template, method]).then((windowId) => {
+          canvas.windowId = windowId;
+          const renderer = new RemoteRenderer(client, canvas.el, windowId);
+          SizeHelper.onSizeChange(() => {
+            renderer.resize();
+          });
+          SizeHelper.startListening();
+          return renderer;
+        });
     });
 }
