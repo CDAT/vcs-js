@@ -95,7 +95,7 @@ function print_variables (filename) {
     );
 }
 
-$(function () {    
+$(function () {
   // Ordinarily this would be a URL string of a rest
   // interface for generating a new server side connection.
   // Here we short circuit that code to generate a simulated
@@ -113,16 +113,29 @@ $(function () {
   var canvasPromise = sessionPromise.then(function (session) {
     return session.init(document.getElementById('vcs-isofill'));
   });
-    
+
   // generate the plot when all of the promises resolve
   canvasPromise.then(function (canvas) {
     var dataSpec = {
       file: 'coads_climatology.nc',
       variable: 'SST',
     };
-    canvas.plot(dataSpec, 'default', 'isofill', 'robinson', 'server', window);
+    const t0 = window.performance.now();
+    console.log(`t0=${t0}!`);
+    rendererPromise = canvas.plot(dataSpec, 'default', 'isofill', 'robinson', 'server');
+
+    rendererPromise.then(function (renderer) {
+      const imagePromise = new Promise((resolve, reject) => {
+        renderer.onImageReady(resolve);
+      });
+      imagePromise.then(() => {
+        const t1 = window.performance.now();
+        console.log(`t1=${t1}!`);
+        console.log(`plot took ${t1 - t0}! milliseconds.`);
+      });
+    });
   });
-  
+
   // // generate another plot using client side rendering
   // // we don't have an api for getting data yet, so we'll
   // // just use an ajax request to data.kitware.com
@@ -161,7 +174,7 @@ $(function () {
 
   // var canvasPromise3 = sessionPromise.then(function (session) {
   //   return session.init(document.getElementById('vcs-vector'));
-  // });    
+  // });
   //   // generate the plot when all of the promises resolve
   // canvasPromise3.then(function (canvas) {
   //   var dataSpec = {
@@ -174,7 +187,7 @@ $(function () {
   // var canvasPromise4 = sessionPromise.then(function (session) {
   //   return session.init(document.getElementById('vcs-vector-subset'));
   // });
-    
+
   //   // generate the plot when all of the promises resolve
   // canvasPromise4.then(function (canvas) {
   //   var dataSpec = {
@@ -189,8 +202,7 @@ $(function () {
     canvasPromise.then((canvas) => canvas.close());
     // canvasPromise2.then((canvas) => canvas.close());
     // canvasPromise3.then((canvas) => canvas.close());
-    // canvasPromise4.then((canvas) => canvas.close());        
+    // canvasPromise4.then((canvas) => canvas.close());
     return 'Your own message goes here...';
   });
 });
-

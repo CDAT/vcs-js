@@ -17,10 +17,9 @@ import SizeHelper from 'ParaViewWeb/Common/Misc/SizeHelper';
  *              - range: list with lower and upper range for the index varia
  */
 export default function remoteRender(canvas, dataSpec, template,
-                                     graphicsMethodType, graphicsMethodName, window) {
+                                     graphicsMethodType, graphicsMethodName) {
   return canvas.session.client()
     .then((client) => {
-      const t0 = window.performance.now();
       // simplified interface
       if (dataSpec.file && dataSpec.variable) {
         if (typeof dataSpec.variable === 'string') {
@@ -44,19 +43,17 @@ export default function remoteRender(canvas, dataSpec, template,
           }
         }
       }
-      client.session.call(
+      return client.session.call(
         'cdat.view.create',
         [dataSpec.variables, template,
          graphicsMethodType, graphicsMethodName]).then((windowId) => {
            canvas.windowId = windowId;
            const renderer = new RemoteRenderer(client, canvas.el, windowId);
            SizeHelper.onSizeChange(() => {
-             console.log('remoteRender onSizeChange');
              renderer.resize();
            });
            SizeHelper.startListening();
-           const t1 = window.performance.now();
-           console.log(`plot took ${t1 - t0}! milliseconds.`);
+           return renderer;
          });
     });
 }
