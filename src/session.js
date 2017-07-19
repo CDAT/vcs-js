@@ -66,7 +66,7 @@ export default (url, username, password) => {
         session: outerSession,
 
         plot(dataSpec, template,
-             graphicsMethodType, graphicsMethodName, renderingType, window) {
+             graphicsMethodType, graphicsMethodName, renderingType) {
           switch (renderingType) {
             case 'client': {
               return plotly(this, dataSpec, template,
@@ -74,7 +74,7 @@ export default (url, username, password) => {
             }
             case 'server':
               return vtkweb(this, dataSpec, template,
-                            graphicsMethodType, graphicsMethodName, window);
+                            graphicsMethodType, graphicsMethodName);
 
             default:
               return Promise.reject(new Error('Invalid renderingType'));

@@ -8,7 +8,6 @@ from vtk.web import protocols, server
 import vcs
 import sys
 import traceback
-import gc
 
 from FileLoader import FileLoader
 from VcsPlot import VcsPlot
