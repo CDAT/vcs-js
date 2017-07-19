@@ -95,7 +95,7 @@ function print_variables (filename) {
     );
 }
 
-$(function () {
+$(function () {    
   // Ordinarily this would be a URL string of a rest
   // interface for generating a new server side connection.
   // Here we short circuit that code to generate a simulated
@@ -113,96 +113,85 @@ $(function () {
   var canvasPromise = sessionPromise.then(function (session) {
     return session.init(document.getElementById('vcs-isofill'));
   });
-
+    
   // generate the plot when all of the promises resolve
   canvasPromise.then(function (canvas) {
     var dataSpec = {
       file: 'coads_climatology.nc',
       variable: 'SST',
     };
-    const t0 = window.performance.now();
-    console.log(`t0=${t0}!`);
-    rendererPromise = canvas.plot(dataSpec, 'default', 'isofill', 'robinson', 'server');
-
-    rendererPromise.then(function (renderer) {
-      const imagePromise = new Promise((resolve, reject) => {
-        renderer.onImageReady(resolve);
-      });
-      imagePromise.then(() => {
-        const t1 = window.performance.now();
-        console.log(`t1=${t1}!`);
-        console.log(`plot took ${t1 - t0}! milliseconds.`);
-      });
-    });
+    canvas.plot(dataSpec, 'no_legend', 'isofill', 'robinson', 'server');
+  });
+  
+  // generate another plot using client side rendering
+  // we don't have an api for getting data yet, so we'll
+  // just use an ajax request to data.kitware.com
+  var cltPromise = $.ajax('https://data.kitware.com/api/v1/file/576aa3c08d777f1ecd6701ae/download');
+  var latPromise = $.ajax('https://data.kitware.com/api/v1/item/576aa3c08d777f1ecd6701b0/download');
+  var lonPromise = $.ajax('https://data.kitware.com/api/v1/item/576aa3c08d777f1ecd6701b9/download');
+  var canvasPromise2 = sessionPromise.then(function (session) {
+    return session.init(document.getElementById('plotly-isofill'));
   });
 
-  // // generate another plot using client side rendering
-  // // we don't have an api for getting data yet, so we'll
-  // // just use an ajax request to data.kitware.com
-  // var cltPromise = $.ajax('https://data.kitware.com/api/v1/file/576aa3c08d777f1ecd6701ae/download');
-  // var latPromise = $.ajax('https://data.kitware.com/api/v1/item/576aa3c08d777f1ecd6701b0/download');
-  // var lonPromise = $.ajax('https://data.kitware.com/api/v1/item/576aa3c08d777f1ecd6701b9/download');
-  // var canvasPromise2 = sessionPromise.then(function (session) {
-  //   return session.init(document.getElementById('plotly-isofill'));
-  // });
 
+  // This is all very rough, likely much of this should be wrapped inside the api
+  Promise.all([
+    canvasPromise2, cltPromise, latPromise, lonPromise
+  ]).then(function (arg) {
+    var canvas = arg[0];
+    var clt = arg[1];
+    var lat = arg[2];
+    var lon = arg[3];
+    var timestep = 0;
 
-  // // This is all very rough, likely much of this should be wrapped inside the api
-  // Promise.all([
-  //   canvasPromise2, cltPromise, latPromise, lonPromise
-  // ]).then(function (arg) {
-  //   var canvas = arg[0];
-  //   var clt = arg[1];
-  //   var lat = arg[2];
-  //   var lon = arg[3];
-  //   var timestep = 0;
+    var data = {
+      x: lon.data,
+      y: lat.data
+    };
 
-  //   var data = {
-  //     x: lon.data,
-  //     y: lat.data
-  //   };
+    function draw() {
+      data.z = ndarray(clt.data, clt.shape).pick(timestep, null, null);
+      canvas.plot(data, 'default', 'isofill', 'quick', 'client');
+      timestep = (timestep + 1) % clt.shape[0];
+    }
 
-  //   function draw() {
-  //     data.z = ndarray(clt.data, clt.shape).pick(timestep, null, null);
-  //     canvas.plot(data, 'default', 'isofill', 'quick', 'client');
-  //     timestep = (timestep + 1) % clt.shape[0];
-  //   }
+    // call again for the next time step
+    draw();
+  });
 
-  //   // call again for the next time step
-  //   draw();
-  // });
+  var canvasPromise3 = sessionPromise.then(function (session) {
+    return session.init(document.getElementById('vcs-vector'));
+  });
+    
+    // generate the plot when all of the promises resolve
+  canvasPromise3.then(function (canvas) {
+    var dataSpec = {
+      file: 'coads_climatology.nc',
+      variable: ['UWND', 'VWND'],
+    };
+    canvas.plot(dataSpec, 'default', 'vector', 'default', 'server');
+  });
 
-  // var canvasPromise3 = sessionPromise.then(function (session) {
-  //   return session.init(document.getElementById('vcs-vector'));
-  // });
-  //   // generate the plot when all of the promises resolve
-  // canvasPromise3.then(function (canvas) {
-  //   var dataSpec = {
-  //     file: 'coads_climatology.nc',
-  //     variable: ['UWND', 'VWND'],
-  //   };
-  //   canvas.plot(dataSpec, 'default', 'vector', 'default', 'server');
-  // });
-
-  // var canvasPromise4 = sessionPromise.then(function (session) {
-  //   return session.init(document.getElementById('vcs-vector-subset'));
-  // });
-
-  //   // generate the plot when all of the promises resolve
-  // canvasPromise4.then(function (canvas) {
-  //   var dataSpec = {
-  //     file: 'coads_climatology.nc',
-  //     variable: ['UWND', 'VWND'],
-  //     subset: {'COADSX': [60, 180], 'COADSY': [0, 90]}
-  //   };
-  //   canvas.plot(dataSpec, 'default', 'vector', 'default', 'server');
-  // });
+  var canvasPromise4 = sessionPromise.then(function (session) {
+    return session.init(document.getElementById('vcs-vector-subset'));
+  });
+    
+    // generate the plot when all of the promises resolve
+  canvasPromise4.then(function (canvas) {
+    var dataSpec = {
+      file: 'coads_climatology.nc',
+      variable: ['UWND', 'VWND'],
+      subset: {'COADSX': [60, 180], 'COADSY': [0, 90]}
+    };
+    canvas.plot(dataSpec, 'default', 'vector', 'default', 'server');
+  });
 
   $(window).on('beforeunload', function() {
     canvasPromise.then((canvas) => canvas.close());
-    // canvasPromise2.then((canvas) => canvas.close());
-    // canvasPromise3.then((canvas) => canvas.close());
-    // canvasPromise4.then((canvas) => canvas.close());
+    canvasPromise2.then((canvas) => canvas.close());
+    canvasPromise3.then((canvas) => canvas.close());
+    canvasPromise4.then((canvas) => canvas.close());        
     return 'Your own message goes here...';
   });
 });
+
