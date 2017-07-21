@@ -22,8 +22,8 @@ Running the vcs.js demo
 -----------------------
 
 Executing the demo requires a running vtkweb service, which is assumed to exist at <ws://localhost:9000/ws>.
-A basic protocol implementation for demo purposes exists in this repository at `server/server.py`.
-You can start the server with the command `vtkpython server/server.py -p 9000`.  Use the `--help` argument
+A basic protocol implementation for demo purposes exists in this repository at `scripts/vcs_server`.
+You can start the server with the command `PYTHONPATH=. vtkpython scripts/vcs_server -p 9000`.  Use the `--help` argument
 for a list of options.  After starting the server, you can execute the demo using `npm run demo` and
 browsing to <http://localhost:8080/demo>.
 
