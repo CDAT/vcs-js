@@ -55,9 +55,10 @@ class Visualizer(protocols.vtkWebProtocol):
             vis.setTemplate(template)
             all_vars = []
             for obj in variable:
-                all_vars.append(cdms2.open(obj))
+                all_vars.append(cdms2.open(obj['uri'])(obj['variable']))
             vis.loadVariable(all_vars)
             window = vis.getWindow()
+            self.setActiveView(window)
             id = self.getGlobalId(window)
             self._active[id] = vis
             return id
