@@ -1,5 +1,3 @@
-var sessionPromise;
-
 $(function () {
   // Ordinarily this would be a URL string of a rest
   // interface for generating a new server side connection.
@@ -20,22 +18,11 @@ $(function () {
   var vector_subview = {"datawc_timeunits": "days since 2000", "projection": "linear", "reference": 1e+20, "xticlabels1": "*", "xticlabels2": "*", "linecolor": null, "ymtics1": "", "ymtics2": "", "linewidth": null, "datawc_x1": 60, "datawc_x2": 180, "xmtics1": "", "xmtics2": "", "datawc_calendar": 135441, "alignment": "center", "type": "arrows", "colormap": null, "xaxisconvert": "linear", "scale": 1.0, "linetype": null, "datawc_y2": 90, "datawc_y1": 0, "yaxisconvert": "linear", "name": "subset_vector", "yticlabels1": "*", "yticlabels2": "*", "scalerange": [0.1, 1.0], "scaleoptions": ["off", "constant", "normalize", "linear", "constantNNormalize", "constantNLinear"], "g_name": "Gv", "scaletype": "constantNNormalize"};
   var dv3d = {ScaleColormap: null, ScaleOpacity: null, BasemapOpacity: null, Camera: "{}", ZSlider: null, YSlider: null, ToggleVolumePlot: null, PointSize: null, Configure: null, XSlider: null, SliceThickness: null, axes: "xyz", plot_attributes: {name: "3d_scalar", template: "default"}, IsosurfaceValue: null, VerticalScaling: null, ChooseColormap: null, ToggleSurfacePlot: null, Colorbar: null, ncores: 8, ScaleTransferFunction: null, name: "default", ToggleClipping: null, Animation: null, g_name: "3d_scalar" };
 
-  // create the session
-  sessionPromise = vcs.createSession(url);
-
-  sessionPromise.catch(() => {
-    console.log('Could not connect to ' + url);
-  });
-
-  var canvasPromise = sessionPromise.then(function (session) {
-    return session.init(document.getElementById('vcs-isofill'));
-  });
+  var canvas = vcs.init(document.getElementById('vcs-isofill'));
 
   // generate the plot when all of the promises resolve
-  canvasPromise.then(function (canvas) {
-    var dataSpec = variables.clt;
-    canvas.plot(dataSpec, 'default', boxfill, 'server');
-  });
+  var dataSpec = variables.clt;
+  canvas.plot(dataSpec, 'default', boxfill, 'server');
 
    // generate another plot using client side rendering
   // we don't have an api for getting data yet, so we'll
@@ -43,81 +30,53 @@ $(function () {
   var cltPromise = $.ajax('https://data.kitware.com/api/v1/file/576aa3c08d777f1ecd6701ae/download');
   var latPromise = $.ajax('https://data.kitware.com/api/v1/item/576aa3c08d777f1ecd6701b0/download');
   var lonPromise = $.ajax('https://data.kitware.com/api/v1/item/576aa3c08d777f1ecd6701b9/download');
-  var canvasPromise2 = sessionPromise.then(function (session) {
-    return session.init(document.getElementById('plotly-isofill'));
-  });
-
+  var canvas2 = vcs.init(document.getElementById('plotly-isofill'));
 
   // This is all very rough, likely much of this should be wrapped inside the api
   Promise.all([
-    canvasPromise2, cltPromise, latPromise, lonPromise
+    cltPromise, latPromise, lonPromise
   ]).then(function (arg) {
-    console.log("1")
-    var canvas = arg[0];
-    console.log("2")
-    var clt = arg[1];
-    console.log("3")
-    var lat = arg[2];
-    console.log("4")
-    var lon = arg[3];
-    console.log("5")
+    var clt = arg[0];
+    var lat = arg[1];
+    var lon = arg[2];
     var timestep = 0;
-    console.log("6")
 
     var data = {
       x: lon.data,
       y: lat.data
     };
-    console.log("7")
 
     function draw() {
-      console.log("8")
       data.z = ndarray(clt.data, clt.shape).pick(timestep, null, null);
-      console.log("9")
-      canvas.plot(data, 'default', { "g_type": "Gfi" }, 'client');
-      console.log("10")
+      canvas2.plot(data, 'default', { "g_type": "Gfi" }, 'client');
       timestep = (timestep + 1) % clt.shape[0];
     }
-    console.log("11")
-    // call again for the next time step
     draw();
   });
 
-  var canvasPromise3 = sessionPromise.then(function (session) {
-    return session.init(document.getElementById('vcs-vector'));
-  });
+  var canvas3 = vcs.init(document.getElementById('vcs-vector'));
     // generate the plot when all of the promises resolve
-  canvasPromise3.then(function (canvas) {
-    var dataSpec = [variables.u, variables.v];
-    canvas.plot(dataSpec, 'default', vector, 'server');
-  });
+  var dataSpec = [variables.u, variables.v];
+  canvas3.plot(dataSpec, 'default', vector, 'server');
 
-  var canvasPromise4 = sessionPromise.then(function (session) {
-    return session.init(document.getElementById('vcs-vector-subset'));
-  });
+  var canvas4 = vcs.init(document.getElementById('vcs-vector-subset'));
 
   // generate the plot when all of the promises resolve
-  canvasPromise4.then(function (canvas) {
-    var dataSpec = [variables.u, variables.v];
-    canvas.plot(dataSpec, 'default', vector_subview, 'server');
-  });
+  var dataSpec = [variables.u, variables.v];
+  canvas4.plot(dataSpec, 'default', vector_subview, 'server');
 
-  var canvasPromise5 = sessionPromise.then(function (session) {
-    return session.init(document.getElementById('vcs3d'));
-  });
+  var canvas5 = vcs.init(document.getElementById('vcs3d'));
 
   // generate the plot when all of the promises resolve
-  canvasPromise5.then(function (canvas) {
-    var dataSpec = variables.airt;
-    canvas.plot(dataSpec, 'default', dv3d, 'server');
-  });
+  var dataSpec = variables.airt;
+  canvas5.plot(dataSpec, 'default', dv3d, 'server');
 
   $(window).on('beforeunload', function() {
-    canvasPromise.then((canvas) => canvas.close());
-    canvasPromise2.then((canvas) => canvas.close());
-    canvasPromise3.then((canvas) => canvas.close());
-    canvasPromise4.then((canvas) => canvas.close());
-    canvasPromise5.then((canvas) => canvas.close());
+    canvas.close();
+    canvas2.close();
+    canvas3.close();
+    canvas4.close();
+    canvas5.close();
     return 'Your own message goes here...';
   });
 });
