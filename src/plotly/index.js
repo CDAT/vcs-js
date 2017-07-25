@@ -19,7 +19,7 @@ function asyncPlot(canvas, dataObject, template, method) {
 
 function plot(dataObject, template, method) {
   return new Promise((resolve, reject) => {
-              resolve(asyncPlot(dataObject, template, method));
+    resolve(asyncPlot(dataObject, template, method));
   });
 }
 
