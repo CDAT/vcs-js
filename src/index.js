@@ -18,7 +18,8 @@ function init(el) {
         }
         case 'server':
           if (clients.vtkweb === undefined) {
-            clients.vtkweb = vtkweb.connect('@@@URL@@@/ws');
+            // @@@URL@@@/ws
+            clients.vtkweb = vtkweb.connect('ws://localhost:9000/ws');
           }
           this.clients.vtkweb = clients.vtkweb;
           return vtkweb.plot(this, dataSpec, template, method);
