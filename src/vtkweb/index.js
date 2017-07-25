@@ -41,7 +41,7 @@ const backend = {
       } else {
         spec = dataSpec;
       }
-      client.pvw.session.call(
+      return client.pvw.session.call(
         'cdat.view.create',
         [spec, template, method]).then((windowId) => {
           canvas.windowId = windowId;

@@ -1,11 +1,4 @@
 $(function () {
-  // Ordinarily this would be a URL string of a rest
-  // interface for generating a new server side connection.
-  // Here we short circuit that code to generate a simulated
-  // session connecting to pregenerated files through
-  // Girder's rest interface.
-  var url = 'ws://localhost:9000/ws';
-
   var variables = {
     "clt": {"uri": "clt.nc", "variable": "clt"},
     "u": {"uri": "clt.nc", "variable": "u"},
@@ -22,7 +15,16 @@ $(function () {
 
   // generate the plot when all of the promises resolve
   var dataSpec = variables.clt;
-  canvas.plot(dataSpec, 'default', boxfill, 'server');
+  var rendererPromise = canvas.plot(dataSpec, 'default', boxfill, 'server');
+  rendererPromise.then((renderer) => {
+    const imagePromise = new Promise((resolve, reject) => {
+      renderer.onImageReady(resolve);
+    });
+    imagePromise.then(() => {
+      console.log("Ready");
+    });
+  });
+                    
 
    // generate another plot using client side rendering
   // we don't have an api for getting data yet, so we'll
