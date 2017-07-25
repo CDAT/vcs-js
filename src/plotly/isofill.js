@@ -2,7 +2,7 @@ import Plotly from 'plotly.js/dist/plotly-cartesian';
 import unpack from 'ndarray-unpack';
 import isnd from 'isndarray';
 
-export default (spec) => {
+function isofill(spec) {
   let { x, y, z } = spec;
   const { el, title } = spec;
 
@@ -29,4 +29,6 @@ export default (spec) => {
       layout,
     },
   });
-};
+}
+
+export { isofill as default };

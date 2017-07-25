@@ -70,19 +70,6 @@ if __name__ == "__main__":
 
     # Configure our current application
     _VCSApp.authKey = args.authKey
-    # Create a temp directory for the server to host its translated JS out of
-    args.content = tempfile.mkdtemp()
-    # Retrieve the JS contents to transform and cache in the tempdir
-    js_file = pkg_resources.resource_string(vcs_server.__name__, "js/vcs.js")
-    with open(os.path.join(args.content, "vcs.js"), "w") as f:
-        if args.sslKey and args.sslCert:
-            # Use wss
-            protocol = "wss://"
-        else:
-            protocol = "ws://"
-        url = protocol + args.host + ":%d" % args.port
-        f.write(js_file.replace("@@@URL@@@", url))
+
     # Start server
     server.start_webserver(options=args, protocol=_VCSApp)
-    # Once we're done serving, clean up the cached JS
-    shutil.rmtree(args.content)
