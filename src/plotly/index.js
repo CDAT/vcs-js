@@ -27,4 +27,4 @@ const o = {
   plot,
 };
 
-export { o };
+export { o as default };
