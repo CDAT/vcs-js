@@ -25,29 +25,24 @@ $(function () {
     });
   });
 
-  var canvas2 = vcs.init(document.getElementById('plotly-isofill'));
-  canvas2.plot(dataSpec, isofill, 'default', 'client');
+  // var canvas2 = vcs.init(document.getElementById('plotly-isofill'));
+  // canvas2.plot(dataSpec, isofill, 'default', 'client');
 
   var canvas3 = vcs.init(document.getElementById('vcs-vector'));
-    // generate the plot when all of the promises resolve
   var dataSpec = [variables.u, variables.v];
   canvas3.plot(dataSpec, vector);
 
   var canvas4 = vcs.init(document.getElementById('vcs-vector-subset'));
-
-  // generate the plot when all of the promises resolve
   var dataSpec = [variables.u, variables.v];
   canvas4.plot(dataSpec, vector_subview);
 
   var canvas5 = vcs.init(document.getElementById('vcs3d'));
-
-  // generate the plot when all of the promises resolve
   var dataSpec = variables.airt;
   canvas5.plot(dataSpec, dv3d, 'default', 'server');
 
   $(window).on('beforeunload', function() {
     canvas.close();
-    canvas2.close();
+    // canvas2.close();
     canvas3.close();
     canvas4.close();
     canvas5.close();
