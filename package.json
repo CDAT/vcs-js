@@ -5,6 +5,7 @@
   "main": "dist/vcs.js",
   "scripts": {
     "build": "webpack --progress --colors",
+    "build-continuous": "webpack --progress --colors --watch",    
     "lint": "eslint --cache .",
     "karma": "karma start --single-run",
     "test": "npm run lint && npm run karma",
