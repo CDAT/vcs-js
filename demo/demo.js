@@ -22,6 +22,7 @@ $(function () {
     });
     imagePromise.then(() => {
       console.log("Ready");
+      canvas.close();
     });
   });
 
@@ -39,13 +40,4 @@ $(function () {
   var canvas5 = vcs.init(document.getElementById('vcs3d'));
   var dataSpec = variables.airt;
   canvas5.plot(dataSpec, dv3d, 'default', 'server');
-
-  $(window).on('beforeunload', function() {
-    canvas.close();
-    // canvas2.close();
-    canvas3.close();
-    canvas4.close();
-    canvas5.close();
-    return 'Your own message goes here...';
-  });
 });

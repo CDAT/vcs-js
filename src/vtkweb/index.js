@@ -21,10 +21,11 @@ const backend = {
       const handlers = ['MouseHandler', 'ViewPort', 'ViewPortImageDelivery', 'FileListing'];
       return {
         pvw: createClient(connection, handlers),
-        close: (canvas) => {
+        close(canvas) {
           if (canvas.windowId !== undefined) {
             this.pvw.session.call('cdat.view.close', [canvas.windowId]);
           }
+          return 0;
         },
       };
     });

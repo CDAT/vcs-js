@@ -21,7 +21,6 @@ function init(el) {
       } else {
         spec = dataSpec;
       }
-      console.log(renderingType);
       let type = renderingType;
       if (renderingType === undefined) {
         type = 'server';
@@ -35,14 +34,16 @@ function init(el) {
       switch (type) {
         case 'client': {
           if (clients.data === undefined) {
-            clients.data = cdms.connect('http@@@SECURE@@@://@@@URL@@@/data');
+            // http@@@SECURE@@@://@@@URL@@@/data
+            clients.data = cdms.connect('http://localhost:8888/data');
           }
           this.clients.data = clients.data;
           return plotly.plot(this, spec, tmpl, method);
         }
         case 'server':
           if (clients.vtkweb === undefined) {
-            clients.vtkweb = vtkweb.connect('ws@@@SECURE@@@://@@@URL@@@/ws');
+            // ws@@@SECURE@@@://@@@URL@@@/ws
+            clients.vtkweb = vtkweb.connect('ws://localhost:9000/ws');
           }
           this.clients.vtkweb = clients.vtkweb;
           return vtkweb.plot(this, spec, tmpl, method);
@@ -51,7 +52,11 @@ function init(el) {
       }
     },
     close() {
-      Object.keys(this.clients).map((k) => { return this.clients[k].then((c) => { c.close(this); }); });
+      Object.keys(this.clients).map((k) => {
+        return this.clients[k].then((c) => {
+          return c.close(this);
+        });
+      });
     },
   };
   return canvas;
