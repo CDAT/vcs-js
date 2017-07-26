@@ -20,7 +20,8 @@ class DataReader(tornado.web.RequestHandler):
         if isinstance(v, cdms2.avariable.AbstractVariable):
             axis_id_list = []
             for index, axis in enumerate(v.getAxisList()):
-                axis_json = axis.exportProvenance()
+                # axis_json = axis.exportProvenance()
+                axis_json = {}
                 # Jam a little bit of extra info into the JSON for ease of use
                 if axis.isLatitude():
                     header = "Latitude"
