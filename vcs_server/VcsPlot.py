@@ -76,7 +76,5 @@ class VcsPlot(object):
     def getWindow(self):
         return self._canvas.backend.renWin
 
-    def close(self):
-        print 'VcsPlot.close(): %s'%self._canvas
-        print 'refcount: %s'%str(sys.getrefcount(self.getWindow()))
-        self._canvas.close()
+    def getCanvas(self):
+        return self._canvas

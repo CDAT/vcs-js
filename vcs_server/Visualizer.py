@@ -37,11 +37,22 @@ class Visualizer(protocols.vtkWebProtocol):
             lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
             print ''.join('!! ' + line for line in lines)  # Log it or whatever here
             return 0
-    
+
     @register('cdat.view.update')
     def render_view(self, id, opts={}):
         if id in self._active:
             return self._active[id].render(opts)
+        return False
+
+    @register('cdat.view.clear')
+    def clear(self, id):
+        if id in self._active:
+            print 'clearing window %s' % id
+            self._active[id].getCanvas().clear()
+            self.getApplication().InvalidateCache(self.getView(id))
+            self.getApplication().InvokeEvent('PushRender')
+            return True
+        print 'clearing window: %s not found' % id
         return False
 
     @register('cdat.view.close')
@@ -49,9 +60,11 @@ class Visualizer(protocols.vtkWebProtocol):
         print 'close window %s' % id
         vis = self._active.pop(id)
         if vis:
-            vis.close()
+            print 'calling close'
+            vis.getCanvas().close()
             del vis
             return True
+        print 'window %s not found' % id        
         return False
 
     @classmethod

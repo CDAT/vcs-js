@@ -5,7 +5,7 @@ import { createClient } from 'ParaViewWeb/IO/WebSocket/ParaViewWebClient';
 
 
 const backend = {
-  connect: (url) => {
+  connect(url) {
     const smartConnect = new SmartConnect({
       sessionURL: url,
     });
@@ -32,7 +32,7 @@ const backend = {
     smartConnect.connect();
     return pvw;
   },
-  plot: (canvas, dataSpec, template, method) => {
+  plot(canvas, dataSpec, template, method) {
     return canvas.clients.vtkweb.then((client) => {
       // dataSpec is either one or more variable objects (if more, they're in an array)
       let spec = [];
@@ -53,6 +53,12 @@ const backend = {
           SizeHelper.startListening();
           return renderer;
         });
+    });
+  },
+  clear(canvas) {
+    canvas.el.innerHTML = '';
+    return canvas.clients.vtkweb.then((client) => {
+      client.pvw.session.call('cdat.view.clear', [canvas.windowId]);
     });
   },
 };
