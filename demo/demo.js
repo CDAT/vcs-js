@@ -1,3 +1,15 @@
+var canvas;
+
+function vcs_boxfill_close()
+{
+  canvas.close();
+}
+
+function vcs_boxfill_clear()
+{
+  canvas.clear();
+}
+
 $(function () {
   var variables = {
     "clt": {"uri": "clt.nc", "variable": "clt"},
@@ -14,7 +26,7 @@ $(function () {
 
   var dataSpec = variables.clt;
 
-  var canvas = vcs.init(document.getElementById('vcs-isofill'));
+  canvas = vcs.init(document.getElementById('vcs-boxfill'));
   var rendererPromise = canvas.plot(dataSpec, boxfill, 'default', 'server');
   rendererPromise.then((renderer) => {
     const imagePromise = new Promise((resolve, reject) => {
@@ -22,7 +34,6 @@ $(function () {
     });
     imagePromise.then(() => {
       console.log("Ready");
-      canvas.close();
     });
   });
 

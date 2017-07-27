@@ -8,7 +8,10 @@
 <body>
   <table>
     <tr>
-      <td><div class="plot" id="vcs-isofill"></div></td>
+      <td><div class="plot" id="vcs-boxfill"></div>
+      <a onclick="vcs_boxfill_close()" href="javascript:void(0)">Close</a>
+      <a onclick="vcs_boxfill_clear()" href="javascript:void(0)">Clear</a>
+      </td>
       <td><div class="plot" id="plotly-isofill"></div></td>
     </tr>
     <tr>
@@ -22,14 +25,6 @@
   </table>
   <script type="text/javascript" src="http://localhost:8888/scripts/vcs.js"></script>  
   <script type="text/javascript" src="demo.js"></script>
-    
-  <ul>
-    <!-- Need a 3D variable for this: <li><a onclick="cdat.create_plot('http://test.opendap.org/opendap/data/nc/coads_climatology.nc', 'AIRT', '3d_scalar', 'default', 'default')" href="javascript:void(0)">Volume example</a></li> -->
-    <li><a onclick="print_variables('coads_climatology.nc')" href="javascript:void(0)">Rectilinear grid variables example</a></li>
-    <li><a onclick="print_variables('clt.nc')" href="javascript:void(0)">clt.nc variables example</a></li>
-    <li><a onclick="print_variables('sampleCurveGrid4.nc')" href="javascript:void(0)">Curvilinear grid variable example</a></li>
-    <li><a onclick="print_variables('sampleGenGrid3.nc')" href="javascript:void(0)">Generic grid variable example</a></li>
-  </ul>
 </body>
 
 </html>
