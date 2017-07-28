@@ -23,6 +23,7 @@ const backend = {
         pvw: createClient(connection, handlers),
         close(canvas) {
           if (canvas.windowId !== undefined) {
+            canvas.el.innerHTML = '';
             this.pvw.session.call('cdat.view.close', [canvas.windowId]);
           }
           return 0;
@@ -62,9 +63,11 @@ const backend = {
     });
   },
   clear(canvas) {
-    canvas.el.innerHTML = '';
     return canvas.clients.vtkweb.then((client) => {
-      client.pvw.session.call('cdat.view.clear', [canvas.windowId]);
+      if (canvas.windowId !== undefined) {
+        canvas.el.innerHTML = '';
+        client.pvw.session.call('cdat.view.clear', [canvas.windowId]);
+      }
     });
   },
 };
