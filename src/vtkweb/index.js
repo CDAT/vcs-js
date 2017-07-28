@@ -42,7 +42,7 @@ const backend = {
       } else {
         spec = dataSpec;
       }
-      return client.pvw.session.call(
+      const rendererPromise = client.pvw.session.call(
         'cdat.view.create',
         [spec, template, method]).then((windowId) => {
           canvas.windowId = windowId;
@@ -53,6 +53,12 @@ const backend = {
           SizeHelper.startListening();
           return renderer;
         });
+      return rendererPromise.then((renderer) => {
+        const imagePromise = new Promise((resolve, reject) => {
+          renderer.onImageReady(resolve);
+        });
+        return imagePromise;
+      });
     });
   },
   clear(canvas) {

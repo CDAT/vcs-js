@@ -27,14 +27,9 @@ $(function () {
   var dataSpec = variables.clt;
 
   canvas = vcs.init(document.getElementById('vcs-boxfill'));
-  var rendererPromise = canvas.plot(dataSpec, boxfill, 'default', 'server');
-  rendererPromise.then((renderer) => {
-    const imagePromise = new Promise((resolve, reject) => {
-      renderer.onImageReady(resolve);
-    });
-    imagePromise.then(() => {
-      console.log("Ready");
-    });
+  var imagePromise = canvas.plot(dataSpec, boxfill, 'default', 'server');
+  imagePromise.then(() => {
+    console.log("Ready");
   });
 
   // var canvas2 = vcs.init(document.getElementById('plotly-isofill'));
