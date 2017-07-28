@@ -55,33 +55,9 @@ if __name__ == "__main__":
     # Exctract arguments
     args = parser.parse_args()
 
-    # Create a temp directory for the server to host its translated JS out of
-    js_dir = tempfile.mkdtemp()
-    # Retrieve the JS contents to transform and cache in the tempdir
-    js_file = pkg_resources.resource_string(vcs_server.__name__, "js/vcs.js")
-    map_file = pkg_resources.resource_string(vcs_server.__name__, "js/vcs.js.map")
-
-    replacements = {
-        "@@@SECURE@@@": "s" if args.ssl else "",
-        "@@@URL@@@": args.host + ":%d" % args.port
-    }
-
-    for r in replacements:
-        js_file = js_file.replace(r, replacements[r])
-        map_file = map_file.replace(r, replacements[r])
-
-    with open(os.path.join(js_dir, "vcs.js"), "w") as jsfile:
-        jsfile.write(js_file)
-    with open(os.path.join(js_dir, "vcs.js.map"), "w") as mapfile:
-        mapfile.write(map_file)
-
     # Start server
     application = tornado.web.Application([
-        (r"/scripts/(.*)", tornado.web.StaticFileHandler, {"path": js_dir}),
         (r"/data", DataReader),
     ], default_host=args.host)
     application.listen(args.port)
     tornado.ioloop.IOLoop.current().start()
-
-    # Once we're done serving, clean up the cached JS
-    shutil.rmtree(js_dir)

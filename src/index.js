@@ -21,8 +21,7 @@ function init(el, renderingType) {
       backend = plotly;
       break;
     case 'server':
-      // // ws@@@SECURE@@@://@@@URL@@@/ws
-      clients.vtkweb = vtkweb.connect('ws://localhost:9000/ws');
+      clients.vtkweb = vtkweb.connect('@@@URL@@@/ws');
       backend = vtkweb;
       break;
     default:
