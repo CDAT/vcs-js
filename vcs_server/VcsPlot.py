@@ -41,13 +41,17 @@ class VcsPlot(object):
         for k in gm:
             if k == "name":
                 continue
-            if gm[k] == 100000000000000000000L:
+            if gm[k] == 100000000000000000000:
                 gm[k] = 1e20
+            if gm[k] == -100000000000000000000:
+                gm[k] = -1e20
             if isinstance(gm[k], list):
                 conv = []
                 for v in gm[k]:
-                    if v == 100000000000000000000L:
+                    if v == 100000000000000000000:
                         conv.append(1e20)
+                    elif v == -100000000000000000000:
+                        conv.append(-1e20)
                     else:
                         conv.append(v)
                 gm[k] = conv
@@ -56,14 +60,29 @@ class VcsPlot(object):
                     setattr(my_gm, k, gm[k])
                 except:
                     print "Could not set attribute %s on graphics method of type %s" % (k, t)
+        if "ext_1" in gm:
+            my_gm.ext_1 = gm["ext_1"]
+        if "ext_2" in gm:
+            my_gm.ext_2 = gm["ext_2"]
         self._plot.graphics_method = my_gm
 
     def setTemplate(self, template):
-        if template in vcs.elements['template']:
-            self._plot.template = vcs.elements['template'][template]
-            return True
+        if isinstance(template, dict):
+            my_tmpl = vcs.createtemplate()
+            for attr in template:
+                if attr == "name":
+                    continue
+                if attr == "p_name":
+                    continue
+                for key in template[attr]:
+                    if key == "member":
+                        continue
+                    tmpl_attr = getattr(my_tmpl, attr)
+                    new_val = template[attr][key]
+                    setattr(tmpl_attr, key, new_val)
         else:
-            return False
+            my_tmpl = vcs.gettemplate(str(template))
+        self._plot.template = my_tmpl
 
     def loadVariable(self, var, opts={}):
         """Load a variable into the visualization.
