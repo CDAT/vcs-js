@@ -27,10 +27,18 @@ $(function () {
   var dataSpec = variables.clt;
 
   canvas = vcs.init(document.getElementById('vcs-boxfill'));
-  var imagePromise = canvas.plot(dataSpec, boxfill, 'default', 'server');
+  var imagePromise = canvas.plot(dataSpec, boxfill);
   imagePromise.then(() => {
-    console.log("Ready");
+    console.log("Ready1");
+    // what if we want to plot over the first plot
+    var dataSpec = [variables.u, variables.v];
+    var imagePromise2 = canvas.plot(dataSpec, vector);
+    imagePromise.then(() => {
+      console.log("Ready2");
+    });
   });
+  console.log('call second plot quickly', canvas.insidePlot);
+  canvas.plot(dataSpec, boxfill);
 
   // var canvas2 = vcs.init(document.getElementById('plotly-isofill'));
   // canvas2.plot(dataSpec, isofill, 'default', 'client');

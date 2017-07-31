@@ -5,6 +5,8 @@ import { createClient } from 'ParaViewWeb/IO/WebSocket/ParaViewWebClient';
 
 
 const backend = {
+  // RemoteRenderer associated with a windowId
+  _renderer: {},
   connect(url) {
     const smartConnect = new SmartConnect({
       sessionURL: url,
@@ -22,9 +24,12 @@ const backend = {
       return {
         pvw: createClient(connection, handlers),
         close(canvas) {
-          if (canvas.windowId !== undefined) {
+          if (canvas.canvasId) {
             canvas.el.innerHTML = '';
-            this.pvw.session.call('cdat.view.close', [canvas.windowId]);
+            this.pvw.session.call('vcs.canvas.close', [canvas.canvasId]);
+            delete canvas.backend._renderer.windowId;
+            canvas.canvasId = 0;
+            canvas.windowId = 0;
           }
           return 0;
         },
@@ -34,7 +39,8 @@ const backend = {
     return pvw;
   },
   plot(canvas, dataSpec, template, method) {
-    return canvas.clients.vtkweb.then((client) => {
+    canvas.insidePlot = true;
+    return canvas.connection.vtkweb.then((connection) => {
       // dataSpec is either one or more variable objects (if more, they're in an array)
       let spec = [];
 
@@ -43,16 +49,23 @@ const backend = {
       } else {
         spec = dataSpec;
       }
-      const rendererPromise = client.pvw.session.call(
-        'cdat.view.create',
-        [spec, template, method]).then((windowId) => {
-          canvas.windowId = windowId;
-          const renderer = new RemoteRenderer(client.pvw, canvas.el, windowId);
-          SizeHelper.onSizeChange(() => {
-            renderer.resize();
-          });
-          SizeHelper.startListening();
-          return renderer;
+      const prevCanvasId = (canvas.canvasId !== undefined) ? canvas.canvasId : 0;
+      const rendererPromise = connection.pvw.session.call(
+        'vcs.canvas.plot',
+        [prevCanvasId, spec, template, method]).then(([canvasId, windowId]) => {
+          if (!prevCanvasId) {
+            canvas.canvasId = canvasId;
+            const renderer = new RemoteRenderer(connection.pvw, canvas.el, windowId);
+            SizeHelper.onSizeChange(() => {
+              renderer.resize();
+            });
+            SizeHelper.startListening();
+            this._renderer.windowId = renderer;
+            canvas.insidePlot = false;
+            return renderer;
+          }
+          canvas.insidePlot = false;
+          return this._renderer.windowId;
         });
       return rendererPromise.then((renderer) => {
         const imagePromise = new Promise((resolve, reject) => {
@@ -63,10 +76,10 @@ const backend = {
     });
   },
   clear(canvas) {
-    return canvas.clients.vtkweb.then((client) => {
-      if (canvas.windowId !== undefined) {
+    return canvas.connection.vtkweb.then((connection) => {
+      if (canvas.canvasId) {
         canvas.el.innerHTML = '';
-        client.pvw.session.call('cdat.view.clear', [canvas.windowId]);
+        connection.pvw.session.call('vcs.canvas.clear', [canvas.canvasId]);
       }
     });
   },
