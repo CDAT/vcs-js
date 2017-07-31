@@ -5,34 +5,33 @@ import vtkweb from './vtkweb';
 import plotly from './plotly';
 import cdms from './cdms';
 
-const globalClients = {};
+const globalConnection = {};
 
 function init(el, renderingType) {
-  const clients = {};
+  const connection = {};
   let backend = null;
 
   switch (renderingType) {
     case 'client':
-      if (globalClients.data === undefined) {
+      if (globalConnection.data === undefined) {
         // http@@@SECURE@@@://@@@URL@@@/data
-        globalClients.data = cdms.connect('http://localhost:8888/data');
+        globalConnection.data = cdms.connect('http://localhost:8888/data');
       }
-      clients.data = globalClients.data;
+      connection.data = globalConnection.data;
       backend = plotly;
       break;
     case 'server':
-      clients.vtkweb = vtkweb.connect('@@@URL@@@/ws');
-      backend = vtkweb;
-      break;
     default:
-      // Fallback to vtkweb if they pass a bad renderingType.
-      clients.vtkweb = vtkweb.connect('@@@URL@@@/ws');
+      if (globalConnection.vtkweb === undefined) {
+        globalConnection.vtkweb = vtkweb.connect('@@@URL@@@/ws');
+      }
+      connection.vtkweb = globalConnection.vtkweb;
       backend = vtkweb;
   }
 
   const canvas = {
     el,
-    clients,
+    connection,
     backend,
     plot(dataSpec, method, template) {
       // Clean up inputs
@@ -48,15 +47,18 @@ function init(el, renderingType) {
       if (template === undefined) {
         tmpl = 'default';
       }
-
+      if (this.insidePlot) {
+        console.log('Ignore second plot calls made before canvasId comes back to the client');
+        return Promise.resolve();
+      }
       return this.backend.plot(this, spec, tmpl, method);
     },
     clear() {
       this.backend.clear(this);
     },
     close() {
-      Object.keys(this.clients).map((k) => {
-        return this.clients[k].then((c) => {
+      Object.keys(this.connection).map((k) => {
+        return this.connection[k].then((c) => {
           return c.close(this);
         });
       });

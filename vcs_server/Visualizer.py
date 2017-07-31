@@ -15,56 +15,53 @@ from VcsPlot import VcsPlot
 
 class Visualizer(protocols.vtkWebProtocol):
 
-    _active = {}
+    _canvas = {}
 
-    @register('cdat.view.create')
-    def create(self, variable, template, method, opts={}):
+    @register('vcs.canvas.plot')
+    def plot(self, prevCanvasId, variable, template, method, opts={}):
         try:
-            vis = VcsPlot()
-            vis.setGraphicsMethod(method)
-            vis.setTemplate(template)
+            canvas = self._canvas[prevCanvasId] if prevCanvasId != 0 else None
+            if (prevCanvasId):
+                print 'Using existing canvas % d', prevCanvasId
+            plot = VcsPlot(canvas)
+            plot.setGraphicsMethod(method)
+            plot.setTemplate(template)
             all_vars = []
             for obj in variable:
                 all_vars.append(cdms2.open(obj['uri'])(obj['variable']))
-            vis.loadVariable(all_vars)
-            window = vis.getWindow()
-            self.setActiveView(window)
-            id = self.getGlobalId(window)
-            self._active[id] = vis
-            return id
+            plot.loadVariable(all_vars)
+            self.setActiveView(plot.getWindow())
+            canvas = plot.getCanvas()
+            canvasId = id(canvas)
+            self._canvas[canvasId] = canvas
+            windowId = self.getGlobalId(plot.getWindow())
+            print 'storing canvas %d' % canvasId
+            return [canvasId, windowId]
         except:
             exc_type, exc_value, exc_traceback = sys.exc_info()
             lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
             print ''.join('!! ' + line for line in lines)  # Log it or whatever here
             return 0
 
-    @register('cdat.view.update')
-    def render_view(self, id, opts={}):
-        if id in self._active:
-            return self._active[id].render(opts)
-        return False
-
-    @register('cdat.view.clear')
+    @register('vcs.canvas.clear')
     def clear(self, id):
-        if id in self._active:
-            print 'clearing window %s' % id
-            self._active[id].getCanvas().clear()
-            self.getApplication().InvalidateCache(self.getView(id))
-            self.getApplication().InvokeEvent('PushRender')
+        if id in self._canvas:
+            print 'clearing canvas %s' % id
+            self._canvas[id].clear()
             return True
-        print 'clearing window: %s not found' % id
+        print 'clearing canvas: %s not found' % id
         return False
 
-    @register('cdat.view.close')
-    def remove_view(self, id):
-        print 'close window %s' % id
-        vis = self._active.pop(id)
-        if vis:
+    @register('vcs.canvas.close')
+    def close(self, id):
+        print 'close canvas %s' % id
+        canvas = self._canvas.pop(id)
+        if canvas:
             print 'calling close'
-            vis.getCanvas().close()
-            del vis
+            canvas.close()
+            del canvas
             return True
-        print 'window %s not found' % id        
+        print 'canvas %s not found' % id
         return False
 
     @classmethod
