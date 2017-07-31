@@ -26,8 +26,7 @@ function init(el, renderingType) {
       break;
     default:
       // Fallback to vtkweb if they pass a bad renderingType.
-      // ws@@@SECURE@@@://@@@URL@@@/ws
-      clients.vtkweb = vtkweb.connect('ws://localhost:9000/ws');
+      clients.vtkweb = vtkweb.connect('@@@URL@@@/ws');
       backend = vtkweb;
   }
 
