@@ -18,12 +18,12 @@ class Visualizer(protocols.vtkWebProtocol):
     _canvas = {}
 
     @register('vcs.canvas.plot')
-    def plot(self, prevCanvasId, variable, template, method, opts={}):
+    def plot(self, prevCanvasId, variable, template, method, width, height, opts={}):
         try:
             canvas = self._canvas[prevCanvasId] if prevCanvasId != 0 else None
             if (prevCanvasId):
                 print 'Using existing canvas % d', prevCanvasId
-            plot = VcsPlot(canvas)
+            plot = VcsPlot(canvas, width=width, height=height)
             plot.setGraphicsMethod(method)
             plot.setTemplate(template)
             all_vars = []

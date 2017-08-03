@@ -7,10 +7,11 @@ To get started, first run `npm install`.
 
 Useful npm commands:
 ```bash
-npm run build      # build the library to dist/vcs.js
-npm run test       # run all tests
-npm run test:serve # start test service (runs as files change)
-npm run demo       # serve the demo page at http://localhost:8080/demo/
+npm run build                 # build the library to dist/vcs.js
+npm run build-continuous      # build the library to dist/vcs.js and rebuild after changes
+npm run test                  # run all tests
+npm run test:serve            # start test service (runs as files change)
+npm run demo                  # serve the demo page at http://localhost:8080/demo/
 ```
 
 While serving tests, you can debug them in the browser at [http://localhost:9876/debug.html](http://localhost:9876/debug.html).

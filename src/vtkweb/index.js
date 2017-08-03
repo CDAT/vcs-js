@@ -52,21 +52,22 @@ const backend = {
       const prevCanvasId = (canvas.canvasId !== undefined) ? canvas.canvasId : 0;
       const rendererPromise = connection.pvw.session.call(
         'vcs.canvas.plot',
-        [prevCanvasId, spec, template, method]).then(([canvasId, windowId]) => {
-          if (!prevCanvasId) {
-            canvas.canvasId = canvasId;
-            const renderer = new RemoteRenderer(connection.pvw, canvas.el, windowId);
-            SizeHelper.onSizeChange(() => {
-              renderer.resize();
-            });
-            SizeHelper.startListening();
-            this._renderer.windowId = renderer;
-            canvas.insidePlot = false;
-            return renderer;
-          }
-          canvas.insidePlot = false;
-          return this._renderer.windowId;
-        });
+        [prevCanvasId, spec, template, method,
+         canvas.el.clientWidth, canvas.el.clientHeight]).then(([canvasId, windowId]) => {
+           if (!prevCanvasId) {
+             canvas.canvasId = canvasId;
+             const renderer = new RemoteRenderer(connection.pvw, canvas.el, windowId);
+             SizeHelper.onSizeChange(() => {
+               renderer.resize();
+             });
+             SizeHelper.startListening();
+             this._renderer.windowId = renderer;
+             canvas.insidePlot = false;
+             return renderer;
+           }
+           canvas.insidePlot = false;
+           return this._renderer.windowId;
+         });
       return rendererPromise.then((renderer) => {
         const imagePromise = new Promise((resolve, reject) => {
           renderer.onImageReady(resolve);
