@@ -30,7 +30,6 @@ class Visualizer(protocols.vtkWebProtocol):
             for obj in variable:
                 all_vars.append(cdms2.open(obj['uri'])(obj['variable']))
             plot.loadVariable(all_vars)
-            self.setActiveView(plot.getWindow())
             canvas = plot.getCanvas()
             canvasId = id(canvas)
             self._canvas[canvasId] = canvas
