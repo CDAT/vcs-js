@@ -37,7 +37,8 @@ $(function () {
       console.log("Ready2");
     });
   });
-  console.log('call second plot quickly', canvas.insidePlot);
+  // call canvas.plot quickly, before the canvasId arrives back from the client.
+  // this is ignored.
   canvas.plot(dataSpec, boxfill);
 
   // var canvas2 = vcs.init(document.getElementById('plotly-isofill'));
