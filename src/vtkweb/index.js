@@ -26,8 +26,10 @@ const backend = {
         close(canvas) {
           if (canvas.canvasId) {
             canvas.el.innerHTML = '';
+            canvas.el.removeEventListener('mousedown', this._renderer[canvas.windowId].mousedown);
+            canvas.el.removeEventListener('mouseup', this._renderer[canvas.windowId].mouseup);
             this.pvw.session.call('vcs.canvas.close', [canvas.canvasId]);
-            delete canvas.backend._renderer.windowId;
+            delete canvas.backend._renderer[canvas.windowId];
             canvas.canvasId = 0;
             canvas.windowId = 0;
           }
@@ -60,13 +62,55 @@ const backend = {
               renderer.resize();
             });
             SizeHelper.startListening();
-            this._renderer[windowId] = renderer;
+            const render = () => renderer.render();
+            const getVtkEvent = (x, y) => {
+              const vtkEvent = {
+                view: windowId,
+                buttonLeft: true,
+                buttonMiddle: false,
+                buttonRight: false,
+                /* eslint-disable no-bitwise */
+                shiftKey: false,
+                ctrlKey: false,
+                altKey: false,
+                metaKey: false,
+                /* eslint-enable no-bitwise */
+                x: x / canvas.el.clientWidth,
+                y: 1.0 - (y / canvas.el.clientHeight),
+                action: 'down',
+              };
+              return vtkEvent;
+            };
+            const getPosition = (event, element) => {
+              const x = event.pageX - (element.getClientRects()[0].x || element.getClientRects()[0].left);
+              const y = event.pageY - (element.getClientRects()[0].y || element.getClientRects()[0].top);
+              return { x, y };
+            };
+            const mousedown = (e) => {
+              const pos = getPosition(e, canvas.el);
+              console.log('onmousedown render', pos.x, pos.y);
+              const vtkEvent = getVtkEvent(pos.x, pos.y);
+              vtkEvent.action = 'down';
+              vtkEvent.buttonLeft = true;
+              connection.pvw.MouseHandler.interaction(vtkEvent).then(render);
+            };
+            const mouseup = (e) => {
+              const pos = getPosition(e, canvas.el);
+              console.log('onmouseup render', pos.x, pos.y);
+              const vtkEvent = getVtkEvent(pos.x, pos.y);
+              vtkEvent.action = 'up';
+              vtkEvent.buttonLeft = false;
+              connection.pvw.MouseHandler.interaction(vtkEvent).then(render);
+            };
+            canvas.el.addEventListener('mousedown', mousedown);
+            canvas.el.addEventListener('mouseup', mouseup);
+            this._renderer[windowId] = { renderer, mousedown, mouseup, render };
             canvas.insidePlot = false;
             return renderer;
           }
-          this._renderer[windowId].render(true);
+          this._renderer[windowId].renderer.render(true);
           canvas.insidePlot = false;
-          return this._renderer[windowId];
+          return this._renderer[windowId].renderer;
         });
       return rendererPromise.then((renderer) => {
         const imagePromise = new Promise((resolve, reject) => {
@@ -80,6 +124,8 @@ const backend = {
     return canvas.connection.vtkweb.then((connection) => {
       if (canvas.canvasId) {
         canvas.el.innerHTML = '';
+        canvas.el.removeEventListener('mousedown', this._renderer[canvas.windowId].mousedown);
+        canvas.el.removeEventListener('mouseup', this._renderer[canvas.windowId].mouseup);
         connection.pvw.session.call('vcs.canvas.clear', [canvas.canvasId]);
       }
     });
