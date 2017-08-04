@@ -18,11 +18,11 @@ class Visualizer(protocols.vtkWebProtocol):
     _canvas = {}
 
     @register('vcs.canvas.plot')
-    def plot(self, prevCanvasId, variable, template, method, width, height, opts={}):
+    def plot(self, prevWindowId, variable, template, method, width, height, opts={}):
         try:
-            canvas = self._canvas[prevCanvasId] if prevCanvasId != 0 else None
-            if (prevCanvasId):
-                print 'Using existing canvas % d', prevCanvasId
+            canvas = self._canvas[prevWindowId] if prevWindowId != 0 else None
+            if (prevWindowId):
+                print('Using existing canvas % d' % prevWindowId)
             plot = VcsPlot(canvas, width=width, height=height)
             plot.setGraphicsMethod(method)
             plot.setTemplate(template)
@@ -31,11 +31,11 @@ class Visualizer(protocols.vtkWebProtocol):
                 all_vars.append(cdms2.open(obj['uri'])(obj['variable']))
             plot.loadVariable(all_vars)
             canvas = plot.getCanvas()
-            canvasId = id(canvas)
-            self._canvas[canvasId] = canvas
             windowId = self.getGlobalId(plot.getWindow())
-            print 'storing canvas %d' % canvasId
-            return [canvasId, windowId]
+            print('plot canvas %d, (%d, %d)' % (windowId, width, height))
+            self._canvas[windowId] = canvas
+            print 'returning windowId %d' % windowId
+            return [windowId]
         except:
             exc_type, exc_value, exc_traceback = sys.exc_info()
             lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
@@ -43,24 +43,34 @@ class Visualizer(protocols.vtkWebProtocol):
             return 0
 
     @register('vcs.canvas.clear')
-    def clear(self, id):
-        if id in self._canvas:
-            print 'clearing canvas %s' % id
-            self._canvas[id].clear()
+    def clear(self, windowId):
+        if windowId in self._canvas:
+            print 'clearing canvas %s' % windowId
+            self._canvas[windowId].clear()
             return True
-        print 'clearing canvas: %s not found' % id
+        print 'clearing canvas: %s not found' % windowId
+        return False
+
+    @register('vcs.canvas.resize')
+    def resize(self, windowId, width, height):
+        if windowId in self._canvas:
+            print('resizing canvas %d to (%d, %d)' % (windowId, width, height))
+            canvas = self._canvas[windowId];
+            canvas.geometry(width, height)
+            return True
+        print('resize canvas: %d not found' % windowId)
         return False
 
     @register('vcs.canvas.close')
-    def close(self, id):
-        print 'close canvas %s' % id
-        canvas = self._canvas.pop(id)
+    def close(self, windowId):
+        print 'close canvas %s' % windowId
+        canvas = self._canvas.pop(windowId)
         if canvas:
             print 'calling close'
             canvas.close()
             del canvas
             return True
-        print 'canvas %s not found' % id
+        print 'canvas %s not found' % windowId
         return False
 
     @classmethod

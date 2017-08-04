@@ -10,6 +10,12 @@ function vcs_boxfill_clear()
   canvas.clear();
 }
 
+function vcs_boxfill_resize()
+{
+  canvas.el.style.width = '400px';
+  canvas.el.style.borderRight = '400 px solid black';
+}
+
 $(function () {
   var variables = {
     "clt": {"uri": "clt.nc", "variable": "clt"},

@@ -3,6 +3,12 @@
     width: 800px;
 }
 
+#vcs-boxfill {
+    height: 600px;
+    width: 800px;
+
+}
+
 table, th, td {
     border: 1px solid black;
 }
