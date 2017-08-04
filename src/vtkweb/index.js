@@ -24,13 +24,12 @@ const backend = {
       return {
         pvw: createClient(connection, handlers),
         close(canvas) {
-          if (canvas.canvasId) {
+          if (canvas.windowId) {
             canvas.el.innerHTML = '';
-            canvas.el.removeEventListener('mousedown', this._renderer[canvas.windowId].mousedown);
-            canvas.el.removeEventListener('mouseup', this._renderer[canvas.windowId].mouseup);
-            this.pvw.session.call('vcs.canvas.close', [canvas.canvasId]);
+            canvas.el.removeEventListener('mousedown', canvas.backend._renderer[canvas.windowId].mousedown);
+            canvas.el.removeEventListener('mouseup', canvas.backend._renderer[canvas.windowId].mouseup);
+            this.pvw.session.call('vcs.canvas.close', [canvas.windowId]);
             delete canvas.backend._renderer[canvas.windowId];
-            canvas.canvasId = 0;
             canvas.windowId = 0;
           }
           return 0;
@@ -51,18 +50,18 @@ const backend = {
       } else {
         spec = dataSpec;
       }
-      const prevCanvasId = (canvas.canvasId !== undefined) ? canvas.canvasId : 0;
+      const prevWindowId = (canvas.windowId !== undefined) ? canvas.windowId : 0;
       const rendererPromise = connection.pvw.session.call(
         'vcs.canvas.plot',
-        [prevCanvasId, spec, template, method, canvas.el.clientWidth, canvas.el.clientHeight]).then(([canvasId, windowId]) => {
-          if (!prevCanvasId) {
-            canvas.canvasId = canvasId;
+        [prevWindowId, spec, template, method, canvas.el.clientWidth, canvas.el.clientHeight]).then(([windowId]) => {
+          if (!prevWindowId) {
+            canvas.windowId = windowId;
             const renderer = new RemoteRenderer(connection.pvw, canvas.el, windowId);
             SizeHelper.onSizeChange(() => {
               renderer.resize();
             });
             SizeHelper.startListening();
-            const render = () => renderer.render();
+            const render = () => renderer.render(true);
             const getVtkEvent = (x, y) => {
               const vtkEvent = {
                 view: windowId,
@@ -104,7 +103,7 @@ const backend = {
             };
             canvas.el.addEventListener('mousedown', mousedown);
             canvas.el.addEventListener('mouseup', mouseup);
-            this._renderer[windowId] = { renderer, mousedown, mouseup, render };
+            this._renderer[windowId] = { renderer, mousedown, mouseup };
             canvas.insidePlot = false;
             return renderer;
           }
@@ -120,13 +119,22 @@ const backend = {
       });
     });
   },
+  resize(canvas, width, height) {
+    return canvas.connection.vtkweb.then((connection) => {
+      if (canvas.windowId) {
+        connection.pvw.session.call('vcs.canvas.resize', [canvas.windowId, width, height]).then(() => {
+          this._renderer[canvas.windowId].renderer.render(true);
+        });
+      }
+    });
+  },
   clear(canvas) {
     return canvas.connection.vtkweb.then((connection) => {
-      if (canvas.canvasId) {
+      if (canvas.windowId) {
         canvas.el.innerHTML = '';
         canvas.el.removeEventListener('mousedown', this._renderer[canvas.windowId].mousedown);
         canvas.el.removeEventListener('mouseup', this._renderer[canvas.windowId].mouseup);
-        connection.pvw.session.call('vcs.canvas.clear', [canvas.canvasId]);
+        connection.pvw.session.call('vcs.canvas.clear', [canvas.windowId]);
       }
     });
   },
