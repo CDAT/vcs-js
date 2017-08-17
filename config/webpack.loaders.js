@@ -32,6 +32,7 @@ module.exports = [
     test: /\.js$/,
     include: [
       /src/,
+      /node_modules\/paraviewweb/,
     ],
     loader: 'babel?presets[]=es2015-nostrict',
   },

@@ -22,10 +22,10 @@ module.exports = {
   plugins: pluginList,
   entry: entry,
   output: {
-    path: './vcs_server/js',
+    path: './dist',
     filename: 'vcs.js',
     library: 'vcs',
-    libraryTarget: 'var',
+    libraryTarget: 'umd',
     publicPath: '/dist/',
   },
   isparta: {
