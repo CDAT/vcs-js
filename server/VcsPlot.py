@@ -1,10 +1,9 @@
 
 from PlotManager import PlotManager
-import json
+
 import vcs
 import sys
 import gc
-
 
 class VcsPlot(object):
 
@@ -27,35 +26,13 @@ class VcsPlot(object):
         self._canvas.update()
         return True
 
-    def setGraphicsMethod(self, gm):
-        for t in vcs.elements:
-            if len(vcs.elements[t]):
-                o = vcs.elements[t].values()[0]
-                if hasattr(o, "g_name"):
-                    if o.g_name == gm["g_name"]:
-                        break
+    def setPlotMethod(self, plot_type, plot_method):
+        method = vcs.getgraphicsmethod(plot_type, plot_method)
+        if method:
+            self._plot.graphics_method = method
+            return True
         else:
             return False
-        my_gm = vcs.creategraphicsmethod(t)
-        for k in gm:
-            if k == "name":
-                continue
-            if gm[k] == 100000000000000000000L:
-                gm[k] = 1e20
-            if isinstance(gm[k], list):
-                conv = []
-                for v in gm[k]:
-                    if v == 100000000000000000000L:
-                        conv.append(1e20)
-                    else:
-                        conv.append(v)
-                gm[k] = conv
-            if hasattr(my_gm, k):
-                try:
-                    setattr(my_gm, k, gm[k])
-                except:
-                    print "Could not set attribute %s on graphics method of type %s" % (k, t)
-        self._plot.graphics_method = my_gm
 
     def setTemplate(self, template):
         if template in vcs.elements['template']:

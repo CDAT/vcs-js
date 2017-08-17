@@ -1,4 +1,4 @@
-import Promise from 'bluebird';
+import Promise from 'vcs/promise';
 
 const vtkwebInjector = require('inject!vcs/vtkweb');
 
@@ -19,23 +19,12 @@ describe('vtkweb', () => {
       el: 'el',
     };
 
-    /* eslint-disable */
-    const fileURI = __dirname + "/../../clt.nc";
-    const clt = {"id": "clt", "derivation": [{"type": "file", "uri": fileURI}, {"parents": [0], "operation": {"type": "get", "id": "clt"}, "type": "variable"}]};
-    /* eslint-enable */
-
     const remoteRender = vtkwebInjector({
       'ParaViewWeb/NativeUI/Canvas/RemoteRenderer': createRemoteRenderer,
       'ParaViewWeb/Common/Misc/SizeHelper': { onSizeChange, startListening },
     }).default;
 
-    const gm = {
-      g_name: 'Gfb',
-      level_1: 0,
-      level_2: 50,
-    };
-
-    return remoteRender(canvas, clt, gm)
+    return remoteRender(canvas, 'data', 'gm', 't')
       .then(() => {
         sinon.assert.calledOnce(createRemoteRenderer);
         sinon.assert.calledWith(createRemoteRenderer, client);
