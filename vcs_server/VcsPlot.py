@@ -59,11 +59,6 @@ class VcsPlot(object):
                     setattr(my_gm, k, gm[k])
                 except:
                     print "Could not set attribute %s on graphics method of type %s" % (k, t)
-        if "ext_1" in gm:
-            my_gm.ext_1 = gm["ext_1"]
-        if "ext_2" in gm:
-            my_gm.ext_2 = gm["ext_2"]
-
         self._plot.graphics_method = my_gm
 
     def setTemplate(self, template):
