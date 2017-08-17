@@ -39,7 +39,7 @@ class Visualizer(tornado.websocket.WebSocketHandler):
         vis.setTemplate(template)
         all_vars = []
         for obj in variable:
-            all_vars.append(cdms2.open(obj["uri"])(obj["variable"]))
+            all_vars.append(cdms2.open(obj))
         vis.loadVariable(all_vars)
 
     def mouseDown(self, x, y):
