@@ -8,9 +8,44 @@ import cdms from './cdms';
 
 const globalConnection = {};
 
-function init(el, renderingType) {
+function connect(renderingType) {
   const connection = {};
+
+  switch (renderingType) {
+    case 'client':
+      if (globalConnection.data === undefined) {
+        // http@@@SECURE@@@://@@@URL@@@/data
+        globalConnection.data = cdms.connect('http://localhost:8888/data');
+      }
+      connection.data = globalConnection.data;
+      break;
+    case 'server':
+    default:
+      if (globalConnection.vtkweb === undefined) {
+        globalConnection.vtkweb = vtkweb.connect('@@@URL@@@/ws');
+      }
+      connection.vtkweb = globalConnection.vtkweb;
+  }
+  return connection;
+}
+
+function variables(fileName) {
+  const connection = connect('server');
+  return connection.vtkweb
+    .then((client) => { return client.pvw.session.call('cdat.file.variables', [fileName]); });
+}
+
+function init(el, renderingType) {
+  const connection = connect(renderingType);
   let backend = null;
+  switch (renderingType) {
+    case 'client':
+      backend = plotly;
+      break;
+    case 'server':
+    default:
+      backend = vtkweb;
+  }
 
   switch (renderingType) {
     case 'client':
@@ -34,9 +69,9 @@ function init(el, renderingType) {
     el,
     connection,
     backend,
+
     plot(dataSpec, method, template) {
       // Clean up inputs
-
       let spec = [];
       if (!Array.isArray(dataSpec)) {
         spec.push(dataSpec);
@@ -54,12 +89,15 @@ function init(el, renderingType) {
       }
       return this.backend.plot(this, spec, tmpl, method);
     },
+
     clear() {
       this.backend.clear(this);
     },
+
     resize(width, height) {
       this.backend.resize(this, width, height);
     },
+
     close() {
       Object.keys(this.connection).map((k) => {
         return this.connection[k].then((c) => {
@@ -68,7 +106,6 @@ function init(el, renderingType) {
       });
     },
   };
-
   let resizeTimer = null;
   /* eslint-disable no-new */
   new ResizeSensor(el, () => {
@@ -88,5 +125,6 @@ function init(el, renderingType) {
 
 export {
   init,
+  variables,
   remoteRenderer,
 };

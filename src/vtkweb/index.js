@@ -40,7 +40,7 @@ const backend = {
   },
   plot(canvas, dataSpec, template, method) {
     canvas.insidePlot = true;
-    return canvas.connection.vtkweb.then((connection) => {
+    return canvas.connection.vtkweb.then((client) => {
       // dataSpec is either one or more variable objects (if more, they're in an array)
       let spec = [];
 
@@ -50,12 +50,12 @@ const backend = {
         spec = dataSpec;
       }
       const prevWindowId = (canvas.windowId !== undefined) ? canvas.windowId : 0;
-      const rendererPromise = connection.pvw.session.call(
+      const rendererPromise = client.pvw.session.call(
         'vcs.canvas.plot',
         [prevWindowId, spec, template, method, canvas.el.clientWidth, canvas.el.clientHeight]).then(([windowId]) => {
           if (!prevWindowId) {
             canvas.windowId = windowId;
-            const renderer = new RemoteRenderer(connection.pvw, canvas.el, windowId);
+            const renderer = new RemoteRenderer(client.pvw, canvas.el, windowId);
             SizeHelper.onSizeChange(() => {
               renderer.resize();
             });
@@ -90,7 +90,7 @@ const backend = {
               const vtkEvent = getVtkEvent(pos.x, pos.y);
               vtkEvent.action = 'down';
               vtkEvent.buttonLeft = true;
-              connection.pvw.MouseHandler.interaction(vtkEvent).then(render);
+              client.pvw.MouseHandler.interaction(vtkEvent).then(render);
             };
             const mouseup = (e) => {
               const pos = getPosition(e, canvas.el);
@@ -98,7 +98,7 @@ const backend = {
               const vtkEvent = getVtkEvent(pos.x, pos.y);
               vtkEvent.action = 'up';
               vtkEvent.buttonLeft = false;
-              connection.pvw.MouseHandler.interaction(vtkEvent).then(render);
+              client.pvw.MouseHandler.interaction(vtkEvent).then(render);
             };
             canvas.el.addEventListener('mousedown', mousedown);
             canvas.el.addEventListener('mouseup', mouseup);
@@ -119,21 +119,21 @@ const backend = {
     });
   },
   resize(canvas, width, height) {
-    return canvas.connection.vtkweb.then((connection) => {
+    return canvas.connection.vtkweb.then((client) => {
       if (canvas.windowId) {
-        connection.pvw.session.call('vcs.canvas.resize', [canvas.windowId, width, height]).then(() => {
+        client.pvw.session.call('vcs.canvas.resize', [canvas.windowId, width, height]).then(() => {
           this._renderer[canvas.windowId].renderer.render(true);
         });
       }
     });
   },
   clear(canvas) {
-    return canvas.connection.vtkweb.then((connection) => {
+    return canvas.connection.vtkweb.then((client) => {
       if (canvas.windowId) {
         canvas.el.innerHTML = '';
         canvas.el.removeEventListener('mousedown', this._renderer[canvas.windowId].mousedown);
         canvas.el.removeEventListener('mouseup', this._renderer[canvas.windowId].mouseup);
-        connection.pvw.session.call('vcs.canvas.clear', [canvas.windowId]);
+        client.pvw.session.call('vcs.canvas.clear', [canvas.windowId]);
       }
     });
   },

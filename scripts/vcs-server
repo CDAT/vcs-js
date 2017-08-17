@@ -41,6 +41,7 @@ from wslink import server
 # import protocols
 import vcs_server
 from vcs_server.Visualizer import Visualizer
+from vcs_server.FileLoader import FileLoader
 import pkg_resources
 import tempfile
 import os
@@ -50,12 +51,15 @@ import shutil
 class _VCSApp(vtk_wslink.ServerProtocol):
 
     # Application configuration
+    rootDir = "."
     authKey = "wslink-secret"
 
     def initialize(self):
         self.registerVtkWebProtocol(protocols.vtkWebMouseHandler())
         self.registerVtkWebProtocol(protocols.vtkWebViewPort())
         self.registerVtkWebProtocol(protocols.vtkWebViewPortImageDelivery())
+        self.registerVtkWebProtocol(protocols.vtkWebFileBrowser(self.rootDir, 'Home'))
+        self.registerVtkWebProtocol(FileLoader(self.rootDir))
         self.registerVtkWebProtocol(Visualizer())
 
         # Update authentication key to use

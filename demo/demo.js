@@ -16,6 +16,77 @@ function vcs_boxfill_resize()
   canvas.el.style.borderRight = '400 px solid black';
 }
 
+/**
+ * Prints the result from get_variables to the console.
+ * @param {string? filename An absolute path to a netcdf file
+ */
+function print_variables (filename) {
+  var varsPromise = vcs.variables(filename);
+    var vars, axes, shape, axisList, lonLat, logString, boundsString,
+        gridType;
+    var v, i, al;
+    varsPromise.then(
+        function (varsAxes) {
+            // variables
+            vars = varsAxes[0];
+            for (v in vars) {
+                // shape of the variable
+                shape = '(' + vars[v].shape[0];
+                for (i = 1; i < vars[v].shape.length; ++i) {
+                    shape += (',' + vars[v].shape[i]);
+                }
+                shape += ')';
+                // axes for the variable
+                al = vars[v].axisList;
+                axisList = '(' + al[0];
+                for (i = 1; i < al.length; ++i) {
+                    axisList += (', ' + al[i]);
+                }
+                axisList += ')';
+                // bounds are received for longitude and latitude
+                boundsString = '';
+                if (vars[v].bounds) {
+                    boundsString += ': (' + vars[v].bounds[0] + ', ' +
+                        vars[v].bounds[1] + ')';
+                }
+                // longitude, latitude for the variable
+                // these are different than the axes for the curvilinear or
+                // generic grids
+                lonLat = null;
+                if (vars[v].lonLat) {
+                    lonLat = '(' + vars[v].lonLat[0] + ', ' +
+                        vars[v].lonLat[1] + ')';
+                }
+                logString = v + shape + '[' + vars[v].name + ', ' +
+                    vars[v].units + boundsString + ']' + ': ' + axisList;
+                if (lonLat) {
+                    logString += (', ' + lonLat);
+                }
+                if (vars[v].gridType) {
+                    logString += (', ' + vars[v].gridType);
+                }
+                console.log(logString);
+            }
+            // all axes in the file
+            axes = varsAxes[1];
+            for (v in axes) {
+                shape = '(' + axes[v].shape[0];
+                for (i = 1; i < axes[v].shape.length; ++i) {
+                    shape += (',' + axes[v].shape[i]);
+                }
+                shape += ')';
+                console.log(v + shape + '[' + axes[v].name + ', ' +
+                            axes[v].units + ': (' +
+                            axes[v].data[0] + ', ' +
+                            axes[v].data[axes[v].data.length - 1] + ')]');
+            }
+        },
+        function (reason) {
+            console.log(reason);
+        }
+    );
+}
+
 $(function () {
   var variables = {
     "clt": {"uri": "clt.nc", "variable": "clt"},
@@ -60,5 +131,5 @@ $(function () {
 
   var canvas5 = vcs.init(document.getElementById('vcs3d'));
   var dataSpec = variables.airt;
-  canvas5.plot(dataSpec, dv3d, 'default', 'server');
+  canvas5.plot(dataSpec, dv3d, 'default');
 });
