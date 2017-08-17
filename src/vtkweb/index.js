@@ -1,6 +1,6 @@
 import RemoteRenderer from 'ParaViewWeb/NativeUI/Canvas/RemoteRenderer';
 import SizeHelper from 'ParaViewWeb/Common/Misc/SizeHelper';
-import SmartConnect from 'ParaViewWeb/IO/WebSocket/SmartConnect';
+import SmartConnect from 'wslink/src/SmartConnect';
 import { createClient } from 'ParaViewWeb/IO/WebSocket/ParaViewWebClient';
 
 
@@ -8,9 +8,8 @@ const backend = {
   // RemoteRenderer associated with a windowId
   _renderer: {},
   connect(url) {
-    const smartConnect = new SmartConnect({
-      sessionURL: url,
-    });
+    const config = { sessionURL: url };
+    const smartConnect = SmartConnect.newInstance({ config });
 
     const connectionPromise = new Promise((resolve, reject) => {
       smartConnect.onConnectionReady(resolve);

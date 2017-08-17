@@ -39,3 +39,10 @@ Running the vtkweb demo
 To start the server run `vtkpython demo1/vtk_server.py -p 1234`.
 For runnig the client, use the same procedure as for vcs.js demo (`npm run demo`). If the client for
 vcs.js demo is already started, just browse to <http://localhost:8080/demo1>.
+
+
+Running the paraviewweb demo
+----------------------------
+
+To start the server run `vtkpython demo1/vtk_web_cone.py -p 1234`
+To run the client go to `paravieweb/src` and run `npm run doc:www -- RemoteRenderer'`
