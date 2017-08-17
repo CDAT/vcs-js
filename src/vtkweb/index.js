@@ -80,8 +80,8 @@ const backend = {
               return vtkEvent;
             };
             const getPosition = (event, element) => {
-              const x = event.pageX - (element.getClientRects()[0].x || element.getClientRects()[0].left);
-              const y = event.pageY - (element.getClientRects()[0].y || element.getClientRects()[0].top);
+              const x = event.clientX - (element.getClientRects()[0].x || element.getClientRects()[0].left);
+              const y = event.clientY - (element.getClientRects()[0].y || element.getClientRects()[0].top);
               return { x, y };
             };
             const mousedown = (e) => {
