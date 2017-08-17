@@ -1,4 +1,4 @@
-import SmartConnect from 'ParaViewWeb/IO/WebSocket/SmartConnect';
+import SmartConnect from 'wslink/src/SmartConnect';
 import { createClient } from 'ParaViewWeb/IO/WebSocket/ParaViewWebClient';
 import RemoteRenderer from 'ParaViewWeb/NativeUI/Canvas/RemoteRenderer';
 import SizeHelper from 'ParaViewWeb/Common/Misc/SizeHelper';
@@ -6,7 +6,7 @@ import SizeHelper from 'ParaViewWeb/Common/Misc/SizeHelper';
 
 export default (canvas, window) => {
   const config = { sessionURL: 'ws://localhost:1234/ws' };
-  const smartConnect = new SmartConnect(config);
+  const smartConnect = SmartConnect.newInstance({ config });
   smartConnect.onConnectionReady((connection) => {
     const pvwClient = createClient(connection, ['MouseHandler', 'ViewPort', 'ViewPortImageDelivery', 'FileListing']);
     const renderer = new RemoteRenderer(pvwClient);

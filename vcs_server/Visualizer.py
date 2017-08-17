@@ -1,10 +1,10 @@
 """This module exposes methods for finding and creating visualizations."""
 
 import json
-from autobahn.wamp import register
+from wslink import register as exportRpc
 # import vtk modules.
 import vtk
-from vtk.web import protocols, server
+from vtk.web import protocols
 # vcs modules
 import vcs
 import cdms2
@@ -17,12 +17,12 @@ class Visualizer(protocols.vtkWebProtocol):
 
     _canvas = {}
 
-    @register('vcs.canvas.plot')
+    @exportRpc('vcs.canvas.plot')
     def plot(self, prevWindowId, variable, template, method, width, height, opts={}):
         try:
             canvas = self._canvas[prevWindowId] if prevWindowId != 0 else None
             if (prevWindowId):
-                print('Using existing canvas % d' % prevWindowId)
+                print('Using existing canvas %d ' % prevWindowId)
             plot = VcsPlot(canvas, width=width, height=height)
             plot.setGraphicsMethod(method)
             plot.setTemplate(template)
@@ -42,7 +42,7 @@ class Visualizer(protocols.vtkWebProtocol):
             print ''.join('!! ' + line for line in lines)  # Log it or whatever here
             return 0
 
-    @register('vcs.canvas.clear')
+    @exportRpc('vcs.canvas.clear')
     def clear(self, windowId):
         if windowId in self._canvas:
             print 'clearing canvas %s' % windowId
@@ -51,7 +51,7 @@ class Visualizer(protocols.vtkWebProtocol):
         print 'clearing canvas: %s not found' % windowId
         return False
 
-    @register('vcs.canvas.resize')
+    @exportRpc('vcs.canvas.resize')
     def resize(self, windowId, width, height):
         if windowId in self._canvas:
             print('resizing canvas %d to (%d, %d)' % (windowId, width, height))
@@ -61,7 +61,7 @@ class Visualizer(protocols.vtkWebProtocol):
         print('resize canvas: %d not found' % windowId)
         return False
 
-    @register('vcs.canvas.close')
+    @exportRpc('vcs.canvas.close')
     def close(self, windowId):
         print 'close canvas %s' % windowId
         canvas = self._canvas.pop(windowId)

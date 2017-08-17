@@ -24,8 +24,10 @@ import sys
 import os
 # import vtk modules.
 import vtk
-from vtk.web import protocols, server
-from vtk.web import wamp as vtk_wamp
+from vtk.web import protocols
+from vtk.web import wslink as vtk_wslink
+from wslink import server
+
 try:
     import argparse
 except ImportError:
@@ -35,10 +37,10 @@ except ImportError:
 # =============================================================================
 # Create custom ServerProtocol class to handle clients requests
 # =============================================================================
-class _WebCone(vtk_wamp.ServerProtocol):
+class _WebCone(vtk_wslink.ServerProtocol):
     # Application configuration
     view    = None
-    authKey = "vtkweb-secret"
+    authKey = "wslink-secret"
 
 
 r"""
@@ -66,8 +68,10 @@ import sys
 import os
 # import vtk modules.
 import vtk
-from vtk.web import protocols, server
-from vtk.web import wamp as vtk_wamp
+from vtk.web import protocols
+from vtk.web import wslink as vtk_wslink
+from wslink import server
+
 try:
     import argparse
 except ImportError:
@@ -77,10 +81,11 @@ except ImportError:
 # =============================================================================
 # Create custom ServerProtocol class to handle clients requests
 # =============================================================================
-class _WebCone(vtk_wamp.ServerProtocol):
+class _WebCone(vtk_wslink.ServerProtocol):
     # Application configuration
     view    = None
-    authKey = "vtkweb-secret"
+    authKey = "wslink-secret"
+
     def initialize(self):
         print "initialize"
         global renderer, renderWindow, renderWindowInteractor, cone, mapper, actor
@@ -91,6 +96,9 @@ class _WebCone(vtk_wamp.ServerProtocol):
         self.registerVtkWebProtocol(protocols.vtkWebViewPortGeometryDelivery())
         self.registerVtkWebProtocol(protocols.vtkWebFileBrowser('.', '.'))
         # Create default pipeline (Only once for all the session)
+        # Update authentication key to use
+        self.updateSecret(_WebCone.authKey)
+        
         if not _WebCone.view:
             # # VTK specific code
             # renderer = vtk.vtkRenderer()
@@ -134,7 +142,7 @@ class _WebCone(vtk_wamp.ServerProtocol):
             renderWindow = x.backend.renWin
             # VTK Web application specific
             _WebCone.view = renderWindow
-            self.Application.GetObjectIdMap().SetActiveObject("VIEW", renderWindow)
+            self.getApplication().GetObjectIdMap().SetActiveObject("VIEW", renderWindow)
 
 # =============================================================================
 # Main: Parse args and start server
