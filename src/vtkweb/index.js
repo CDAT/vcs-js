@@ -86,7 +86,6 @@ const backend = {
             };
             const mousedown = (e) => {
               const pos = getPosition(e, canvas.el);
-              console.log('onmousedown render', pos.x, pos.y);
               const vtkEvent = getVtkEvent(pos.x, pos.y);
               vtkEvent.action = 'down';
               vtkEvent.buttonLeft = true;
@@ -94,7 +93,6 @@ const backend = {
             };
             const mouseup = (e) => {
               const pos = getPosition(e, canvas.el);
-              console.log('onmouseup render', pos.x, pos.y);
               const vtkEvent = getVtkEvent(pos.x, pos.y);
               vtkEvent.action = 'up';
               vtkEvent.buttonLeft = false;

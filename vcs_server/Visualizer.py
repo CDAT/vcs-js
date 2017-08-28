@@ -18,7 +18,7 @@ class Visualizer(protocols.vtkWebProtocol):
     _canvas = {}
 
     @exportRpc('vcs.canvas.plot')
-    def plot(self, prevWindowId, variable, template, method, width, height, opts={}):
+    def plot(self, prevWindowId, varSpecs, template, method, width, height, opts={}):
         try:
             canvas = self._canvas[prevWindowId] if prevWindowId != 0 else None
             if (prevWindowId):
@@ -27,8 +27,31 @@ class Visualizer(protocols.vtkWebProtocol):
             plot.setGraphicsMethod(method)
             plot.setTemplate(template)
             all_vars = []
-            for obj in variable:
-                all_vars.append(cdms2.open(obj['uri'])(obj['variable']))
+            for varSpec in varSpecs:
+                f = cdms2.open(varSpec['uri'])
+                var = f(varSpec['variable'])
+                if ('operations' in varSpec):
+                    for op in varSpec['operations']:
+                        print op
+                        if ('subRegion' in op):
+                            kargs = op['subRegion']
+                            var = var.subRegion(**kargs)
+                        elif ('subSlice' in op):
+                            kargs = op['subSlice']
+                            # fill in None with begin and end of the current axis
+                            for axis in kargs.keys():
+                                values = kargs[axis]
+                                newValues = values
+                                axisIndex = var.getAxisIndex(axis)
+                                if values[0] is None:
+                                    newValues[0] = 0
+                                if values[1] is None:
+                                    newValues[1] = var.shape[axisIndex] - 1
+                                kargs[axis] = slice(*newValues)
+                            var = var.subSlice(**kargs)
+                all_vars.append(var)
+                print varSpec
+
             plot.loadVariable(all_vars)
             canvas = plot.getCanvas()
             windowId = self.getGlobalId(plot.getWindow())
