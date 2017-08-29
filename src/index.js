@@ -84,7 +84,7 @@ function init(el, renderingType) {
         tmpl = 'default';
       }
       if (this.insidePlot) {
-        console.log('Ignore second plot calls made before windowId comes back to the client');
+        // Ignore second plot calls made before windowId comes back to the client
         return Promise.resolve();
       }
       return this.backend.plot(this, spec, tmpl, method);
