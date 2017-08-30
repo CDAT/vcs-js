@@ -47,6 +47,11 @@ class Visualizer(protocols.vtkWebProtocol):
                                     newValues[1] = var.shape[axisIndex] - 1
                                 kargs[axis] = slice(*newValues)
                             var = var.subSlice(**kargs)
+                if ('axis_order' in varSpec):
+                    indexOrder = varSpec['axis_order']
+                    stringOrder = var.getOrder()
+                    stringOrder = ''.join([stringOrder[i] for i in indexOrder])
+                    var = var(order=stringOrder)
                 all_vars.append(var)
 
             plot.loadVariable(all_vars)

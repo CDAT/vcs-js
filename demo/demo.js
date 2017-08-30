@@ -88,6 +88,9 @@ function print_variables (filename) {
 }
 
 $(function () {
+  operations = [{"subRegion": {'longitude1': [70, 180], 'latitude1': [0, 90]}},
+                {"subSlice": {'longitude1': [null,null,2], 'latitude1': [null,null,2]}}];
+  axis_order = [0, 1, 3, 2];
   var variables = {
     "clt": {"uri": "clt.nc", "variable": "clt"},
     "u": {"uri": "clt.nc", "variable": "u"},
@@ -95,13 +98,10 @@ $(function () {
     // execute a list of operations on the variable
     // for subSlice, null (or undefined) means the current value for being or end index
     "u_subset": {"uri": "clt.nc", "variable": "u",
-                 "operations": [{"subRegion": {'longitude1': [60, 180], 'latitude1': [0, 90]}},
-                                {"subSlice": {'longitude1': [null,null,2], 'latitude1': [null,null,2]}}]
+                 "operations": operations, "axis_order": axis_order
                 },
     "v_subset": {"uri": "clt.nc", "variable": "v",
-                 "operations":
-                 [{"subRegion": {'longitude2': [60, 180], 'latitude2': [0, 90]}},
-                  {"subSlice": {'longitude1': [,,2], 'latitude1': [,,2]}}]
+                 "operations": operations, "axis_order": axis_order
                 },
     
     "airt" : {"uri": "coads_climatology.nc", "variable": "AIRT"}
