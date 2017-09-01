@@ -16,7 +16,7 @@ mkdir ~/conda-bld
 conda install -q anaconda-client conda-build
 conda config --set anaconda_upload no
 export CONDA_BLD_PATH=${HOME}/conda-bld
-export VERSION="2.12"
+export VERSION="*"
 echo "Cloning recipes"
 git clone git://github.com/UV-CDAT/conda-recipes
 cd conda-recipes
