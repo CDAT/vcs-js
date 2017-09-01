@@ -10,7 +10,7 @@ general:
 
 checkout:
   post:
-    - ./scripts/checkout_merge_commit.sh
+    - ./ci-support/checkout_merge_commit.sh
 
 #machine:
 machine:
