@@ -53,6 +53,7 @@ const backend = {
       const rendererPromise = client.pvw.session.call(
         'vcs.canvas.plot',
         [prevWindowId, spec, template, method, canvas.el.clientWidth, canvas.el.clientHeight]).then(([windowId]) => {
+          console.log('windowId: ', windowId);
           if (!prevWindowId) {
             canvas.windowId = windowId;
             const renderer = new RemoteRenderer(client.pvw, canvas.el, windowId);
@@ -108,12 +109,7 @@ const backend = {
           canvas.insidePlot = false;
           return this._renderer[windowId].renderer;
         });
-      return rendererPromise.then((renderer) => {
-        const imagePromise = new Promise((resolve, reject) => {
-          renderer.onImageReady(resolve);
-        });
-        return imagePromise;
-      });
+      return rendererPromise;
     });
   },
   resize(canvas, width, height) {
