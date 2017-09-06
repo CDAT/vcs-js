@@ -11,7 +11,7 @@ class VcsPlot(object):
     def __init__(self, canvas, *arg, **kw):
         self._width = kw.get('width', 800)
         self._height = kw.get('height', 600)
-        self._canvas = canvas if canvas != None else vcs.init()
+        self._canvas = canvas if canvas != None else vcs.init(bg=1)
         self._canvas.geometry(self._width, self._height)
         self._plot = PlotManager(self._canvas)
         self._plot.graphics_method = vcs.getisofill()              # default
