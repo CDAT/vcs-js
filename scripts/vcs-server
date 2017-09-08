@@ -46,8 +46,6 @@ import pkg_resources
 import tempfile
 import os
 import shutil
-
-
 class _VCSApp(vtk_wslink.ServerProtocol):
 
     # Application configuration

@@ -57,6 +57,7 @@ const backend = {
             canvas.windowId = windowId;
             const renderer = new RemoteRenderer(client.pvw, canvas.el, windowId);
             SizeHelper.onSizeChange(() => {
+              console.log('renderer.resize');
               renderer.resize();
             });
             SizeHelper.startListening();
@@ -108,21 +109,7 @@ const backend = {
           canvas.insidePlot = false;
           return this._renderer[windowId].renderer;
         });
-      return rendererPromise.then((renderer) => {
-        const imagePromise = new Promise((resolve, reject) => {
-          renderer.onImageReady(resolve);
-        });
-        return imagePromise;
-      });
-    });
-  },
-  resize(canvas, width, height) {
-    return canvas.connection.vtkweb.then((client) => {
-      if (canvas.windowId) {
-        client.pvw.session.call('vcs.canvas.resize', [canvas.windowId, width, height]).then(() => {
-          this._renderer[canvas.windowId].renderer.render(true);
-        });
-      }
+      return rendererPromise;
     });
   },
   clear(canvas) {

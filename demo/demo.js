@@ -1,4 +1,5 @@
 var canvas;
+var renderer;
 
 function vcs_boxfill_close()
 {
@@ -12,8 +13,9 @@ function vcs_boxfill_clear()
 
 function vcs_boxfill_resize()
 {
-  canvas.el.style.width = '400px';
-  canvas.el.style.borderRight = '400 px solid black';
+  canvas.el.style.height = '400px';
+  renderer.resize();
+  console.log('div resize');
 }
 
 /**
@@ -126,15 +128,21 @@ $(function () {
 
   var dataSpec = variables.clt;
   canvas = vcs.init(document.getElementById('vcs-boxfill'));
-  var imagePromise = canvas.plot(dataSpec, boxfill);
-  imagePromise.then(() => {
-    console.log("Ready1");
-    // what if we want to plot over the first plot
-    var dataSpec = [variables.u, variables.v];
-    var imagePromise2 = canvas.plot(dataSpec, vector);
-    imagePromise.then(() => {
-      console.log("Ready2");
+  var rendererPromise = canvas.plot(dataSpec, boxfill);
+  rendererPromise.then((r) => {
+    renderer = r;
+    renderer.onImageReady(() => {
+      console.log("Ready1");
     });
+
+    // // what if we want to plot over the first plot
+    // var dataSpec = [variables.u, variables.v];
+    // var rendererPromise2 = canvas.plot(dataSpec, vector);
+    // rendererPromise2.then((r) => {
+    //   r.onImageReady(() => {
+    //     console.log("Ready2");
+    //   });
+    // });
   });
   // call canvas.plot quickly, before the canvasId arrives back from the client.
   // this is ignored.
@@ -145,60 +153,35 @@ $(function () {
 
   var canvas3 = vcs.init(document.getElementById('vcs-vector'));
   var dataSpec = [variables.u, variables.v];
-  var imagePromise3 = canvas3.plot(dataSpec, vector);
-  imagePromise3.then(() => {
-    console.log("Ready3");
-  });
+  canvas3.plot(dataSpec, vector);
 
   var canvas4 = vcs.init(document.getElementById('vcs-vector-subset'));
   var dataSpec = [variables.u, variables.v];
-  var imagePromise4 = canvas4.plot(dataSpec, vector_subview);
-  imagePromise4.then(() => {
-    console.log("Ready4");
-  });
+  canvas4.plot(dataSpec, vector_subview);
 
   var canvas5 = vcs.init(document.getElementById('vcs3d'));
   var dataSpec = variables.airt;
-  var imagePromise5 = canvas5.plot(dataSpec, dv3d, 'default');
-  imagePromise5.then((renderer5) => {
-    console.log("Ready5");
-  });
-
+  canvas5.plot(dataSpec, dv3d, 'default');
 
   var canvas6 = vcs.init(document.getElementById('vcs-vector-subset-cdms'));
   var dataSpec = [variables.u_subset, variables.v_subset];
-  var imagePromise6 = canvas6.plot(dataSpec, vector);
-  imagePromise6.then((renderer6) => {
-    console.log("Ready6");
-  });
-  
+  canvas6.plot(dataSpec, vector);
+
   // unstructured grid
   var canvas7 = vcs.init(document.getElementById('vcs-meshfill3'));
   var dataSpec = variables.sample3;
-  var imagePromise7 = canvas7.plot(dataSpec, meshfill);
-  imagePromise7.then(() => {
-    console.log("Ready7");
-  });
+  canvas7.plot(dataSpec, meshfill);
 
   var canvas8 = vcs.init(document.getElementById('vcs-meshfill3-subset'));
   var dataSpec = variables.sample3_subset;
-  var imagePromise8 = canvas8.plot(dataSpec, meshfill);
-  imagePromise8.then(() => {
-    console.log("Ready8");
-  });
+  canvas8.plot(dataSpec, meshfill);
 
   // curvilinear grid
   var canvas9 = vcs.init(document.getElementById('vcs-meshfill4'));
   var dataSpec = variables.sample4;
-  var imagePromise9 = canvas9.plot(dataSpec, meshfill);
-  imagePromise9.then(() => {
-    console.log("Ready9");
-  });
+  canvas9.plot(dataSpec, meshfill);
 
   var canvas10 = vcs.init(document.getElementById('vcs-meshfill4-subset'));
   var dataSpec = variables.sample4_subset;
-  var imagePromise10 = canvas10.plot(dataSpec, meshfill);
-  imagePromise10.then(() => {
-    console.log("Ready10");
-  });
+  canvas10.plot(dataSpec, meshfill);
 });
