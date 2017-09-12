@@ -1,6 +1,6 @@
+/* eslint-disable no-unused-vars */
 import $ from 'jquery';
 import 'ndarray';
-import ResizeSensor from 'css-element-queries/src/ResizeSensor';
 import remoteRenderer from './RemoteRenderer';
 import vtkweb from './vtkweb';
 import plotly from './plotly';
@@ -94,10 +94,6 @@ function init(el, renderingType) {
       this.backend.clear(this);
     },
 
-    resize(width, height) {
-      this.backend.resize(this, width, height);
-    },
-
     close() {
       Object.keys(this.connection).map((k) => {
         return this.connection[k].then((c) => {
@@ -106,20 +102,6 @@ function init(el, renderingType) {
       });
     },
   };
-  let resizeTimer = null;
-  /* eslint-disable no-new */
-  new ResizeSensor(el, () => {
-    if (resizeTimer !== null) {
-      clearTimeout(resizeTimer);
-      resizeTimer = null;
-    }
-    resizeTimer = setTimeout(() => {
-      const width = $(el).width();
-      const height = $(el).height();
-      canvas.resize(width, height);
-      resizeTimer = null;
-    }, 100);
-  });
   return canvas;
 }
 

@@ -1,4 +1,3 @@
-
 from PlotManager import PlotManager
 import json
 import vcs
@@ -11,11 +10,17 @@ class VcsPlot(object):
     def __init__(self, canvas, *arg, **kw):
         self._width = kw.get('width', 800)
         self._height = kw.get('height', 600)
-        self._canvas = canvas if canvas != None else vcs.init()
-        self._canvas.geometry(self._width, self._height)
+        if (canvas != None):
+            self._canvas = canvas
+        else:
+            self._canvas = vcs.init(
+                geometry={'width': self._width, 'height':self._height}, bg=1)
+            self._canvas.open()
+            self._canvas.backend.renWin.AddObserver("ModifiedEvent", self.modifiedEvent)
         self._plot = PlotManager(self._canvas)
         self._plot.graphics_method = vcs.getisofill()              # default
         self._plot.template = vcs.elements['template']['default']  # default
+        self._insideModifiedEvent = False
 
     def render(self, opts={}):
         self._width = opts.get('width', self._width)
@@ -27,6 +32,20 @@ class VcsPlot(object):
         self._canvas.backend.configureEvent(None, None)
         self._canvas.update()
         return True
+
+    def modifiedEvent(self, obj, ev):
+        if (not self._insideModifiedEvent):
+            # seems that SetSize (800, 600)
+            # sets the size to (814, 606) before settling on (800, 600)
+            # this happens with OpenGL1. Probably should be fixed in VTK
+            # if it happens with OpenGL2
+            self._insideModifiedEvent = True
+            newSize = self.getWindow().GetSize()
+            if (newSize != (self._width, self._height)):
+                self._canvas.backend.bgX = newSize[0]
+                self._canvas.backend.bgY = newSize[1]
+                self.render({'width': newSize[0], 'height': newSize[1]})
+            self._insideModifiedEvent = False
 
     def setGraphicsMethod(self, gm):
         for t in vcs.elements:

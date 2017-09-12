@@ -68,10 +68,10 @@ class _WebCone(vtk_wslink.ServerProtocol):
             # VTK specific code
             renderer = vtk.vtkRenderer()
             renderWindow = vtk.vtkRenderWindow()
-            #renderWindow.OffScreenRenderingOn()
             renderWindow.AddRenderer(renderer)
 
-            renderWindowInteractor = vtk.vtkRenderWindowInteractor()
+            renderWindow.OffScreenRenderingOn()
+            renderWindowInteractor = vtk.vtkGenericRenderWindowInteractor()
             renderWindowInteractor.SetRenderWindow(renderWindow)
             renderWindowInteractor.GetInteractorStyle().SetCurrentStyleToTrackballCamera()
 
@@ -86,7 +86,7 @@ class _WebCone(vtk_wslink.ServerProtocol):
             renderer.AddActor(actor)
             renderer.ResetCamera()
             renderWindow.Render()
-            
+
             # VTK Web application specific
             _WebCone.view = renderWindow
             self.getApplication().GetObjectIdMap().SetActiveObject("VIEW", renderWindow)

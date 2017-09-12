@@ -118,7 +118,7 @@ class _WebCone(vtk_wslink.ServerProtocol):
 
             # VCS specific code
             import vcs, cdms2, sys
-            x = vcs.init()
+            x = vcs.init(bg=1)
             f = cdms2.open( vcs.sample_data+"/geos5-sample.nc" )
             v = f["uwnd"]
             dv3d = vcs.get3d_scalar()

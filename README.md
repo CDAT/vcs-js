@@ -33,16 +33,22 @@ If you get an error message refering to `WAMP_FEATURES` while building, try runn
 npm run fix-autobahn
 ```
 
-Running the vtkweb demo
------------------------
+Running the vtkweb demo with vcs
+--------------------------------
 
-To start the server run `vtkpython demo1/vtk_server.py -p 1234`.
+To start the server run `vtkpython demo1/vcs_server.py -p 1234`.
 For runnig the client, use the same procedure as for vcs.js demo (`npm run demo`). If the client for
 vcs.js demo is already started, just browse to <http://localhost:8080/demo1>.
 
 
-Running the paraviewweb demo
-----------------------------
-
+Running the vtkweb demo with VTK
+--------------------------------
 To start the server run `vtkpython demo1/vtk_web_cone.py -p 1234`
-To run the client go to `paravieweb/src` and run `npm run doc:www -- RemoteRenderer'`
+To run the client use the same procedure as for vtkweb demo with vcs.
+
+
+Running the vtkweb demo with ParaView
+-------------------------------------
+This is used to look at differences between vtkweb with ParaView server and with VTK server.
+To start the server run `PV_ALLOW_BATCH_INTERACTION=1 ~/projects/ParaView/build/bin/pvbatch pv_server.py -p 1234`
+To run the client use the same procedure as for vtkweb demo with vcs.
