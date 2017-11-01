@@ -88,3 +88,32 @@ class Visualizer(protocols.vtkWebProtocol):
             del canvas
             return True
         return False
+
+    # Colormap routines
+    @exportRpc('vcs.colormapnames')
+    def colormapnames(self):
+        """Returns a list of colormap names"""
+        return vcs.elements['colormap'].keys()
+
+    @exportRpc('vcs.getcolormap')
+    def getcolormap(self, name):
+        """Returns the color values in a colormap"""
+        name = str(name)
+        return vcs.getcolormap(name).getindex().values()
+
+    @exportRpc('vcs.setcolormap')
+    def setcolormap(self, name, values):
+        """Sets color values in a specified colormap"""
+        name = str(name)
+        cm = vcs.getcolormap(name)
+        for i, value in enumerate(values):
+            cm.setcolorcell(i, value[0], value[1], value[2], value[3])
+
+    @exportRpc('vcs.createcolormap')
+    def createcolormap(self, name, nameSource):
+        """Creates a colormap 'name' as a copy of 'nameSource'"""
+        name = str(name)
+        if (nameSource is None):
+            nameSource = 'default'
+        nameSource = str(nameSource)
+        cm = vcs.createcolormap(name, nameSource)
