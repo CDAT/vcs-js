@@ -35,6 +35,36 @@ function variables(fileName) {
     .then((client) => { return client.pvw.session.call('cdat.file.variables', [fileName]); });
 }
 
+function colormapnames() {
+  const connection = connect('server');
+  return connection.vtkweb
+    .then((client) => { return client.pvw.session.call('vcs.colormapnames'); });
+}
+
+function getcolormap(name) {
+  const connection = connect('server');
+  return connection.vtkweb
+    .then((client) => {
+      return client.pvw.session.call('vcs.getcolormap', [name]);
+    });
+}
+
+function setcolormap(name, values) {
+  const connection = connect('server');
+  return connection.vtkweb
+    .then((client) => {
+      return client.pvw.session.call('vcs.setcolormap', [name, values]);
+    });
+}
+
+function createcolormap(name, nameSource) {
+  const connection = connect('server');
+  return connection.vtkweb
+    .then((client) => {
+      return client.pvw.session.call('vcs.createcolormap', [name, nameSource]);
+    });
+}
+
 function init(el, renderingType) {
   const connection = connect(renderingType);
   let backend = null;
@@ -91,7 +121,7 @@ function init(el, renderingType) {
     },
 
     clear() {
-      this.backend.clear(this);
+      return this.backend.clear(this);
     },
 
     close() {
@@ -108,5 +138,9 @@ function init(el, renderingType) {
 export {
   init,
   variables,
+  colormapnames,
+  getcolormap,
+  setcolormap,
+  createcolormap,
   remoteRenderer,
 };

@@ -23,15 +23,16 @@ const backend = {
       return {
         pvw: createClient(connection, handlers),
         close(canvas) {
-          if (canvas.windowId) {
-            canvas.el.innerHTML = '';
-            canvas.el.removeEventListener('mousedown', canvas.backend._renderer[canvas.windowId].mousedown);
-            canvas.el.removeEventListener('mouseup', canvas.backend._renderer[canvas.windowId].mouseup);
-            this.pvw.session.call('vcs.canvas.close', [canvas.windowId]);
-            delete canvas.backend._renderer[canvas.windowId];
-            canvas.windowId = 0;
+          if (! canvas.windowId) {
+            return Promise.resolve(0);
           }
-          return 0;
+          canvas.el.innerHTML = '';
+          canvas.el.removeEventListener('mousedown', canvas.backend._renderer[canvas.windowId].mousedown);
+          canvas.el.removeEventListener('mouseup', canvas.backend._renderer[canvas.windowId].mouseup);
+          const closePromise = this.pvw.session.call('vcs.canvas.close', [canvas.windowId]);
+          delete canvas.backend._renderer[canvas.windowId];
+          canvas.windowId = 0;
+          return closePromise;
         },
       };
     });
@@ -113,13 +114,14 @@ const backend = {
     });
   },
   clear(canvas) {
+    if (canvas.windowId) {
+      return Promise.resolve(false);
+    }
     return canvas.connection.vtkweb.then((client) => {
-      if (canvas.windowId) {
-        canvas.el.innerHTML = '';
-        canvas.el.removeEventListener('mousedown', this._renderer[canvas.windowId].mousedown);
-        canvas.el.removeEventListener('mouseup', this._renderer[canvas.windowId].mouseup);
-        client.pvw.session.call('vcs.canvas.clear', [canvas.windowId]);
-      }
+      canvas.el.innerHTML = '';
+      canvas.el.removeEventListener('mousedown', this._renderer[canvas.windowId].mousedown);
+      canvas.el.removeEventListener('mouseup', this._renderer[canvas.windowId].mouseup);
+      return client.pvw.session.call('vcs.canvas.clear', [canvas.windowId]);
     });
   },
 };
