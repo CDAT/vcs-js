@@ -65,6 +65,14 @@ function createcolormap(name, nameSource) {
     });
 }
 
+function removecolormap(name) {
+  const connection = connect('server');
+  return connection.vtkweb
+    .then((client) => {
+      return client.pvw.session.call('vcs.removecolormap', [name]);
+    });
+}
+
 function init(el, renderingType) {
   const connection = connect(renderingType);
   let backend = null;
@@ -142,5 +150,6 @@ export {
   getcolormap,
   setcolormap,
   createcolormap,
+  removecolormap,
   remoteRenderer,
 };
