@@ -117,3 +117,10 @@ class Visualizer(protocols.vtkWebProtocol):
             nameSource = 'default'
         nameSource = str(nameSource)
         cm = vcs.createcolormap(name, nameSource)
+
+    @exportRpc('vcs.removecolormap')
+    def removecolormap(self, name):
+        """Removes the colormap 'name'."""
+        name = str(name)
+        cm = vcs.removeCp(name)
+        return True

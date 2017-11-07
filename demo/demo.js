@@ -20,6 +20,15 @@ function print_getcolormap(name)
   });
 }
 
+function removecolormap(name)
+{
+  var colorsPromise = vcs.removecolormap(name);
+  colorsPromise.then((retVal) => {
+    console.log(retVal);
+  });
+}
+
+
 function vcs_boxfill_close()
 {
   canvas.close();
@@ -31,7 +40,7 @@ function vcs_boxfill_clear()
 }
 
 
-function vcs_plot_magma()
+function vcs_plot_mycolormap()
 {
   vcs.createcolormap("mycolormap").then(() => {
     return vcs.getcolormap("magma");
