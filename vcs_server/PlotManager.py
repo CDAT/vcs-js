@@ -90,8 +90,7 @@ class PlotManager(object):
             for var in self.variables:
                 if var is not None:
                     args.append(var)
+            args.append(self.graphics_method)
             args.append(self.template.name)
-            args.append(vcs.graphicsmethodtype(self.graphics_method))
-            args.append(self.graphics_method.name)
             self.dp = self.canvas.plot(*args, ratio="autot")
             self.dp_ind = self.canvas.display_names.index(self.dp.name)
