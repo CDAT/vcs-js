@@ -154,7 +154,7 @@ class Visualizer(protocols.vtkWebProtocol):
     @exportRpc('vcs.getgraphicsmethodtypes')
     def getgraphicsmethodtypes(self):
         """Returns a list of available graphics methods"""
-        return vcs.getgraphicsmethodtypes()
+        return vcs.graphicsmethodlist()
 
     @exportRpc('vcs.setgraphicsmethod')
     def setgraphicsmethod(self, typeName, name, nameValueMap):
