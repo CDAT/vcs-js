@@ -4,15 +4,15 @@ var boxfill;
 var variables;
 
 
-function print_colormapnames()
+function printcolormapnames()
 {
-  var namesPromise = vcs.colormapnames();
+  var namesPromise = vcs.getcolormapnames();
   namesPromise.then((names) => {
     console.log(names);
   });
 }
 
-function print_getcolormap(name)
+function printcolormap(name)
 {
   var colorsPromise = vcs.getcolormap(name);
   colorsPromise.then((colors) => {
@@ -28,6 +28,39 @@ function removecolormap(name)
   });
 }
 
+function printgraphicsmethodtypes(typeName)
+{
+  var namesPromise = vcs.getgraphicsmethodtypes(typeName);
+  namesPromise.then((names) => {
+    console.log(names);
+  });
+}
+
+function printgraphicsmethodnames(typeName)
+{
+  var namesPromise = vcs.getgraphicsmethodnames(typeName);
+  namesPromise.then((names) => {
+    console.log(names);
+  });
+}
+
+function printgraphicsmethod(type, name)
+{
+  var colorsPromise = vcs.getgraphicsmethod(type, name);
+  colorsPromise.then((gm) => {
+    console.log(gm);
+  });
+}
+
+function removegraphicsmethod(typeName, name)
+{
+  var colorsPromise = vcs.removegraphicsmethod(typeName, name);
+  colorsPromise.then((retVal) => {
+    console.log(retVal);
+  });
+}
+
+
 
 function vcs_boxfill_close()
 {
@@ -42,10 +75,12 @@ function vcs_boxfill_clear()
 
 function vcs_plot_mycolormap()
 {
-  vcs.createcolormap("mycolormap").then(() => {
+  // this is for demonstration only.
+  // we could have created mycolormap directly as a copy of magma
+  vcs.createcolormap("mycolormap").then((defaultCm) => {
     return vcs.getcolormap("magma");
-  }).then((colorValues) => {
-    return vcs.setcolormap("mycolormap", colorValues);
+  }).then((magmaCm) => {
+    return vcs.setcolormap("mycolormap", magmaCm);
   }).then(() => {
     boxfill["colormap"] = "mycolormap";
     var rendererPromise = canvas.plot(variables.clt, boxfill);
@@ -167,17 +202,11 @@ $(function () {
     "airt" : {"uri": "coads_climatology.nc", "variable": "AIRT"}
   }
 
-  boxfill = {"fillareaopacity": [], "datawc_timeunits": "days since 2000", "projection": "linear", "xticlabels1": "*", "xticlabels2": "*", "ymtics1": "", "ymtics2": "", "datawc_x1": 1e+20, "datawc_x2": 1e+20, "boxfill_type": "linear", "xmtics1": "", "fillareacolors": null, "xmtics2": "", "color_2": 255, "datawc_calendar": 135441, "fillareaindices": [1], "color_1": 0, "colormap": null, "missing": [0.0, 0.0, 0.0, 100.0], "xaxisconvert": "linear", "level_2": 1e+20, "ext_1": false, "ext_2": false, "datawc_y2": 1e+20, "datawc_y1": 1e+20, "yaxisconvert": "linear", "legend": null, "name": "__boxfill_717978942019492", "yticlabels1": "*", "yticlabels2": "*", "fillareastyle": "solid", "levels": [1e+20, 1e+20], "g_name": "Gfb", "level_1": 1e+20};
-  var vector =         {"datawc_timeunits": "days since 2000", "projection": "linear", "reference": 1e+20, "xticlabels1": "*", "xticlabels2": "*", "linecolor": null, "ymtics1": "", "ymtics2": "", "linewidth": null, "datawc_x1": 1e+20, "datawc_x2": 1e+20, "xmtics1": "", "xmtics2": "", "datawc_calendar": 135441, "alignment": "center", "type": "arrows", "colormap": null, "xaxisconvert": "linear", "scale": 1.0, "linetype": null, "datawc_y2": 1e+20, "datawc_y1": 1e+20, "yaxisconvert": "linear", "name": "vector_full",   "yticlabels1": "*", "yticlabels2": "*", "scalerange": [0.1, 1.0], "scaleoptions": ["off", "constant", "normalize", "linear", "constantNNormalize", "constantNLinear"], "g_name": "Gv", "scaletype": "constantNNormalize"};
-  var vector_subview = {"datawc_timeunits": "days since 2000", "projection": "linear", "reference": 1e+20, "xticlabels1": "*", "xticlabels2": "*", "linecolor": null, "ymtics1": "", "ymtics2": "", "linewidth": null, "datawc_x1": 60,    "datawc_x2": 180,   "xmtics1": "", "xmtics2": "", "datawc_calendar": 135441, "alignment": "center", "type": "arrows", "colormap": null, "xaxisconvert": "linear", "scale": 1.0, "linetype": null, "datawc_y2": 90,    "datawc_y1": 0,     "yaxisconvert": "linear", "name": "subset_vector", "yticlabels1": "*", "yticlabels2": "*", "scalerange": [0.1, 1.0], "scaleoptions": ["off", "constant", "normalize", "linear", "constantNNormalize", "constantNLinear"], "g_name": "Gv", "scaletype": "constantNNormalize"};
-  var isofill = {"g_name": "Gfi"};
-  var meshfill = {"g_name": "Gfm"};
-  var dv3d = {ScaleColormap: null, ScaleOpacity: null, BasemapOpacity: null, Camera: "{}", ZSlider: null, YSlider: null, ToggleVolumePlot: null, PointSize: null, Configure: null, XSlider: null, SliceThickness: null, axes: "xyz", plot_attributes: {name: "3d_scalar", template: "default"}, IsosurfaceValue: null, VerticalScaling: null, ChooseColormap: null, ToggleSurfacePlot: null, Colorbar: null, ncores: 8, ScaleTransferFunction: null, name: "default", ToggleClipping: null, Animation: null, g_name: "3d_scalar" };
-
-  var dataSpec = variables.clt;
   canvas = vcs.init(document.getElementById('vcs-boxfill'));
-  var rendererPromise = canvas.plot(dataSpec, boxfill);
-  rendererPromise.then((r) => {
+  vcs.creategraphicsmethod('boxfill', 'myboxfill').then((gm) => {
+    boxfill = gm;
+    return canvas.plot(variables.clt, ['boxfill', 'myboxfill']);
+  }).then((r) => {
     renderer = r;
     renderer.onImageReady(() => {
       console.log("Ready1");
@@ -194,42 +223,44 @@ $(function () {
   });
   // call canvas.plot quickly, before the canvasId arrives back from the client.
   // this is ignored.
-  canvas.plot(dataSpec, boxfill);
+  // canvas.plot(dataSpec, boxfill);
 
   // var canvas2 = vcs.init(document.getElementById('plotly-isofill'));
-  // canvas2.plot(dataSpec, isofill, 'default', 'client');
+  // canvas2.plot(dataSpec, ['isofill', 'default'], 'default', 'client');
 
   var canvas3 = vcs.init(document.getElementById('vcs-vector'));
-  var dataSpec = [variables.u, variables.v];
-  canvas3.plot(dataSpec, vector);
+  canvas3.plot([variables.u, variables.v], ['vector', 'default']);
 
   var canvas4 = vcs.init(document.getElementById('vcs-vector-subset'));
-  var dataSpec = [variables.u, variables.v];
-  canvas4.plot(dataSpec, vector_subview);
+  vcs.creategraphicsmethod('vector', 'vector_subview', 'default').then((gm) => {
+    vector_subview = gm;
+    vector_subview["datawc_x1"]=60;
+    vector_subview["datawc_x2"]=180;
+    vector_subview["datawc_y2"]=90;
+    vector_subview["datawc_y1"]=0;
+    return vcs.setgraphicsmethod('vector', 'vector_subview', vector_subview);
+  }).then(()=> {
+    return canvas4.plot([variables.u, variables.v], ['vector', 'vector_subview']);
+  });
+
 
   var canvas5 = vcs.init(document.getElementById('vcs3d'));
-  var dataSpec = variables.airt;
-  canvas5.plot(dataSpec, dv3d, 'default');
+  canvas5.plot(variables.airt, ['3d_scalar', 'default']);
 
   var canvas6 = vcs.init(document.getElementById('vcs-vector-subset-cdms'));
-  var dataSpec = [variables.u_subset, variables.v_subset];
-  canvas6.plot(dataSpec, vector);
+  canvas6.plot([variables.u_subset, variables.v_subset], ['vector', 'default']);
 
   // unstructured grid
   var canvas7 = vcs.init(document.getElementById('vcs-meshfill3'));
-  var dataSpec = variables.sample3;
-  canvas7.plot(dataSpec, meshfill);
+  canvas7.plot(variables.sample3, ['meshfill', 'default']);
 
   var canvas8 = vcs.init(document.getElementById('vcs-meshfill3-subset'));
-  var dataSpec = variables.sample3_subset;
-  canvas8.plot(dataSpec, meshfill);
+  canvas8.plot(variables.sample3_subset, ['meshfill', 'default']);
 
   // curvilinear grid
   var canvas9 = vcs.init(document.getElementById('vcs-meshfill4'));
-  var dataSpec = variables.sample4;
-  canvas9.plot(dataSpec, meshfill);
+  canvas9.plot(variables.sample4, ['meshfill', 'default']);
 
   var canvas10 = vcs.init(document.getElementById('vcs-meshfill4-subset'));
-  var dataSpec = variables.sample4_subset;
-  canvas10.plot(dataSpec, meshfill);
+  canvas10.plot(variables.sample4_subset, ['meshfill', 'default']);
 });

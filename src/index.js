@@ -35,44 +35,6 @@ function variables(fileName) {
     .then((client) => { return client.pvw.session.call('cdat.file.variables', [fileName]); });
 }
 
-function colormapnames() {
-  const connection = connect('server');
-  return connection.vtkweb
-    .then((client) => { return client.pvw.session.call('vcs.colormapnames'); });
-}
-
-function getcolormap(name) {
-  const connection = connect('server');
-  return connection.vtkweb
-    .then((client) => {
-      return client.pvw.session.call('vcs.getcolormap', [name]);
-    });
-}
-
-function setcolormap(name, values) {
-  const connection = connect('server');
-  return connection.vtkweb
-    .then((client) => {
-      return client.pvw.session.call('vcs.setcolormap', [name, values]);
-    });
-}
-
-function createcolormap(name, nameSource) {
-  const connection = connect('server');
-  return connection.vtkweb
-    .then((client) => {
-      return client.pvw.session.call('vcs.createcolormap', [name, nameSource]);
-    });
-}
-
-function removecolormap(name) {
-  const connection = connect('server');
-  return connection.vtkweb
-    .then((client) => {
-      return client.pvw.session.call('vcs.removecolormap', [name]);
-    });
-}
-
 function init(el, renderingType) {
   const connection = connect(renderingType);
   let backend = null;
@@ -125,7 +87,7 @@ function init(el, renderingType) {
         // Ignore second plot calls made before windowId comes back to the client
         return Promise.resolve();
       }
-      return this.backend.plot(this, spec, tmpl, method);
+      return this.backend.plot(this, spec, method, tmpl);
     },
 
     clear() {
@@ -143,13 +105,113 @@ function init(el, renderingType) {
   return canvas;
 }
 
+// ======================================================================
+// Colormap functionality
+
+function getcolormapnames() {
+  const connection = connect('server');
+  return connection.vtkweb
+    .then((client) => { return client.pvw.session.call('vcs.listelements', ['colormap']); });
+}
+
+function getcolormap(name) {
+  const connection = connect('server');
+  return connection.vtkweb
+    .then((client) => {
+      return client.pvw.session.call('vcs.getcolormap', [name]);
+    });
+}
+
+function setcolormap(name, values) {
+  const connection = connect('server');
+  return connection.vtkweb
+    .then((client) => {
+      return client.pvw.session.call('vcs.setcolormap', [name, values]);
+    });
+}
+
+function createcolormap(name, nameSource) {
+  const connection = connect('server');
+  return connection.vtkweb
+    .then((client) => {
+      return client.pvw.session.call('vcs.createcolormap', [name, nameSource]);
+    });
+}
+
+function removecolormap(name) {
+  const connection = connect('server');
+  return connection.vtkweb
+    .then((client) => {
+      return client.pvw.session.call('vcs.removeelement', ['colormap', name]);
+    });
+}
+
+// ======================================================================
+// Graphics method functionality
+function getgraphicsmethod(typeName, name) {
+  const connection = connect('server');
+  return connection.vtkweb
+    .then((client) => {
+      return client.pvw.session.call('vcs.getgraphicsmethod', [typeName, name]);
+    });
+}
+
+/**
+ * Creates a graphics method named 'name' (if 'name' is undefined it generates a name).
+ * It copies all property values from 'nameSource' (nameSource is 'default' if not specified).
+ */
+function creategraphicsmethod(typeName, name, nameSource) {
+  const connection = connect('server');
+  return connection.vtkweb
+    .then((client) => {
+      return client.pvw.session.call('vcs.creategraphicsmethod', [typeName, name, nameSource]);
+    });
+}
+
+function getgraphicsmethodnames(typeName) {
+  const connection = connect('server');
+  return connection.vtkweb
+    .then((client) => { return client.pvw.session.call('vcs.listelements', [typeName]); });
+}
+
+function getgraphicsmethodtypes() {
+  const connection = connect('server');
+  return connection.vtkweb
+    .then((client) => { return client.pvw.session.call('vcs.getgraphicsmethodtypes'); });
+}
+
+function setgraphicsmethod(typeName, name, nameValueMap) {
+  const connection = connect('server');
+  return connection.vtkweb
+    .then((client) => {
+      return client.pvw.session.call('vcs.setgraphicsmethod', [typeName, name, nameValueMap]);
+    });
+}
+
+function removegraphicsmethod(typeName, name) {
+  const connection = connect('server');
+  return connection.vtkweb
+    .then((client) => {
+      return client.pvw.session.call('vcs.removeelement', [typeName, name]);
+    });
+}
+
+
 export {
   init,
   variables,
-  colormapnames,
+  remoteRenderer,
+  // Colormap functions
+  getcolormapnames,
   getcolormap,
   setcolormap,
   createcolormap,
   removecolormap,
-  remoteRenderer,
+  // Graphics method functions
+  getgraphicsmethodtypes,
+  getgraphicsmethodnames,
+  getgraphicsmethod,
+  setgraphicsmethod,
+  creategraphicsmethod,
+  removegraphicsmethod,
 };

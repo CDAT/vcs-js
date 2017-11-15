@@ -39,7 +39,7 @@ const backend = {
     smartConnect.connect();
     return pvw;
   },
-  plot(canvas, dataSpec, template, method) {
+  plot(canvas, dataSpec, method, template) {
     canvas.insidePlot = true;
     return canvas.connection.vtkweb.then((client) => {
       // dataSpec is either one or more variable objects (if more, they're in an array)
@@ -53,7 +53,7 @@ const backend = {
       const prevWindowId = (canvas.windowId !== undefined) ? canvas.windowId : 0;
       const rendererPromise = client.pvw.session.call(
         'vcs.canvas.plot',
-        [prevWindowId, spec, template, method, canvas.el.clientWidth, canvas.el.clientHeight]).then(([windowId]) => {
+        [prevWindowId, spec, method, template, canvas.el.clientWidth, canvas.el.clientHeight]).then(([windowId]) => {
           if (!prevWindowId) {
             canvas.windowId = windowId;
             const renderer = new RemoteRenderer(client.pvw, canvas.el, windowId);

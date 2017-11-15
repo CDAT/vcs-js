@@ -19,7 +19,7 @@ class VcsPlot(object):
             self._canvas.backend.renWin.AddObserver("ModifiedEvent", self.modifiedEvent)
         self._plot = PlotManager(self._canvas)
         self._plot.graphics_method = vcs.getisofill()              # default
-        self._plot.template = vcs.elements['template']['default']  # default
+        self._plot.template = vcs.gettemplate('default')  # default
         self._insideModifiedEvent = False
 
     def render(self, opts={}):
@@ -48,8 +48,11 @@ class VcsPlot(object):
             self._insideModifiedEvent = False
 
     def setGraphicsMethod(self, gm):
-        for t in vcs.elements:
-            if len(vcs.elements[t]):
+        if (isinstance(gm, list)):
+            self._plot.graphics_method = vcs.getgraphicsmethod(gm[0], gm[1])
+            return
+        for t in vcs.listelements():
+            if len(vcs.listelements(t)):
                 o = vcs.elements[t].values()[0]
                 if hasattr(o, "g_name"):
                     if o.g_name == gm["g_name"]:
