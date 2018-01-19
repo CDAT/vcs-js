@@ -114,7 +114,7 @@ const backend = {
     });
   },
   clear(canvas) {
-    if (canvas.windowId) {
+    if (!canvas.windowId) {
       return Promise.resolve(false);
     }
     return canvas.connection.vtkweb.then((client) => {
