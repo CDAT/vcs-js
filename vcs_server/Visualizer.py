@@ -135,7 +135,7 @@ class Visualizer(protocols.vtkWebProtocol):
         gm = vcs.getgraphicsmethod(typeName, name)
         if (gm is None):
             raise ValueError('Cannot find graphics method [%s, %s]' % (typeName, name))
-        propertyNames = [i for i in gm.__slots__ if not i[0] == '_']
+        propertyNames = [i for i in gm.__slots__ if not i[0] == '_' and hasattr(gm, i)]
         properties = {k:getattr(gm, k) for k in propertyNames}
         return properties
 
