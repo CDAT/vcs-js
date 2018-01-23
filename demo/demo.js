@@ -96,8 +96,7 @@ function vcs_plot_mycolormap()
 
 function vcs_boxfill_resize()
 {
-  canvas.el.style.height = '400px';
-  renderer.resize();
+  canvas.resize(600, 400);
   console.log('div resize');
 }
 

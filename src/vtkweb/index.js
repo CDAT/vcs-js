@@ -124,6 +124,16 @@ const backend = {
       return client.pvw.session.call('vcs.canvas.clear', [canvas.windowId]);
     });
   },
+  resize(canvas, newWidth, newHeight) {
+    if (!canvas.windowId) {
+      return Promise.resolve(false);
+    }
+    return canvas.connection.vtkweb.then((client) => {
+      return client.pvw.session.call('vcs.canvas.resize', [canvas.windowId, newWidth, newHeight]).then(() => {
+        this._renderer[canvas.windowId].renderer.resize();
+      });
+    });
+  },
 };
 
 export { backend as default };

@@ -94,6 +94,12 @@ function init(el, renderingType) {
       return this.backend.clear(this);
     },
 
+    resize(newWidth, newHeight) {
+      el.style.width = `${newWidth}px`;
+      el.style.height = `${newHeight}px`;
+      return this.backend.resize(this, newWidth, newHeight);
+    },
+
     close() {
       Object.keys(this.connection).map((k) => {
         return this.connection[k].then((c) => {
