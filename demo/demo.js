@@ -73,23 +73,25 @@ function vcs_boxfill_clear()
 }
 
 
-function vcs_plot_mycolormap()
-{
-  // this is for demonstration only.
-  // we could have created mycolormap directly as a copy of magma
-  vcs.createcolormap("mycolormap").then((defaultCm) => {
-    return vcs.getcolormap("magma");
-  }).then((magmaCm) => {
-    return vcs.setcolormap("mycolormap", magmaCm);
-  }).then(() => {
-    boxfill["colormap"] = "mycolormap";
-    var rendererPromise = canvas.plot(variables.clt, boxfill);
-    rendererPromise.then((r) => {
-      renderer = r;
-      renderer.onImageReady(() => {
-        console.log("Ready magma");
+function vcs_plot_mycolormap(evt) {
+  function applyMagmaColorsToMyMap(colorMapNotUsed) {
+    vcs.getcolormap('magma').then((magmaCm) => {
+      vcs.setcolormap('mycolormap', magmaCm).then(() => {
+        boxfill.colormap = 'mycolormap';
+        var rendererPromise = canvas.plot(variables.clt, boxfill);
+        rendererPromise.then((r) => {
+          renderer = r;
+          renderer.onImageReady(() => {
+            console.log('Ready magma');
+          });
+        });
       });
     });
+  }
+
+  vcs.getcolormap('mycolormap').then(applyMagmaColorsToMyMap, (cmErr) => {
+    // Didn't have "mycolormap" yet, so we'll create it
+    vcs.createcolormap('mycolormap').then(applyMagmaColorsToMyMap);
   });
 }
 
@@ -212,8 +214,10 @@ $(function () {
     });
 
     // // what if we want to plot over the first plot
+    // // This seems to work just fine when uncommented, except for some
+    // // slight misalignment of the vector layer
     // var dataSpec = [variables.u, variables.v];
-    // var rendererPromise2 = canvas.plot(dataSpec, vector);
+    // var rendererPromise2 = canvas.plot(dataSpec, ['vector', 'default']);
     // rendererPromise2.then((r) => {
     //   r.onImageReady(() => {
     //     console.log("Ready2");

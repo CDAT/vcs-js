@@ -118,10 +118,9 @@ const backend = {
       return Promise.resolve(false);
     }
     return canvas.connection.vtkweb.then((client) => {
-      canvas.el.innerHTML = '';
-      canvas.el.removeEventListener('mousedown', this._renderer[canvas.windowId].mousedown);
-      canvas.el.removeEventListener('mouseup', this._renderer[canvas.windowId].mouseup);
-      return client.pvw.session.call('vcs.canvas.clear', [canvas.windowId]);
+      return client.pvw.session.call('vcs.canvas.clear', [canvas.windowId]).then(() => {
+        this._renderer[canvas.windowId].renderer.render(true);
+      });
     });
   },
   resize(canvas, newWidth, newHeight) {
