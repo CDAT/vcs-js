@@ -60,6 +60,18 @@ function removegraphicsmethod(typeName, name)
   });
 }
 
+function printvariablecounts() {
+  vcs.getgraphicsmethodvariablecount('vector').then((vectorCount) => {
+    console.log(`Expected 2, got ${vectorCount}.  ${vectorCount === 2 ? 'SUCCESS!' : 'FAILURE'}`);
+    vcs.getgraphicsmethodvariablecount('boxfill').then((boxFillCount) => {
+      console.log(`Expected 1, got ${boxFillCount}.  ${boxFillCount === 1 ? 'SUCCESS!' : 'FAILURE'}`);
+      vcs.getgraphicsmethodvariablecount('streamline').then((streamLineCount) => {
+        console.log(`Expected 2, got ${streamLineCount}.  ${streamLineCount === 2 ? 'SUCCESS!' : 'FAILURE'}`);
+      });
+    });
+  });
+}
+
 
 
 function vcs_boxfill_close()

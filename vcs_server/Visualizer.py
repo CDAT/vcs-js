@@ -156,6 +156,10 @@ class Visualizer(protocols.vtkWebProtocol):
         """Returns a list of available graphics methods"""
         return vcs.graphicsmethodlist()
 
+    @exportRpc('vcs.getgraphicsmethodvariablecount')
+    def getgraphicsmethodvariablecount(self, typeName):
+        return vcs.xmldocs.obj_details['graphics method'][typeName]['slabs']
+
     @exportRpc('vcs.setgraphicsmethod')
     def setgraphicsmethod(self, typeName, name, nameValueMap):
         gm = vcs.getgraphicsmethod(typeName, name)
