@@ -186,6 +186,12 @@ function getgraphicsmethodtypes() {
     .then((client) => { return client.pvw.session.call('vcs.getgraphicsmethodtypes'); });
 }
 
+function getgraphicsmethodvariablecount(typeName) {
+  const connection = connect('server');
+  return connection.vtkweb
+    .then((client) => { return client.pvw.session.call('vcs.getgraphicsmethodvariablecount', [typeName]); });
+}
+
 function setgraphicsmethod(typeName, name, nameValueMap) {
   const connection = connect('server');
   return connection.vtkweb
@@ -215,6 +221,7 @@ export {
   removecolormap,
   // Graphics method functions
   getgraphicsmethodtypes,
+  getgraphicsmethodvariablecount,
   getgraphicsmethodnames,
   getgraphicsmethod,
   setgraphicsmethod,
