@@ -1,4 +1,3 @@
-import Promise from './promise';
 
 export default (session, fileName) => {
   // file prototype
@@ -24,7 +23,7 @@ export default (session, fileName) => {
     },
 
     set(data) { // ?
-      return Promise.reject('Not implemented');
+      return Promise.reject(new Error('Not implemented'));
     },
   };
   return file;

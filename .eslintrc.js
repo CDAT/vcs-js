@@ -12,4 +12,7 @@ module.exports = {
     'import/no-extraneous-dependencies': 0,
     'import/prefer-default-export': 0,
   },
+  settings: {
+    'import/resolver': 'webpack',
+  },
 };
