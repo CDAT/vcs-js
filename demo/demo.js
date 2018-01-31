@@ -155,7 +155,7 @@ function print_variables (filename) {
                     lonLat = '(' + vars[v].lonLat[0] + ', ' +
                         vars[v].lonLat[1] + ')';
                 }
-                logString = v + shape + '[' + vars[v].name + ', ' +
+                logString = v + shape + ' [' + vars[v].name + ', ' +
                     vars[v].units + boundsString + ']' + ': ' + axisList;
                 if (lonLat) {
                     logString += (', ' + lonLat);
