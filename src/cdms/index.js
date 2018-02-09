@@ -33,8 +33,9 @@ function parseMetadata(headers) {
 }
 
 function readArray(data, meta) {
-  const dtype = meta.dtype;
-  const shape = meta.shape;
+  // const dtype = meta.dtype;
+  // const shape = meta.shape;
+  const { dtype, shape } = meta;
   let arr = null;
   switch (dtype) {
     case 'int8':
@@ -69,9 +70,9 @@ function readArray(data, meta) {
 
 function fetchArray(client, json) {
   return client.connection.get(`/data?var_spec=${json}`)
-                          .then((response) => {
-                            return readArray(response.data, parseMetadata(response.headers));
-                          });
+    .then((response) => {
+      return readArray(response.data, parseMetadata(response.headers));
+    });
 }
 
 function Variable(client, dataObject) {

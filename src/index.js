@@ -1,15 +1,15 @@
 /* eslint-disable no-unused-vars */
-import $ from 'jquery';
-import 'ndarray';
 import remoteRenderer from './RemoteRenderer';
 import vtkweb from './vtkweb';
 import plotly from './plotly';
 import cdms from './cdms';
+import config from './config';
 
 const globalConnection = {};
 
 function connect(renderingType) {
   const connection = {};
+  let backend = null;
 
   switch (renderingType) {
     case 'client':
@@ -18,52 +18,31 @@ function connect(renderingType) {
         globalConnection.data = cdms.connect('http://localhost:8888/data');
       }
       connection.data = globalConnection.data;
+      backend = plotly;
       break;
     case 'server':
     default:
       if (globalConnection.vtkweb === undefined) {
-        globalConnection.vtkweb = vtkweb.connect('@@@URL@@@/ws');
+        globalConnection.vtkweb = vtkweb.connect(config.sessionUrl);
       }
       connection.vtkweb = globalConnection.vtkweb;
+      backend = vtkweb;
   }
-  return connection;
+
+  return {
+    connection,
+    backend,
+  };
 }
 
 function variables(fileName) {
-  const connection = connect('server');
+  const { connection } = connect('server');
   return connection.vtkweb
     .then((client) => { return client.pvw.session.call('cdat.file.variables', [fileName]); });
 }
 
 function init(el, renderingType) {
-  const connection = connect(renderingType);
-  let backend = null;
-  switch (renderingType) {
-    case 'client':
-      backend = plotly;
-      break;
-    case 'server':
-    default:
-      backend = vtkweb;
-  }
-
-  switch (renderingType) {
-    case 'client':
-      if (globalConnection.data === undefined) {
-        // http@@@SECURE@@@://@@@URL@@@/data
-        globalConnection.data = cdms.connect('http://localhost:8888/data');
-      }
-      connection.data = globalConnection.data;
-      backend = plotly;
-      break;
-    case 'server':
-    default:
-      if (globalConnection.vtkweb === undefined) {
-        globalConnection.vtkweb = vtkweb.connect('@@@URL@@@/ws');
-      }
-      connection.vtkweb = globalConnection.vtkweb;
-      backend = vtkweb;
-  }
+  const { connection, backend } = connect(renderingType);
 
   const canvas = {
     el,
@@ -115,13 +94,13 @@ function init(el, renderingType) {
 // Colormap functionality
 
 function getcolormapnames() {
-  const connection = connect('server');
+  const { connection } = connect('server');
   return connection.vtkweb
     .then((client) => { return client.pvw.session.call('vcs.listelements', ['colormap']); });
 }
 
 function getcolormap(name) {
-  const connection = connect('server');
+  const { connection } = connect('server');
   return connection.vtkweb
     .then((client) => {
       return client.pvw.session.call('vcs.getcolormap', [name]);
@@ -129,7 +108,7 @@ function getcolormap(name) {
 }
 
 function setcolormap(name, values) {
-  const connection = connect('server');
+  const { connection } = connect('server');
   return connection.vtkweb
     .then((client) => {
       return client.pvw.session.call('vcs.setcolormap', [name, values]);
@@ -137,7 +116,7 @@ function setcolormap(name, values) {
 }
 
 function createcolormap(name, nameSource) {
-  const connection = connect('server');
+  const { connection } = connect('server');
   return connection.vtkweb
     .then((client) => {
       return client.pvw.session.call('vcs.createcolormap', [name, nameSource]);
@@ -145,7 +124,7 @@ function createcolormap(name, nameSource) {
 }
 
 function removecolormap(name) {
-  const connection = connect('server');
+  const { connection } = connect('server');
   return connection.vtkweb
     .then((client) => {
       return client.pvw.session.call('vcs.removeelement', ['colormap', name]);
@@ -155,7 +134,7 @@ function removecolormap(name) {
 // ======================================================================
 // Graphics method functionality
 function getgraphicsmethod(typeName, name) {
-  const connection = connect('server');
+  const { connection } = connect('server');
   return connection.vtkweb
     .then((client) => {
       return client.pvw.session.call('vcs.getgraphicsmethod', [typeName, name]);
@@ -167,7 +146,7 @@ function getgraphicsmethod(typeName, name) {
  * It copies all property values from 'nameSource' (nameSource is 'default' if not specified).
  */
 function creategraphicsmethod(typeName, name, nameSource) {
-  const connection = connect('server');
+  const { connection } = connect('server');
   return connection.vtkweb
     .then((client) => {
       return client.pvw.session.call('vcs.creategraphicsmethod', [typeName, name, nameSource]);
@@ -175,25 +154,25 @@ function creategraphicsmethod(typeName, name, nameSource) {
 }
 
 function getgraphicsmethodnames(typeName) {
-  const connection = connect('server');
+  const { connection } = connect('server');
   return connection.vtkweb
     .then((client) => { return client.pvw.session.call('vcs.listelements', [typeName]); });
 }
 
 function getgraphicsmethodtypes() {
-  const connection = connect('server');
+  const { connection } = connect('server');
   return connection.vtkweb
     .then((client) => { return client.pvw.session.call('vcs.getgraphicsmethodtypes'); });
 }
 
 function getgraphicsmethodvariablecount(typeName) {
-  const connection = connect('server');
+  const { connection } = connect('server');
   return connection.vtkweb
     .then((client) => { return client.pvw.session.call('vcs.getgraphicsmethodvariablecount', [typeName]); });
 }
 
 function setgraphicsmethod(typeName, name, nameValueMap) {
-  const connection = connect('server');
+  const { connection } = connect('server');
   return connection.vtkweb
     .then((client) => {
       return client.pvw.session.call('vcs.setgraphicsmethod', [typeName, name, nameValueMap]);
@@ -201,7 +180,7 @@ function setgraphicsmethod(typeName, name, nameValueMap) {
 }
 
 function removegraphicsmethod(typeName, name) {
-  const connection = connect('server');
+  const { connection } = connect('server');
   return connection.vtkweb
     .then((client) => {
       return client.pvw.session.call('vcs.removeelement', [typeName, name]);

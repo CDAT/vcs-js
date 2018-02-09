@@ -1,7 +1,9 @@
+const autoprefixer = require('autoprefixer');
+
 module.exports = [
   {
     test: /\.svg$/,
-    loader: 'svg-sprite',
+    loader: 'svg-sprite-loader',
     exclude: /fonts/,
   }, {
     test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
@@ -12,16 +14,25 @@ module.exports = [
     include: /fonts/,
   }, {
     test: /\.(png|jpg)$/,
-    loader: 'url-loader?limit=8192',
+    loader: 'url-loader?limit=1048576',
   }, {
     test: /\.css$/,
-    loader: 'style!css!postcss',
+    use: [
+      { loader: 'style-loader' },
+      { loader: 'css-loader' },
+      {
+        loader: 'postcss-loader',
+        options: {
+          plugins: () => [autoprefixer('last 2 version', 'ie >= 10')],
+        },
+      },
+    ],
   }, {
     test: /\.c$/i,
-    loader: 'shader',
+    loader: 'shader-loader',
   }, {
     test: /\.glsl$/i,
-    loader: 'shader',
+    loader: 'shader-loader',
   }, {
     test: /\.json$/,
     loader: 'json-loader',
@@ -34,6 +45,8 @@ module.exports = [
       /src/,
       /node_modules\/paraviewweb/,
     ],
-    loader: 'babel?presets[]=es2015-nostrict',
+    use: [
+      { loader: 'babel-loader', options: { presets: ['env'] } },
+    ],
   },
 ];
