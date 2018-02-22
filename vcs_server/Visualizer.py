@@ -10,7 +10,7 @@ import vcs
 import cdms2
 import sys
 import traceback
-from VcsPlot import VcsPlot
+from VcsPlot import VcsPlot, updateGraphicsMethodProps
 
 
 class Visualizer(protocols.vtkWebProtocol):
@@ -163,26 +163,4 @@ class Visualizer(protocols.vtkWebProtocol):
     @exportRpc('vcs.setgraphicsmethod')
     def setgraphicsmethod(self, typeName, name, nameValueMap):
         gm = vcs.getgraphicsmethod(typeName, name)
-        for k in nameValueMap:
-            if k == "name":
-                continue
-            if nameValueMap[k] == 100000000000000000000:
-                nameValueMap[k] = 1e20
-            if nameValueMap[k] == -100000000000000000000:
-                nameValueMap[k] = -1e20
-            if isinstance(nameValueMap[k], list):
-                conv = []
-                for v in nameValueMap[k]:
-                    if v == 100000000000000000000:
-                        conv.append(1e20)
-                    elif v == -100000000000000000000:
-                        conv.append(-1e20)
-                    else:
-                        conv.append(v)
-                nameValueMap[k] = conv
-            if hasattr(gm, k):
-                try:
-                    setattr(gm, k, nameValueMap[k])
-                except:
-                    print "Could not set attribute %s on graphics method [%s,%s]" %\
-                      (k, typeName, name)
+        updateGraphicsMethodProps(nameValueMap, gm)
