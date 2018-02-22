@@ -4,6 +4,53 @@ import vcs
 import sys
 import gc
 
+def fixValue(val):
+    if val == 100000000000000000000:
+        return 1e20
+    elif val == -100000000000000000000:
+        return -1e20
+    elif val == 100000002004087730000:
+        return 1.0000000200408773e+20
+    elif val == -100000002004087730000:
+        return -1.0000000200408773e+20
+    else:
+        return val
+
+def fixListProps(items):
+    for idx, item in enumerate(items):
+        if isinstance(item, dict):
+            items[idx] = fixDictProps(item)
+        elif isinstance(item, (list, tuple)):
+            items[idx] = fixListProps(item)
+        else:
+            items[idx] = fixValue(item)
+    return items
+
+def fixDictProps(propMap):
+    for key in propMap:
+        prop = propMap[key]
+        if isinstance(prop, dict):
+            propMap[key] = fixDictProps(prop)
+        elif isinstance(prop, (list, tuple)):
+            propMap[key] = fixListProps(prop)
+        else:
+            propMap[key] = fixValue(prop)
+    return propMap
+
+def updateGraphicsMethodProps(props, graphicsMethod):
+    fixedProps = fixDictProps(props)
+    for key in fixedProps:
+        if key == 'name':
+            continue
+        if hasattr(graphicsMethod, key):
+            try:
+                setattr(graphicsMethod, key, fixedProps[key])
+            except:
+                msg = """
+                    Could not set attribute %s to value %s on graphics
+                    method of type %s
+                """ % (key, str(fixedProps[key]), graphicsMethod._name)
+                print(msg)
 
 class VcsPlot(object):
 
@@ -59,29 +106,10 @@ class VcsPlot(object):
                         break
         else:
             return False
+
         my_gm = vcs.creategraphicsmethod(t)
-        for k in gm:
-            if k == "name":
-                continue
-            if gm[k] == 100000000000000000000:
-                gm[k] = 1e20
-            if gm[k] == -100000000000000000000:
-                gm[k] = -1e20
-            if isinstance(gm[k], list):
-                conv = []
-                for v in gm[k]:
-                    if v == 100000000000000000000:
-                        conv.append(1e20)
-                    elif v == -100000000000000000000:
-                        conv.append(-1e20)
-                    else:
-                        conv.append(v)
-                gm[k] = conv
-            if hasattr(my_gm, k):
-                try:
-                    setattr(my_gm, k, gm[k])
-                except:
-                    print "Could not set attribute %s on graphics method of type %s" % (k, t)
+        updateGraphicsMethodProps(gm, my_gm)
+
         if "ext_1" in gm:
             my_gm.ext_1 = gm["ext_1"]
         if "ext_2" in gm:
