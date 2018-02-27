@@ -49,6 +49,6 @@ To run the client use the same procedure as for vtkweb demo with vcs.
 
 Running the vtkweb demo with ParaView
 -------------------------------------
-This is used to look at differences between vtkweb with ParaView server and with VTK server.
+This is used to look at the differences between vtkweb with ParaView server and with VTK server.
 To start the server run `PV_ALLOW_BATCH_INTERACTION=1 ~/projects/ParaView/build/bin/pvbatch pv_server.py -p 1234`
 To run the client use the same procedure as for vtkweb demo with vcs.
