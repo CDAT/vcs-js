@@ -12,7 +12,7 @@ else
 fi
 
 mkdir ~/conda-bld
-conda install -q anaconda-client conda-build
+conda install -q anaconda-client=1.6.5 conda-build=3.0.27
 conda config --set anaconda_upload no
 export CONDA_BLD_PATH=${HOME}/conda-bld
 export VERSION="*"
