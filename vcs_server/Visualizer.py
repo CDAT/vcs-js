@@ -10,7 +10,7 @@ import vcs
 import cdms2
 import sys
 import traceback
-from VcsPlot import VcsPlot
+from VcsPlot import VcsPlot, updateGraphicsMethodProps
 
 
 class Visualizer(protocols.vtkWebProtocol):
@@ -135,7 +135,7 @@ class Visualizer(protocols.vtkWebProtocol):
         gm = vcs.getgraphicsmethod(typeName, name)
         if (gm is None):
             raise ValueError('Cannot find graphics method [%s, %s]' % (typeName, name))
-        propertyNames = [i for i in gm.__slots__ if not i[0] == '_']
+        propertyNames = [i for i in gm.__slots__ if not i[0] == '_' and hasattr(gm, i)]
         properties = {k:getattr(gm, k) for k in propertyNames}
         return properties
 
@@ -156,29 +156,11 @@ class Visualizer(protocols.vtkWebProtocol):
         """Returns a list of available graphics methods"""
         return vcs.graphicsmethodlist()
 
+    @exportRpc('vcs.getgraphicsmethodvariablecount')
+    def getgraphicsmethodvariablecount(self, typeName):
+        return vcs.xmldocs.obj_details['graphics method'][typeName]['slabs']
+
     @exportRpc('vcs.setgraphicsmethod')
     def setgraphicsmethod(self, typeName, name, nameValueMap):
         gm = vcs.getgraphicsmethod(typeName, name)
-        for k in nameValueMap:
-            if k == "name":
-                continue
-            if nameValueMap[k] == 100000000000000000000:
-                nameValueMap[k] = 1e20
-            if nameValueMap[k] == -100000000000000000000:
-                nameValueMap[k] = -1e20
-            if isinstance(nameValueMap[k], list):
-                conv = []
-                for v in nameValueMap[k]:
-                    if v == 100000000000000000000:
-                        conv.append(1e20)
-                    elif v == -100000000000000000000:
-                        conv.append(-1e20)
-                    else:
-                        conv.append(v)
-                nameValueMap[k] = conv
-            if hasattr(gm, k):
-                try:
-                    setattr(gm, k, nameValueMap[k])
-                except:
-                    print "Could not set attribute %s on graphics method [%s,%s]" %\
-                      (k, typeName, name)
+        updateGraphicsMethodProps(nameValueMap, gm)

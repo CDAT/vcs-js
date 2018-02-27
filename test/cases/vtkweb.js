@@ -1,53 +1,117 @@
-import Promise from 'bluebird';
+/* eslint-disable func-names */
+import { comparePlotToBaseline, getTestRequirements } from '../util/TestUtils';
 
-const vtkwebInjector = require('inject!vcs/vtkweb');
+import baselines from '../baselines';
 
-describe('vtkweb', () => {
-  it('dispatch', () => {
-    const remoteRenderer = {
-      setContainer: sinon.stub(),
-      resize: sinon.stub(),
+
+function getOrCreateGraphicsMethod(vcs, type, name) {
+  return vcs.getgraphicsmethod(type, name).then(
+    gm => gm,
+    err => vcs.creategraphicsmethod(type, name).then(gm => gm),
+  );
+}
+
+function getOrCreateColorMap(vcs, name) {
+  return vcs.getcolormap(name).then(
+    cm => cm,
+    err => vcs.createcolormap(name).then(cm => cm),
+  );
+}
+
+
+describe('endToEnd', function endToEnd() {
+  this.timeout(5000);
+
+  it('rendersABoxfillImage', function () {
+    const testName = this.test.title;
+    const { vcs, container } = getTestRequirements(testName);
+
+    const canvas = vcs.init(container);
+    const clt = {
+      uri: 'clt.nc',
+      variable: 'clt',
     };
-    const createRemoteRenderer = sinon.stub().returns(remoteRenderer);
-    const onSizeChange = sinon.stub();
-    const startListening = sinon.stub();
-    const client = {};
-    const canvas = {
-      session: {
-        client: () => Promise.resolve(client),
+
+    getOrCreateGraphicsMethod(vcs, 'boxfill', 'myboxfill').then((gm) => {
+      const plot = canvas.plot(clt, ['boxfill', 'myboxfill']);
+      return comparePlotToBaseline(plot, canvas, baselines, testName, 1);
+    });
+  });
+
+  it('rendersALinePlotImage', function () {
+    const testName = this.test.title;
+    const { vcs, container } = getTestRequirements(testName);
+
+    const canvas = vcs.init(container);
+    const variables = {
+      u: {
+        uri: 'clt.nc',
+        variable: 'u',
       },
-      el: 'el',
+      v: {
+        uri: 'clt.nc',
+        variable: 'v',
+      },
     };
 
-    /* eslint-disable */
-    const fileURI = __dirname + "/../../clt.nc";
-    const clt = {"id": "clt", "derivation": [{"type": "file", "uri": fileURI}, {"parents": [0], "operation": {"type": "get", "id": "clt"}, "type": "variable"}]};
-    /* eslint-enable */
+    const plot = canvas.plot([variables.u, variables.v], ['vector', 'default']);
+    return comparePlotToBaseline(plot, canvas, baselines, testName, 10);
+  });
 
-    const remoteRender = vtkwebInjector({
-      'ParaViewWeb/NativeUI/Canvas/RemoteRenderer': createRemoteRenderer,
-      'ParaViewWeb/Common/Misc/SizeHelper': { onSizeChange, startListening },
-    }).default;
+  it('appliesMagmaColorsToMap', function () {
+    const testName = this.test.title;
+    const { vcs, container } = getTestRequirements(testName);
 
-    const gm = {
-      g_name: 'Gfb',
-      level_1: 0,
-      level_2: 50,
+    const canvas = vcs.init(container);
+    const clt = {
+      uri: 'clt.nc',
+      variable: 'clt',
     };
 
-    return remoteRender(canvas, clt, gm)
-      .then(() => {
-        sinon.assert.calledOnce(createRemoteRenderer);
-        sinon.assert.calledWith(createRemoteRenderer, client);
-
-        sinon.assert.calledOnce(remoteRenderer.setContainer);
-        sinon.assert.calledWith(remoteRenderer.setContainer, 'el');
-
-        sinon.assert.calledOnce(startListening);
-        sinon.assert.calledOnce(onSizeChange);
-
-        onSizeChange.getCall(0).args[0]();
-        sinon.assert.calledOnce(remoteRenderer.resize);
+    function applyColors(gm) {
+      return vcs.getcolormap('magma').then((magmaCm) => {
+        return vcs.setcolormap('mycolormap', magmaCm).then(() => {
+          gm.colormap = 'mycolormap';
+          const plot = canvas.plot(clt, gm);
+          return comparePlotToBaseline(plot, canvas, baselines, testName, 10);
+        });
       });
+    }
+
+    return getOrCreateColorMap(vcs, 'mycolormap')
+      .then(() => getOrCreateGraphicsMethod(vcs, 'boxfill', 'myboxfill'))
+      .then(applyColors);
+  });
+
+  it('getsAllColorMapNames', function () {
+    const testName = this.test.title;
+    const { vcs } = getTestRequirements(testName, false);
+
+    const expectedNames = [
+      'AMIP', 'NCAR', 'bl_to_darkred', 'bl_to_drkorang', 'blends', 'blue2darkorange',
+      'blue2darkred', 'blue2green', 'blue2grey', 'blue2orange', 'blue2orange2red',
+      'blue_to_grey', 'blue_to_grn', 'blue_to_orange', 'blue_to_orgred', 'brown2blue',
+      'brown_to_blue', 'categorical', 'classic', 'default', 'green2magenta',
+      'grn_to_magenta', 'inferno', 'lightblue2darkblue', 'ltbl_to_drkbl', 'magma',
+      'plasma', 'rainbow', 'rainbow_no_grn', 'rainbownogreen', 'sequential', 'viridis',
+      'white2blue', 'white2green', 'white2magenta', 'white2red', 'white2yellow',
+      'white_to_blue', 'white_to_green', 'white_to_magenta', 'white_to_red',
+      'white_to_yellow',
+    ];
+
+    return vcs.getcolormapnames().then((colorMapNames) => {
+      return new Promise((resolve, reject) => {
+        const missing = [];
+        expectedNames.forEach((name) => {
+          if (colorMapNames.indexOf(name) < 0) {
+            missing.push(name);
+          }
+        });
+        if (missing.length > 0) {
+          reject(new Error(`Missing colormap names: [${missing.join(',')}]`));
+        }
+        resolve(true);
+      });
+    });
   });
 });

@@ -23,7 +23,7 @@ function asyncPlot(canvas, dataSpec, template, method) {
 
     const spec = Object.assign(
       { el: canvas.el },
-      data
+      data,
     );
 
     return isofill(spec);

@@ -1,18 +1,36 @@
 os:
-    - linux
+  - linux
+dist: trusty
+language: node_js
+node_js:
+  - "8"
+addons:
+  chrome: stable
 sudo: false
 before_install:
-- if [ "$TRAVIS_OS_NAME" = "linux" ]; then wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh; fi
-- if [ "$TRAVIS_OS_NAME" = "osx" ]; then wget https://repo.continuum.io/miniconda/Miniconda2-latest-MacOSX-x86_64.sh -O miniconda.sh; fi
-- export PATH="$HOME/miniconda/bin:$PATH"
-- bash miniconda.sh -b -p $HOME/miniconda
-- conda config --set always_yes yes --set changeps1 no
-- conda update -y -q conda
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then wget https://repo.continuum.io/miniconda/Miniconda2-latest-MacOSX-x86_64.sh -O miniconda.sh; fi
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -y -q conda
+install:
+  - npm install
+  - export UVCDAT_ANONYMOUS_LOG=False
+  - export UVCDAT_SETUP_PATH=${HOME}
+  - conda create -q -n py2 -c uvcdat/label/nightly -c conda-forge -c uvcdat "cdms2>2.12.2017" vcs vcsaddons cdat_info udunits2 nose flake8 genutil "matplotlib<2.1" vtk-cdat mesalib image-compare "dv3d>2.12.2017" "cdutil>2.12.2017"
+before_script:
+  - export CONDA_PREFIX=$HOME/miniconda/envs/py2
+  - export PATH=$HOME/miniconda/envs/py2/bin:$PATH
+  - export PYTHONPATH=.
+  - vtkpython scripts/vcs-test-server.py &
 script:
-- export UVCDAT_ANONYMOUS_LOG=False
-- echo $TRAVIS_BRANCH
-- export TRAVIS_PR_BRANCH=$TRAVIS_BRANCH
-- echo $TRAVIS_EVENT_TYPE
-- echo $TRAVIS_PULL_REQUEST
+  - export UVCDAT_ANONYMOUS_LOG=False
+  - echo $TRAVIS_BRANCH
+  - export TRAVIS_PR_BRANCH=$TRAVIS_BRANCH
+  - echo $TRAVIS_EVENT_TYPE
+  - echo $TRAVIS_PULL_REQUEST
+  - export CONDA_PREFIX=$HOME/miniconda/envs/py2
+  - npm run karma:travis:wait
 after_success:
-    - if [ "$TRAVIS_BRANCH" == "master" -a "$TRAVIS_PULL_REQUEST" == "false" ]; then bash ci-support/conda_upload.sh ; fi
+  - if [ "$TRAVIS_BRANCH" == "master" -a "$TRAVIS_PULL_REQUEST" == "false" ]; then bash ci-support/conda_upload.sh ; fi

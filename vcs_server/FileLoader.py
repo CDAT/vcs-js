@@ -42,20 +42,23 @@ class FileLoader(protocols.vtkWebProtocol):
             for axis in var.getAxisList():
                 axisList.append(axis.id)
             lonLat = None
-            if (var.getLongitude() and
+            if (var.getLongitude() and var.getLatitude() and
                     not isinstance(var.getGrid(), cdms2.grid.AbstractRectGrid)):
+                # for curvilinear and generic grids
+                # 1. getAxisList() returns the axes and
+                # 2. getLongitude() and getLatitude() return the lon,lat variables
                 lonName = var.getLongitude().id
                 latName = var.getLatitude().id
                 lonLat = [lonName, latName]
                 # add min/max for longitude/latitude
                 if (lonName not in outVars):
                     outVars[lonName] = {}
-                lonData = var.getLongitude()[:].data
+                lonData = var.getLongitude()[:]
                 outVars[lonName]['bounds'] =\
                   [numpy.amin(lonData), numpy.amax(lonData)]
                 if (latName not in outVars):
                     outVars[latName] = {}
-                latData = var.getLatitude()[:].data
+                latData = var.getLatitude()[:]
                 outVars[latName]['bounds'] =\
                   [numpy.amin(latData), numpy.amax(latData)]
             if (isinstance(var.getGrid(), cdms2.grid.AbstractRectGrid)):

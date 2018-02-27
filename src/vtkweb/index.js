@@ -13,8 +13,18 @@ const backend = {
 
     const connectionPromise = new Promise((resolve, reject) => {
       smartConnect.onConnectionReady(resolve);
-      smartConnect.onConnectionError(reject);
-      smartConnect.onConnectionClose(reject);
+      smartConnect.onConnectionError((data, err) => {
+        console.log('conn err, data: ', data, ', err: ', err);
+        const d = JSON.stringify(data);
+        const e = JSON.stringify(err);
+        const msg = `Connection error, data = (${d}), err = (${e})`;
+        reject(new Error(msg));
+      });
+      smartConnect.onConnectionClose((data) => {
+        console.log('conn closed, data: ', data);
+        const msg = `Connection closed, data = (${JSON.stringify(data)})`;
+        reject(new Error(msg));
+      });
     });
 
     // create a pvw client object after the session is ready
@@ -23,7 +33,7 @@ const backend = {
       return {
         pvw: createClient(connection, handlers),
         close(canvas) {
-          if (! canvas.windowId) {
+          if (!canvas.windowId) {
             return Promise.resolve(0);
           }
           canvas.el.innerHTML = '';
@@ -53,75 +63,85 @@ const backend = {
       const prevWindowId = (canvas.windowId !== undefined) ? canvas.windowId : 0;
       const rendererPromise = client.pvw.session.call(
         'vcs.canvas.plot',
-        [prevWindowId, spec, method, template, canvas.el.clientWidth, canvas.el.clientHeight]).then(([windowId]) => {
-          if (!prevWindowId) {
-            canvas.windowId = windowId;
-            const renderer = new RemoteRenderer(client.pvw, canvas.el, windowId);
-            SizeHelper.onSizeChange(() => {
-              console.log('renderer.resize');
-              renderer.resize();
-            });
-            SizeHelper.startListening();
-            const render = () => renderer.render(true);
-            const getVtkEvent = (x, y) => {
-              const vtkEvent = {
-                view: windowId,
-                buttonLeft: true,
-                buttonMiddle: false,
-                buttonRight: false,
-                /* eslint-disable no-bitwise */
-                shiftKey: false,
-                ctrlKey: false,
-                altKey: false,
-                metaKey: false,
-                /* eslint-enable no-bitwise */
-                x: x / canvas.el.clientWidth,
-                y: 1.0 - (y / canvas.el.clientHeight),
-                action: 'down',
-              };
-              return vtkEvent;
+        [prevWindowId, spec, method, template, canvas.el.clientWidth, canvas.el.clientHeight],
+      ).then(([windowId]) => {
+        if (!prevWindowId) {
+          canvas.windowId = windowId;
+          const renderer = new RemoteRenderer(client.pvw, canvas.el, windowId);
+          SizeHelper.onSizeChange(() => {
+            console.log('renderer.resize');
+            renderer.resize();
+          });
+          SizeHelper.startListening();
+          const render = () => renderer.render(true);
+          const getVtkEvent = (x, y) => {
+            const vtkEvent = {
+              view: windowId,
+              buttonLeft: true,
+              buttonMiddle: false,
+              buttonRight: false,
+              /* eslint-disable no-bitwise */
+              shiftKey: false,
+              ctrlKey: false,
+              altKey: false,
+              metaKey: false,
+              /* eslint-enable no-bitwise */
+              x: x / canvas.el.clientWidth,
+              y: 1.0 - (y / canvas.el.clientHeight),
+              action: 'down',
             };
-            const getPosition = (event, element) => {
-              const x = event.clientX - (element.getClientRects()[0].x || element.getClientRects()[0].left);
-              const y = event.clientY - (element.getClientRects()[0].y || element.getClientRects()[0].top);
-              return { x, y };
-            };
-            const mousedown = (e) => {
-              const pos = getPosition(e, canvas.el);
-              const vtkEvent = getVtkEvent(pos.x, pos.y);
-              vtkEvent.action = 'down';
-              vtkEvent.buttonLeft = true;
-              client.pvw.MouseHandler.interaction(vtkEvent).then(render);
-            };
-            const mouseup = (e) => {
-              const pos = getPosition(e, canvas.el);
-              const vtkEvent = getVtkEvent(pos.x, pos.y);
-              vtkEvent.action = 'up';
-              vtkEvent.buttonLeft = false;
-              client.pvw.MouseHandler.interaction(vtkEvent).then(render);
-            };
-            canvas.el.addEventListener('mousedown', mousedown);
-            canvas.el.addEventListener('mouseup', mouseup);
-            this._renderer[windowId] = { renderer, mousedown, mouseup };
-            canvas.insidePlot = false;
-            return renderer;
-          }
-          this._renderer[windowId].renderer.render(true);
+            return vtkEvent;
+          };
+          const getPosition = (event, element) => {
+            const x = event.clientX - (element.getClientRects()[0].x || element.getClientRects()[0].left);
+            const y = event.clientY - (element.getClientRects()[0].y || element.getClientRects()[0].top);
+            return { x, y };
+          };
+          const mousedown = (e) => {
+            const pos = getPosition(e, canvas.el);
+            const vtkEvent = getVtkEvent(pos.x, pos.y);
+            vtkEvent.action = 'down';
+            vtkEvent.buttonLeft = true;
+            client.pvw.MouseHandler.interaction(vtkEvent).then(render);
+          };
+          const mouseup = (e) => {
+            const pos = getPosition(e, canvas.el);
+            const vtkEvent = getVtkEvent(pos.x, pos.y);
+            vtkEvent.action = 'up';
+            vtkEvent.buttonLeft = false;
+            client.pvw.MouseHandler.interaction(vtkEvent).then(render);
+          };
+          canvas.el.addEventListener('mousedown', mousedown);
+          canvas.el.addEventListener('mouseup', mouseup);
+          this._renderer[windowId] = { renderer, mousedown, mouseup };
           canvas.insidePlot = false;
-          return this._renderer[windowId].renderer;
-        });
+          return renderer;
+        }
+        this._renderer[windowId].renderer.render(true);
+        canvas.insidePlot = false;
+        return this._renderer[windowId].renderer;
+      });
       return rendererPromise;
     });
   },
   clear(canvas) {
-    if (canvas.windowId) {
+    if (!canvas.windowId) {
       return Promise.resolve(false);
     }
     return canvas.connection.vtkweb.then((client) => {
-      canvas.el.innerHTML = '';
-      canvas.el.removeEventListener('mousedown', this._renderer[canvas.windowId].mousedown);
-      canvas.el.removeEventListener('mouseup', this._renderer[canvas.windowId].mouseup);
-      return client.pvw.session.call('vcs.canvas.clear', [canvas.windowId]);
+      return client.pvw.session.call('vcs.canvas.clear', [canvas.windowId]).then(() => {
+        this._renderer[canvas.windowId].renderer.render(true);
+      });
+    });
+  },
+  resize(canvas, newWidth, newHeight) {
+    if (!canvas.windowId) {
+      return Promise.resolve(false);
+    }
+    return canvas.connection.vtkweb.then((client) => {
+      return client.pvw.session.call('vcs.canvas.resize', [canvas.windowId, newWidth, newHeight]).then(() => {
+        this._renderer[canvas.windowId].renderer.resize();
+      });
     });
   },
 };
