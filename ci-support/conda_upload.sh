@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 PKG_NAME=vcs-js
-USER=uvcdat
+USER=cdat
 echo "Trying to upload conda"
 export PATH="$HOME/miniconda/bin:$PATH"
 if [ $(uname) == "Linux" ]; then
