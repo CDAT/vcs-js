@@ -16,7 +16,7 @@ class FileLoader(protocols.vtkWebProtocol):
     def __init__(self, datadir='.'):
         protocols.vtkWebProtocol.__init__(self)
         self._datadir = datadir
-    
+
     @exportRpc('cdat.file.variables')
     def variables(self, file_name):
         """Return a list of variables from the given file name."""
@@ -96,6 +96,8 @@ class FileLoader(protocols.vtkWebProtocol):
                 'name': name,
                 'shape': axis.shape,
                 'units': units,
+                'modulo': axis.getModulo(),
+                'moduloCycle': axis.getModuloCycle(),
                 'data': axis.getData().tolist()
             }
         return [outVars, outAxes]
