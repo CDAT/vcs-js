@@ -114,4 +114,41 @@ describe('endToEnd', function endToEnd() {
       });
     });
   });
+
+  it('getsFileInfoForOneVar', function () {
+    const testName = this.test.title;
+    const { vcs } = getTestRequirements(testName, false);
+
+    return vcs.getfileinfo('clt.nc', 'clt').then((cltInfo) => {
+      return new Promise((resolve, reject) => {
+        const contains = '*** Description of Slab clt ***';
+        if (cltInfo.indexOf(contains) < 0) {
+          reject(new Error(`Expected result to start with \'${contains}\'`));
+        }
+        resolve(true);
+      });
+    });
+  });
+
+  it('getsFileInfoForAllVar', function () {
+    const testName = this.test.title;
+    const { vcs } = getTestRequirements(testName, false);
+
+    return vcs.getfileinfo('clt.nc').then((cltInfo) => {
+      return new Promise((resolve, reject) => {
+        const expectedKeys = ['clt', 'u', 'v'];
+        expectedKeys.forEach((key) => {
+          if (! key in cltInfo) {
+            reject(new Error(`Expected the key ${key} to appear in result`));
+          } else {
+            const contains = `*** Description of Slab ${key} ***`;
+            if (cltInfo[key].indexOf(contains) < 0) {
+              reject(new Error(`Expected result to start with \'${contains}\'`));
+            }
+          }
+        });
+        resolve(true);
+      });
+    });
+  });
 });
