@@ -117,8 +117,8 @@ class FileLoader(protocols.vtkWebProtocol):
             }
         return [outVars, outAxes]
 
-    @exportRpc('cdat.file.info')
-    def getfileinfo(self, file_name, var_name=None):
+    @exportRpc('cdat.file.var.info')
+    def getvarinfofromfile(self, file_name, var_name=None):
         """
         Return the info() from the file and variable (as a string), unless
         var_name is None, in which case return a dictionary mapping variable

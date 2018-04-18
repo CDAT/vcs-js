@@ -119,7 +119,7 @@ describe('endToEnd', function endToEnd() {
     const testName = this.test.title;
     const { vcs } = getTestRequirements(testName, false);
 
-    return vcs.getfileinfo('clt.nc', 'clt').then((cltInfo) => {
+    return vcs.getvarinfofromfile('clt.nc', 'clt').then((cltInfo) => {
       return new Promise((resolve, reject) => {
         const contains = '*** Description of Slab clt ***';
         if (cltInfo.indexOf(contains) < 0) {
@@ -134,7 +134,7 @@ describe('endToEnd', function endToEnd() {
     const testName = this.test.title;
     const { vcs } = getTestRequirements(testName, false);
 
-    return vcs.getfileinfo('clt.nc').then((cltInfo) => {
+    return vcs.getvarinfofromfile('clt.nc').then((cltInfo) => {
       return new Promise((resolve, reject) => {
         const expectedKeys = ['clt', 'u', 'v'];
         expectedKeys.forEach((key) => {
