@@ -41,6 +41,12 @@ function variables(fileName) {
     .then((client) => { return client.pvw.session.call('cdat.file.variables', [fileName]); });
 }
 
+function getfileinfo(fileName, variableName=null) {
+  const { connection } = connect('server');
+  return connection.vtkweb
+    .then((client) => { return client.pvw.session.call('cdat.file.info', [fileName, variableName]); });
+}
+
 function init(el, renderingType) {
   const { connection, backend } = connect(renderingType);
 
@@ -191,6 +197,7 @@ function removegraphicsmethod(typeName, name) {
 export {
   init,
   variables,
+  getfileinfo,
   remoteRenderer,
   // Colormap functions
   getcolormapnames,

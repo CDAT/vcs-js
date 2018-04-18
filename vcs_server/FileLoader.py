@@ -7,6 +7,20 @@ from vtk.web import protocols
 # import vcs modules
 import cdms2
 
+class StringBuffer(object):
+    def __init__(self):
+        self._buf = ''
+
+    def write(self, strText):
+        self._buf += strText
+
+    def getbuffer(self):
+        return self._buf
+
+    def clear(self):
+        self._buf = ''
+
+
 class FileLoader(protocols.vtkWebProtocol):
     """
     Cache open cdms2 files and list variables from a given data file.
@@ -16,7 +30,8 @@ class FileLoader(protocols.vtkWebProtocol):
     def __init__(self, datadir='.'):
         protocols.vtkWebProtocol.__init__(self)
         self._datadir = datadir
-    
+        self._infobuf = StringBuffer()
+
     @exportRpc('cdat.file.variables')
     def variables(self, file_name):
         """Return a list of variables from the given file name."""
@@ -96,9 +111,32 @@ class FileLoader(protocols.vtkWebProtocol):
                 'name': name,
                 'shape': axis.shape,
                 'units': units,
+                'modulo': axis.getModulo(),
+                'moduloCycle': axis.getModuloCycle(),
                 'data': axis.getData().tolist()
             }
         return [outVars, outAxes]
+
+    @exportRpc('cdat.file.info')
+    def getfileinfo(self, file_name, var_name=None):
+        """
+        Return the info() from the file and variable (as a string), unless
+        var_name is None, in which case return a dictionary mapping variable
+        names to their info()."""
+        reader = self.get_reader(file_name)
+
+        def get_var_info(var):
+            self._infobuf.clear()
+            reader(var).info(device=self._infobuf)
+            return self._infobuf.getbuffer()
+
+        if not var_name:
+            result = {}
+            for variable in reader.variables:
+                result[variable] = get_var_info(variable)
+            return result
+
+        return get_var_info(var_name)
 
     @exportRpc('cdat.file.can_open')
     def can_open(self, file_name):
