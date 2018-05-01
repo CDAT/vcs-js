@@ -113,7 +113,8 @@ class FileLoader(protocols.vtkWebProtocol):
                 'units': units,
                 'modulo': axis.getModulo(),
                 'moduloCycle': axis.getModuloCycle(),
-                'data': axis.getData().tolist()
+                'data': axis.getData().tolist(),
+                'isTime': axis.isTime()
             }
         return [outVars, outAxes]
 
