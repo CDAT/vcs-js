@@ -8,6 +8,8 @@ from vtk.web import protocols
 # vcs modules
 import vcs
 import cdms2
+import genutil
+import cdutil
 import sys
 import traceback
 from VcsPlot import VcsPlot, updateGraphicsMethodProps
@@ -46,6 +48,17 @@ class Visualizer(protocols.vtkWebProtocol):
                                 newValues[1] = var.shape[axisIndex] - 1
                             kargs[axis] = slice(*newValues)
                         var = var.subSlice(**kargs)
+                    elif ('transform' in op):
+                        for axis in op["transform"]:
+                            method = op["transform"][axis]
+                            if method == "avg":
+                                var = cdutil.averager(var,axis="({})".format(axis))
+                            elif method == "std":
+                                # .std does not work with a FileVariable
+                                # var[:] turns var into a transientVariable which can be used in .std()
+                                var = genutil.statistics.std(var[:], axis="({})".format(axis))
+                            else:
+                                print "Got {} as a transform method".format(method)
             if ('axis_order' in varSpec):
                 indexOrder = varSpec['axis_order']
                 stringOrder = var.getOrder()
