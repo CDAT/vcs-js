@@ -1,5 +1,5 @@
 from wslink import register as exportRpc
-import numpy
+import numpy as np
 import os
 # import vtk modules.
 import vtk
@@ -70,12 +70,12 @@ class FileLoader(protocols.vtkWebProtocol):
                     outVars[lonName] = {}
                 lonData = var.getLongitude()[:]
                 outVars[lonName]['bounds'] =\
-                  [numpy.amin(lonData), numpy.amax(lonData)]
+                  [float(np.amin(lonData)), float(np.amax(lonData))]
                 if (latName not in outVars):
                     outVars[latName] = {}
                 latData = var.getLatitude()[:]
                 outVars[latName]['bounds'] =\
-                  [numpy.amin(latData), numpy.amax(latData)]
+                  [float(np.amin(latData)), float(np.amax(latData))]
             if (isinstance(var.getGrid(), cdms2.grid.AbstractRectGrid)):
                 gridType = 'rectilinear'
             elif (isinstance(var.getGrid(), cdms2.hgrid.AbstractCurveGrid)):
@@ -134,7 +134,10 @@ class FileLoader(protocols.vtkWebProtocol):
         if not var_name:
             result = {}
             for variable in reader.variables:
-                result[variable] = get_var_info(variable)
+                try:
+                    result[variable] = get_var_info(variable)
+                except:
+                    result[variable] = 'Error getting var info for %s' % variable
             return result
 
         return get_var_info(var_name)
