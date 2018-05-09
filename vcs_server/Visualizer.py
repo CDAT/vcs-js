@@ -61,11 +61,10 @@ class Visualizer(protocols.vtkWebProtocol):
                                 print "Got {} as a transform method".format(method)
             if ('axis_order' in varSpec):
                 indexOrder = varSpec['axis_order']
-                stringOrder = var.getOrder()
-                stringOrder = ''.join([stringOrder[i] for i in indexOrder])
+                axisOrder = var.getAxisIds()
+                stringOrder = ''.join(["({})".format(axisOrder[i]) for i in indexOrder])
                 var = var(order=stringOrder)
             all_vars.append(var)
-
         plot.loadVariable(all_vars)
         canvas = plot.getCanvas()
         windowId = self.getGlobalId(plot.getWindow())
