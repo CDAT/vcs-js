@@ -20,7 +20,7 @@ function getOrCreateColorMap(vcs, name) {
 
 
 describe('endToEnd', function endToEnd() {
-  this.timeout(5000);
+  this.timeout(10000);
 
   it('rendersABoxfillImage', function () {
     const testName = this.test.title;
@@ -148,6 +148,40 @@ describe('endToEnd', function endToEnd() {
           }
         });
         resolve(true);
+      });
+    });
+  });
+
+  it('capturesABase64Png', function () {
+    const testName = this.test.title;
+    const { vcs, container } = getTestRequirements(testName);
+
+    const canvas = vcs.init(container);
+    const vars = {
+      u: {
+        uri: 'clt.nc',
+        variable: 'u',
+      },
+      v: {
+        uri: 'clt.nc',
+        variable: 'v',
+      },
+    };
+
+    return canvas.plot([vars.u, vars.v], ['vector', 'default']).then(() => {
+      return canvas.screenshot('png', true, false, null).then((result) => {
+        return new Promise((resolve, reject) => {
+          if (result.success && result.blob && result.blob.type === 'image/png') {
+            resolve(true);
+          }
+          const msga = `Expected result.success === true (actually ${result.success})`;
+          const msgb = `, and result.blob to be defined (actually ${result.blob})`;
+          let msgc = '';
+          if (result.blob) {
+            msgc = `, and result.blob.type === \'image/png\' (actually \'${result.blob.type}\'')`
+          }
+          reject(new Error(`${msga}${msgb}${msgc}`));
+        });
       });
     });
   });

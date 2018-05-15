@@ -85,6 +85,21 @@ function init(el, renderingType) {
       return this.backend.resize(this, newWidth, newHeight);
     },
 
+    // When this resolves, the result should contain some expected keys:
+    //
+    // {
+    //   success: boolean (did screenshot succeed on server)
+    //   msg: possible error message in case of failure
+    //   type: same as "saveType" argument
+    //   blob: A Blob containing the binary image data
+    // }
+    //
+    screenshot(saveType = 'png', saveLocal = true, saveRemote = false,
+               remotePath = null, width = null, height = null) {
+      return this.backend.screenshot(this, saveType, saveLocal, saveRemote,
+                                     remotePath, width, height);
+    },
+
     close() {
       Object.keys(this.connection).map((k) => {
         return this.connection[k].then((c) => {
@@ -192,7 +207,6 @@ function removegraphicsmethod(typeName, name) {
       return client.pvw.session.call('vcs.removeelement', [typeName, name]);
     });
 }
-
 
 export {
   init,

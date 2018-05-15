@@ -1,8 +1,16 @@
+import b64toBlob from 'b64-to-blob';
 import RemoteRenderer from 'ParaViewWeb/NativeUI/Canvas/RemoteRenderer';
 import SizeHelper from 'ParaViewWeb/Common/Misc/SizeHelper';
 import SmartConnect from 'wslink/src/SmartConnect';
 import { createClient } from 'ParaViewWeb/IO/WebSocket/ParaViewWebClient';
 
+
+const mimeTypeMap = {
+  ps: 'application/postscript',
+  pdf: 'application/pdf',
+  png: 'image/png',
+  svg: 'image/svg+xml',
+};
 
 const backend = {
   // RemoteRenderer associated with a windowId
@@ -122,6 +130,33 @@ const backend = {
         return this._renderer[windowId].renderer;
       });
       return rendererPromise;
+    });
+  },
+  screenshot(canvas, saveType, saveLocal, saveRemote, remotePath, width, height) {
+    if (!canvas.windowId) {
+      return Promise.resolve(false);
+    }
+    return canvas.connection.vtkweb.then((client) => {
+      const args = [
+        canvas.windowId,
+        saveType,
+        saveLocal,
+        saveRemote,
+        remotePath,
+        width,
+        height,
+      ];
+      return client.pvw.session.call('vcs.canvas.screenshot', args).then((result) => {
+        if (result && result.encodedImage) {
+          const blob = b64toBlob(result.encodedImage, mimeTypeMap[saveType]);
+          const newResult = Object.assign({}, result);
+          delete newResult.encodedImage;
+          newResult.blob = blob;
+          newResult.type = saveType;
+          return newResult;
+        }
+        return result;
+      });
     });
   },
   clear(canvas) {
