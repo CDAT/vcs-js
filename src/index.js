@@ -193,6 +193,14 @@ function removegraphicsmethod(typeName, name) {
     });
 }
 
+function gettemplates() {
+  const { connection } = connect('server');
+  return connection.vtkweb
+    .then((client) => {
+      return client.pvw.session.call('vcs.gettemplates');
+    });
+}
+
 
 export {
   init,
@@ -213,4 +221,6 @@ export {
   setgraphicsmethod,
   creategraphicsmethod,
   removegraphicsmethod,
+  // Template method functions
+  gettemplates,
 };

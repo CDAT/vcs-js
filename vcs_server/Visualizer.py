@@ -176,3 +176,13 @@ class Visualizer(protocols.vtkWebProtocol):
     def setgraphicsmethod(self, typeName, name, nameValueMap):
         gm = vcs.getgraphicsmethod(typeName, name)
         updateGraphicsMethodProps(nameValueMap, gm)
+
+    # ======================================================================
+    # Template Method routines
+    @exportRpc('vcs.gettemplates')
+    def gettemplates(self):
+        templates = {}
+        for tname in vcs.elements['template'].keys():
+            templates[tname] = vcs.utils.dumpToDict(vcs.elements['template'][tname])[0]
+        return templates
+
