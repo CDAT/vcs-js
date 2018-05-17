@@ -179,10 +179,35 @@ class Visualizer(protocols.vtkWebProtocol):
 
     # ======================================================================
     # Template Method routines
-    @exportRpc('vcs.gettemplates')
+    @exportRpc('vcs.getalltemplatenames')
     def gettemplates(self):
-        templates = {}
-        for tname in vcs.elements['template'].keys():
-            templates[tname] = vcs.utils.dumpToDict(vcs.elements['template'][tname])[0]
-        return templates
+        template_list = sorted(vcs.elements['template'].keys(), key=lambda s: s.lower())
+        return template_list
+
+    @exportRpc('vcs.gettemplate')
+    def gettemplate(self, template_name):
+        if(template_name in vcs.elements['template'].keys()):
+            template = vcs.dumpToDict(vcs.elements['template'][template_name])[0]
+            return template
+        else:
+            return None
+            
+    @exportRpc('vcs.settemplate')
+    def settemplate(self, name, new_values):
+        template = vcs.gettemplate(name)
+        for outer_key in new_values:
+            if isinstance(new_values[outer_key], dict):
+                template_inner_obj = getattr(template, outer_key)
+                for inner_name in new_values[outer_key]:
+                    setattr(template_inner_obj, inner_name, new_values[outer_key][inner_name])
+                    # Example: 
+                    # if template = {'ymintic1': {'member': 'ymintic1', 'priority': 1, 'line': 'default'}}
+                    # and new_values = {'ymintic1': {'member': 'ymintic1', 'priority': 0, 'line': 'default'}}
+                    #
+                    # template_inner_obj = {'member': 'ymintic1', 'priority': 1, 'line': 'default'}
+                    # outername = 'ymintic1'
+                    # inner_name = 'priority'
+                    # 
+                    # setattr would set template's ymintic1's priority to 0
+                    
 
