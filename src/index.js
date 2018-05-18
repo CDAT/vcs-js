@@ -201,22 +201,37 @@ function getalltemplatenames() {
     });
 }
 
-function gettemplate(template_name) {
+function gettemplate(templateName) {
   const { connection } = connect('server');
   return connection.vtkweb
     .then((client) => {
-      return client.pvw.session.call('vcs.gettemplate', [template_name]);
+      return client.pvw.session.call('vcs.gettemplate', [templateName]);
     });
 }
 
-function settemplate(template_name, template_data) {
+function settemplate(templateName, templateData) {
   const { connection } = connect('server');
   return connection.vtkweb
     .then((client) => {
-      return client.pvw.session.call('vcs.settemplate', [template_name, template_data]);
+      return client.pvw.session.call('vcs.settemplate', [templateName, templateData]);
     });
 }
 
+function createtemplate(templateName, nameSource) {
+  const { connection } = connect('server');
+  return connection.vtkweb
+    .then((client) => {
+      return client.pvw.session.call('vcs.createtemplate', [templateName, nameSource]);
+    });
+}
+
+function removetemplate(templateName) {
+  const { connection } = connect('server');
+  return connection.vtkweb
+    .then((client) => {
+      return client.pvw.session.call('vcs.removetemplate', [templateName]);
+    });
+}
 
 export {
   init,
@@ -241,4 +256,6 @@ export {
   getalltemplatenames,
   gettemplate,
   settemplate,
+  createtemplate,
+  removetemplate,
 };

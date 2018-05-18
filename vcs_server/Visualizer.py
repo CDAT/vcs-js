@@ -185,21 +185,21 @@ class Visualizer(protocols.vtkWebProtocol):
         return template_list
 
     @exportRpc('vcs.gettemplate')
-    def gettemplate(self, template_name):
-        if(template_name in vcs.elements['template'].keys()):
-            template = vcs.dumpToDict(vcs.elements['template'][template_name])[0]
+    def gettemplate(self, templateName):
+        if(templateName in vcs.elements['template'].keys()):
+            template = vcs.dumpToDict(vcs.elements['template'][templateName])[0]
             return template
         else:
             return None
             
     @exportRpc('vcs.settemplate')
-    def settemplate(self, name, new_values):
+    def settemplate(self, name, newValues):
         template = vcs.gettemplate(name)
-        for outer_key in new_values:
-            if isinstance(new_values[outer_key], dict):
+        for outer_key in newValues:
+            if isinstance(newValues[outer_key], dict):
                 template_inner_obj = getattr(template, outer_key)
-                for inner_name in new_values[outer_key]:
-                    setattr(template_inner_obj, inner_name, new_values[outer_key][inner_name])
+                for inner_name in newValues[outer_key]:
+                    setattr(template_inner_obj, inner_name, newValues[outer_key][inner_name])
                     # Example: 
                     # if template = {'ymintic1': {'member': 'ymintic1', 'priority': 1, 'line': 'default'}}
                     # and new_values = {'ymintic1': {'member': 'ymintic1', 'priority': 0, 'line': 'default'}}
@@ -209,5 +209,15 @@ class Visualizer(protocols.vtkWebProtocol):
                     # inner_name = 'priority'
                     # 
                     # setattr would set template's ymintic1's priority to 0
-                    
+                
+    @exportRpc('vcs.createtemplate')
+    def createtemplate(self, templateName, nameSource):
+        base_template = vcs.gettemplate(nameSource)
+        vcs.createtemplate(templateName, base_template)
+        return
+            
+    @exportRpc('vcs.removetemplate')
+    def removetemplate(self, templateName):
+        template = vcs.gettemplate(templateName)
+        vcs.removeP(template)
 
