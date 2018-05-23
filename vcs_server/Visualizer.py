@@ -214,7 +214,6 @@ class Visualizer(protocols.vtkWebProtocol):
     def createtemplate(self, templateName, nameSource):
         base_template = vcs.gettemplate(nameSource)
         vcs.createtemplate(templateName, base_template)
-        return
             
     @exportRpc('vcs.removetemplate')
     def removetemplate(self, templateName):
