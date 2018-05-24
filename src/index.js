@@ -193,6 +193,45 @@ function removegraphicsmethod(typeName, name) {
     });
 }
 
+function getalltemplatenames() {
+  const { connection } = connect('server');
+  return connection.vtkweb
+    .then((client) => {
+      return client.pvw.session.call('vcs.getalltemplatenames');
+    });
+}
+
+function gettemplate(templateName) {
+  const { connection } = connect('server');
+  return connection.vtkweb
+    .then((client) => {
+      return client.pvw.session.call('vcs.gettemplate', [templateName]);
+    });
+}
+
+function settemplate(templateName, templateData) {
+  const { connection } = connect('server');
+  return connection.vtkweb
+    .then((client) => {
+      return client.pvw.session.call('vcs.settemplate', [templateName, templateData]);
+    });
+}
+
+function createtemplate(templateName, nameSource) {
+  const { connection } = connect('server');
+  return connection.vtkweb
+    .then((client) => {
+      return client.pvw.session.call('vcs.createtemplate', [templateName, nameSource]);
+    });
+}
+
+function removetemplate(templateName) {
+  const { connection } = connect('server');
+  return connection.vtkweb
+    .then((client) => {
+      return client.pvw.session.call('vcs.removetemplate', [templateName]);
+    });
+}
 
 export {
   init,
@@ -213,4 +252,10 @@ export {
   setgraphicsmethod,
   creategraphicsmethod,
   removegraphicsmethod,
+  // Template method functions
+  getalltemplatenames,
+  gettemplate,
+  settemplate,
+  createtemplate,
+  removetemplate,
 };
