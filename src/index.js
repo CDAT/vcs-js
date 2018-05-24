@@ -139,6 +139,15 @@ function removecolormap(name) {
 
 // ======================================================================
 // Graphics method functionality
+
+function getallgraphicsmethods() {
+  const { connection } = connect('server');
+  return connection.vtkweb
+    .then((client) => {
+      return client.pvw.session.call('vcs.getallgraphicsmethods');
+    });
+}
+
 function getgraphicsmethod(typeName, name) {
   const { connection } = connect('server');
   return connection.vtkweb
@@ -245,6 +254,7 @@ export {
   createcolormap,
   removecolormap,
   // Graphics method functions
+  getallgraphicsmethods,
   getgraphicsmethodtypes,
   getgraphicsmethodvariablecount,
   getgraphicsmethodnames,
