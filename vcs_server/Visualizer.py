@@ -1,6 +1,5 @@
 """This module exposes methods for finding and creating visualizations."""
 
-import json
 from wslink import register as exportRpc
 # import vtk modules.
 import vtk
@@ -10,8 +9,7 @@ import vcs
 import cdms2
 import genutil
 import cdutil
-import sys
-import traceback
+import numpy
 from VcsPlot import VcsPlot, updateGraphicsMethodProps
 
 
@@ -139,6 +137,31 @@ class Visualizer(protocols.vtkWebProtocol):
 
     # ======================================================================
     # Graphics method routines
+    @exportRpc('vcs.getallgraphicsmethods')
+    def getallgraphicsmethods(self):
+        """
+        Returns a nested object representing all the available graphics method types as keys.
+        Each graphics method type is an object that has the available graphics methods of that type as keys.
+        Example:
+        {
+            boxfill: {
+                polar: {...},
+                default: {...}
+            }
+        }
+        """
+        _methods = {}
+        for t in vcs.graphicsmethodlist():
+            _methods[t] = {}
+            for m in vcs.elements[t].keys():
+                gm = vcs.elements[t][m]
+                _methods[t][m] = vcs.dumpToDict(gm)[0]
+                if hasattr(gm, "levels"):
+                    arr = numpy.array(gm.levels)
+                    if numpy.allclose(arr, 1e20) and arr.shape[-1] == 2:
+                        _methods[t][m]["levels"] = [1e20, 1e20]
+        return _methods
+
     @exportRpc('vcs.getgraphicsmethod')
     def getgraphicsmethod(self, typeName, name):
         """Returns the graphics method object"""
@@ -168,12 +191,14 @@ class Visualizer(protocols.vtkWebProtocol):
         """Returns a list of available graphics methods"""
         return vcs.graphicsmethodlist()
 
-    @exportRpc('vcs.getgraphicsmethodvariablecount')
+    @exportRpc('vcs.getgraphicsmethodvariablecount')        
     def getgraphicsmethodvariablecount(self, typeName):
+        """Returns the number of slabs expected by the graphics method type 'typeName'"""
         return vcs.xmldocs.obj_details['graphics method'][typeName]['slabs']
 
     @exportRpc('vcs.setgraphicsmethod')
     def setgraphicsmethod(self, typeName, name, nameValueMap):
+        """Retrieves the graphics method of type 'typeName' with the name 'name' and applies the values in nameValueMap to it"""
         gm = vcs.getgraphicsmethod(typeName, name)
         updateGraphicsMethodProps(nameValueMap, gm)
 
@@ -181,11 +206,13 @@ class Visualizer(protocols.vtkWebProtocol):
     # Template Method routines
     @exportRpc('vcs.getalltemplatenames')
     def gettemplates(self):
+        """Returns a list of all available template names in sorted order"""
         template_list = sorted(vcs.elements['template'].keys(), key=lambda s: s.lower())
         return template_list
 
     @exportRpc('vcs.gettemplate')
     def gettemplate(self, templateName):
+        """Returns the template as an object if it exists. Returns None otherwise. (None becomes null in js)"""
         if(templateName in vcs.elements['template'].keys()):
             template = vcs.dumpToDict(vcs.elements['template'][templateName])[0]
             return template
@@ -194,6 +221,7 @@ class Visualizer(protocols.vtkWebProtocol):
             
     @exportRpc('vcs.settemplate')
     def settemplate(self, name, newValues):
+        """Finds the template 'name' and applies each value in newValues to it"""
         template = vcs.gettemplate(name)
         for outer_key in newValues:
             if isinstance(newValues[outer_key], dict):
@@ -212,11 +240,13 @@ class Visualizer(protocols.vtkWebProtocol):
                 
     @exportRpc('vcs.createtemplate')
     def createtemplate(self, templateName, nameSource):
+        """Creates a template with name 'templateName' using 'nameSource' as the base template"""
         base_template = vcs.gettemplate(nameSource)
         vcs.createtemplate(templateName, base_template)
             
     @exportRpc('vcs.removetemplate')
     def removetemplate(self, templateName):
+        """Deletes the template named 'templateName' """
         template = vcs.gettemplate(templateName)
         vcs.removeP(template)
 
