@@ -242,6 +242,14 @@ function removetemplate(templateName) {
     });
 }
 
+function calculate(new_operation){
+  const { connection } = connect('server');
+  return connection.vtkweb
+    .then((client) => {
+      return client.pvw.session.call('vcs.calculate', [new_operation]);
+    });
+}
+
 export {
   init,
   variables,
@@ -268,4 +276,6 @@ export {
   settemplate,
   createtemplate,
   removetemplate,
+  // Calculator API
+  calculate,
 };
