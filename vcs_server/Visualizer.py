@@ -33,7 +33,6 @@ class Visualizer(protocols.vtkWebProtocol):
                 f = cdms2.open(varSpec['uri'])
                 # use [] so that the var is not read.
                 var = f[varSpec['variable']]
-
             if ('operations' in varSpec):
                 for op in varSpec['operations']:
                     if ('subRegion' in op):
@@ -289,10 +288,10 @@ class Visualizer(protocols.vtkWebProtocol):
         execute the requested operations. The resulting data can then be plotted. 
         """
         node = None
-        if new_operation['op'] == 'load':
-            # The load operation is useful for dealing with users editing the dimensions
-            # It will handle subset operations as well as 
-            node = cdat_compute_graph.DatasetFunction(**new_operation['args'])
+        # if new_operation['op'] == 'load':
+        #     # The load operation is useful for dealing with users editing the dimensions
+        #     # It will handle subset operations as well as 
+        #     node = cdat_compute_graph.DatasetFunction(**new_operation['args'])
 
         if new_operation['op'] in compute_graph.arithmetic.binary_operators:
             left_value = getVariableNode(new_operation['left_value'])
@@ -315,14 +314,48 @@ def getVariableNode(variable_obj):
     elif variable_obj['type'] == "variable":
         if "json" in variable_obj.keys():
             # If a json key exists, then this variable has already been loaded using cdat_compute_graph
-            # All we need to do then is reconstruct the nodes from the json given
-            return compute_graph.loadjson(variable_obj["json"])
+            # All we need to do then is reconstruct the nodes from the json given,
+            node = compute_graph.loadjson(variable_obj["json"])
         else:
             # If there is no json key, then the variable has not been loaded using cdat_compute_graph
-            # We need to load the given variable from the file specified by the path
-            if "args" in variable_obj.keys():
-                return cdat_compute_graph.DatasetFunction(objtype="variable", uri=variable_obj['path'], id=variable_obj["name"], **variable_obj['args'])
-            else:
-                return cdat_compute_graph.DatasetFunction(objtype="variable", uri=variable_obj['path'], id=variable_obj["name"])
+            # We need to load the given variable from the file specified by the path,
+                node = cdat_compute_graph.DatasetFunction(objtype="variable", uri=variable_obj['path'], id=variable_obj["name"])
+        # After loading the variable, we need to apply any operations the user added post load.
+        # E.g. Axis subsetting, or applying a standard deviation/average across an axis.
+        # These operations are done seperately since they have to be editable on the front end.
+        return applyOperations(node, variable_obj)
     else:
         raise TypeError("Invalid operand type: {}".format(variable_obj["type"]))
+
+def applyOperations(node, varSpec):
+    if "operations" in varSpec:
+        for op in varSpec['operations']:
+            if ('subRegion' in op):
+                kargs = op['subRegion']
+                node = cdat_compute_graph.geospatial.GeospatialFunction(func="subset", array=node, **kargs)
+            # elif ('subSlice' in op):
+            #     kargs = op['subSlice']
+            #     # fill in None with begin and end of the current axis
+            #     for axis in kargs.keys():
+            #         values = kargs[axis]
+            #         newValues = values
+            #         axisIndex = var.getAxisIndex(axis)
+            #         if values[0] is None:
+            #             newValues[0] = 0
+            #         if values[1] is None:
+            #             newValues[1] = var.shape[axisIndex] - 1
+            #         kargs[axis] = slice(*newValues)
+            #     var = var.subSlice(**kargs)
+            # elif ('transform' in op):
+            #     for axis in op["transform"]:
+            #         method = op["transform"][axis]
+            #         if method == "avg":
+            #             var = cdutil.averager(var,axis="({})".format(axis))
+            #         elif method == "std":
+            #             # .std does not work with a FileVariable
+            #             # var[:] turns var into a transientVariable which can be used in .std()
+            #             var = genutil.statistics.std(var[:], axis="({})".format(axis))
+            #         else:
+            #             print "Got {} as a transform method".format(method)
+
+    return node
