@@ -333,6 +333,7 @@ def applyOperations(node, varSpec):
             if ('subRegion' in op):
                 kargs = op['subRegion']
                 node = cdat_compute_graph.geospatial.GeospatialFunction(func="subset", array=node, **kargs)
+            # subSlice not implemented yet. Not sure if it actually used at all
             # elif ('subSlice' in op):
             #     kargs = op['subSlice']
             #     # fill in None with begin and end of the current axis
