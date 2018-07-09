@@ -15,51 +15,51 @@ aliases:
       # following will install miniconda3 under $WORKDIR/miniconda/bin
       python workspace/cdat/scripts/install_miniconda.py -w $WORKDIR -p 'py3'
       
-  - &create_conda_env
-    name: create_conda_env
-    command: |
-       export PATH=$WORKDIR/miniconda/bin:$PATH
-       conda config --set always_yes yes --set changeps1 no
-       conda update -y -q conda
-       conda config --set anaconda_upload no
-       conda create -n py2 -c cdat/label/nightly -c conda-forge -c cdat vcs testsrunner "python<3"
-       #conda create -n py3 -c cdat/label/nightly -c conda-forge -c cdat vcs testsrunner "python>3"
+#  - &create_conda_env
+#    name: create_conda_env
+#    command: |
+#       export PATH=$WORKDIR/miniconda/bin:$PATH
+#       conda config --set always_yes yes --set changeps1 no
+#       conda update -y -q conda
+#       conda config --set anaconda_upload no
+#       conda create -n py2 -c cdat/label/nightly -c conda-forge -c cdat vcs mesalib testsrunner "python<3"
+#       #conda create -n py3 -c cdat/label/nightly -c conda-forge -c cdat vcs mesalib testsrunner "python>3"
 
 
-  - &setup_vcsjs
-    name: setup_vcsjs
-    command: |
-       export PATH=$WORKDIR/miniconda/bin:$PATH
-       export UVCDAT_ANONYMOUS_LOG=False
-       set +e
-       #source activate py3
-       source activate py2
-       set -e
-       rm -rf build
+#  - &setup_vcsjs
+#    name: setup_vcsjs
+#    command: |
+#       export PATH=$WORKDIR/miniconda/bin:$PATH
+#       export UVCDAT_ANONYMOUS_LOG=False
+#       set +e
+#       #source activate py3
+#       source activate py2
+#       set -e
+#       rm -rf build
 
-  - &run_vcsjs_tests
-    name: run_vcsjs_tests
-    command: |
-       export PATH=$WORKDIR/miniconda/bin:$PATH
-       export UVCDAT_ANONYMOUS_LOG=False
-       set +e
-       source activate py2
-       set -e
-       #python run_tests.py -H -v2 
-       export PYTHONPATH=.
-       vtkpython scripts/vcs-test-server.py &
-       npm run karma:travis:wait
-       RESULT=$?
-       #echo "**** py2 test result: "${RESULT}
-       #set +e
-       #source activate py3
-       #set -e
-       #python run_tests.py -H -v2 
-       #PY3_RESULT=$?
-       #echo "**** py3 test result: "${PY3_RESULT}
-       #RESULT=$(( $RESULT + $PY3_RESULT))
-       exit $RESULT
-
+#  - &run_vcsjs_tests
+#    name: run_vcsjs_tests
+#    command: |
+#       export PATH=$WORKDIR/miniconda/bin:$PATH
+#       export UVCDAT_ANONYMOUS_LOG=False
+#       set +e
+#       source activate py2
+#       set -e
+#       #python run_tests.py -H -v2 
+#       export PYTHONPATH=.
+#       vtkpython scripts/vcs-test-server.py &
+#       npm run karma:travis:wait
+#       RESULT=$?
+#       #echo "**** py2 test result: "${RESULT}
+#       #set +e
+#       #source activate py3
+#       #set -e
+#       #python run_tests.py -H -v2 
+#       #PY3_RESULT=$?
+#       #echo "**** py3 test result: "${PY3_RESULT}
+#       #RESULT=$(( $RESULT + $PY3_RESULT))
+#       exit $RESULT
+#
   - &conda_upload
     name: conda_upload
     command: |
@@ -91,13 +91,13 @@ jobs:
     steps:
       - checkout
       - run: *setup_miniconda
-      - run: *create_conda_env
-      - run: *setup_vcsjs
-      - run: *run_vcsjs_tests
+#      - run: *create_conda_env
+#      - run: *setup_vcsjs
+#      - run: *run_vcsjs_tests
       - run: *conda_upload
-      - store_artifacts:
-          path: tests_html
-          destination: tests_html
+#      - store_artifacts:
+#          path: tests_html
+#          destination: tests_html
 
   linux_vcsjs:
     machine:
@@ -108,13 +108,13 @@ jobs:
     steps:
       - checkout
       - run: *setup_miniconda 
-      - run: *create_conda_env
-      - run: *setup_vcsjs
-      - run: *run_vcsjs_tests
+#      - run: *create_conda_env
+#      - run: *setup_vcsjs
+#      - run: *run_vcsjs_tests
       - run: *conda_upload
-      - store_artifacts:
-          path: tests_html
-          destination: tests_html
+#      - store_artifacts:
+#          path: tests_html
+#          destination: tests_html
 
 
 workflows:
