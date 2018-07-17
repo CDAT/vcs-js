@@ -288,12 +288,15 @@ class Visualizer(protocols.vtkWebProtocol):
         execute the requested operations. The resulting data can then be plotted. 
         """
         node = None
-        # if new_operation['op'] == 'load':
-        #     # The load operation is useful for dealing with users editing the dimensions
-        #     # It will handle subset operations as well as 
-        #     node = cdat_compute_graph.DatasetFunction(**new_operation['args'])
+        if new_operation['op'] == 'regrid':
+            left_value = getVariableNode(new_operation['left_value'])
+            right_value = getVariableNode(new_operation['right_value'])
+            if 'args' in new_operation and len(new_operation["args"].keys()) > 0:
+                node = cdat_compute_graph.RegridFunction(left_value, right_value, args=new_operation['args'])
+            else:
+                node = cdat_compute_graph.RegridFunction(left_value, right_value)
 
-        if new_operation['op'] in compute_graph.arithmetic.binary_operators:
+        elif new_operation['op'] in compute_graph.arithmetic.binary_operators:
             left_value = getVariableNode(new_operation['left_value'])
             right_value = getVariableNode(new_operation['right_value'])
             node = compute_graph.ArithmeticOperation(new_operation['op'], left_value, right_value)
