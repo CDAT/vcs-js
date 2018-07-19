@@ -23,6 +23,7 @@ machine:
         - bash vcs-js/ci-support/circleci_mac_machine_pre.sh
     #services:
     #    - docker
+    override:
 
 dependencies:
     override:
