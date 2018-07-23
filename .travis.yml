@@ -18,7 +18,7 @@ install:
   - npm install
   - export UVCDAT_ANONYMOUS_LOG=False
   - export UVCDAT_SETUP_PATH=${HOME}
-  - conda create -q -n py2 -c cdat/label/nightly -c conda-forge -c uvcdat cdms2 vcs vcsaddons cdat_info udunits2 nose flake8 genutil matplotlib mesalib image-compare dv3d cdutil cdat_compute_graph compute_graph "proj4<5" "python<3"
+  - conda create -q -n py2 -c cdat/label/nightly -c conda-forge -c cdat cdms2 vcs vcsaddons cdat_info udunits2 nose flake8 genutil matplotlib mesalib image-compare dv3d cdutil cdat_compute_graph compute_graph "proj4<5" "python<3"
 before_script:
   - export CONDA_PREFIX=$HOME/miniconda/envs/py2
   - export PATH=$HOME/miniconda/envs/py2/bin:$PATH
