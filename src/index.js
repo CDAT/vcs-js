@@ -35,10 +35,16 @@ function connect(renderingType) {
   };
 }
 
-function variables(fileName) {
+function allvariables(fileName) {
   const { connection } = connect('server');
   return connection.vtkweb
-    .then((client) => { return client.pvw.session.call('cdat.file.variables', [fileName]); });
+    .then((client) => { return client.pvw.session.call('cdat.file.allvariables', [fileName]); });
+}
+
+function variable(varSpec) {
+  const { connection } = connect('server');
+  return connection.vtkweb
+    .then((client) => { return client.pvw.session.call('cdat.file.variable', [varSpec]); });
 }
 
 function getvarinfofromfile(fileName, variableName=null) {
@@ -242,9 +248,18 @@ function removetemplate(templateName) {
     });
 }
 
+function calculate(new_operation){
+  const { connection } = connect('server');
+  return connection.vtkweb
+    .then((client) => {
+      return client.pvw.session.call('vcs.calculate', [new_operation]);
+    });
+}
+
 export {
   init,
-  variables,
+  allvariables,
+  variable,
   getvarinfofromfile,
   remoteRenderer,
   // Colormap functions
@@ -268,4 +283,6 @@ export {
   settemplate,
   createtemplate,
   removetemplate,
+  // Calculator API
+  calculate,
 };

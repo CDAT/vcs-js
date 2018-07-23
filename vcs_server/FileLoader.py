@@ -6,6 +6,8 @@ import vtk
 from vtk.web import protocols
 # import vcs modules
 import cdms2
+import compute_graph
+import cdat_compute_graph
 
 class StringBuffer(object):
     def __init__(self):
@@ -32,8 +34,8 @@ class FileLoader(protocols.vtkWebProtocol):
         self._datadir = datadir
         self._infobuf = StringBuffer()
 
-    @exportRpc('cdat.file.variables')
-    def variables(self, file_name):
+    @exportRpc('cdat.file.allvariables')
+    def allvariables(self, file_name):
         """Return a list of variables from the given file name."""
         reader = self.get_reader(file_name)
         outVars = {}
@@ -117,6 +119,94 @@ class FileLoader(protocols.vtkWebProtocol):
                 'isTime': axis.isTime()
             }
         return [outVars, outAxes]
+
+    @exportRpc('cdat.file.variable')
+    def variable(self, varSpec):
+        """
+        Return an array containing two objects. The first entry contains variable info and the second contains axis info
+        """
+        outVar = {}
+        var = None
+        if 'json' in varSpec:
+            var = compute_graph.loadjson(varSpec['json']).derive()
+        else: 
+            reader = self.get_reader(varSpec['file_name'])
+            var = reader.variables[varSpec['var_name']]
+        # Get a displayable name for the variable
+        if hasattr(var, 'long_name'):
+            name = var.long_name
+        elif hasattr(var, 'title'):
+            name = var.title
+        elif hasattr(var, 'id'):
+            name = var.id
+        elif name in varSpec:
+            name = varSpec['name']
+        else:
+            name = "unknown_name"
+        if hasattr(var, 'units'):
+            units = var.units
+        else:
+            units = 'Unknown'
+        axisList = []
+        for axis in var.getAxisList():
+            axisList.append(axis.id)
+        lonLat = None
+        if (var.getLongitude() and var.getLatitude() and
+                not isinstance(var.getGrid(), cdms2.grid.AbstractRectGrid)):
+            # for curvilinear and generic grids
+            # 1. getAxisList() returns the axes and
+            # 2. getLongitude() and getLatitude() return the lon,lat variables
+            lonName = var.getLongitude().id
+            latName = var.getLatitude().id
+            lonLat = [lonName, latName]
+            # add min/max for longitude/latitude
+            outVar[lonName] = {}
+            outVar[latName] = {}
+            lonData = var.getLongitude()[:]
+            outVar[lonName]['bounds'] =\
+                [float(np.amin(lonData)), float(np.amax(lonData))]
+            latData = var.getLatitude()[:]
+            outVar[latName]['bounds'] =\
+                [float(np.amin(latData)), float(np.amax(latData))]
+        if (isinstance(var.getGrid(), cdms2.grid.AbstractRectGrid)):
+            gridType = 'rectilinear'
+        elif (isinstance(var.getGrid(), cdms2.hgrid.AbstractCurveGrid)):
+            gridType = 'curvilinear'
+        elif (isinstance(var.getGrid(), cdms2.gengrid.AbstractGenericGrid)):
+            gridType = 'generic'
+        else:
+            gridType = None
+        
+        outVar['name'] = name
+        outVar['shape'] = var.shape
+        outVar['units'] = units
+        outVar['axisList'] = axisList
+        outVar['lonLat'] = lonLat
+        outVar['gridType'] = gridType
+        if ('bounds' not in outVar):
+            outVar['bounds'] = None
+        outAxes = {}
+        
+        for axis in var.getAxisList():
+            # Get a displayable name for the variable
+            if hasattr(axis, 'id'):
+                name = axis.id
+            else:
+                name = "Unknown-axis"
+            if hasattr(axis, 'units'):
+                units = axis.units
+            else:
+                units = 'Unknown'
+            outAxes[name] = {
+                'name': name,
+                'shape': axis.shape,
+                'units': units,
+                'modulo': axis.getModulo(),
+                'moduloCycle': axis.getModuloCycle(),
+                'data': axis.getData().tolist(),
+                'isTime': axis.isTime()
+            }
+        return [outVar, outAxes]
 
     @exportRpc('cdat.file.var.info')
     def getvarinfofromfile(self, file_name, var_name=None):
