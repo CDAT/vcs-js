@@ -139,6 +139,7 @@ class VcsPlot(object):
 
         Returns success or failure.
         """
+        print("LOADING:",var)
         self._plot.variables = var
         return True
 

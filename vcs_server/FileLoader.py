@@ -118,6 +118,8 @@ class FileLoader(protocols.vtkWebProtocol):
                 'data': axis.getData().tolist(),
                 'isTime': axis.isTime()
             }
+        reader.close()
+        del(self._file_cache[file_name])
         return [outVars, outAxes]
 
     @exportRpc('cdat.file.variable')
@@ -128,6 +130,7 @@ class FileLoader(protocols.vtkWebProtocol):
         outVar = {}
         var = None
         if 'json' in varSpec:
+            reader = None
             var = compute_graph.loadjson(varSpec['json']).derive()
         else: 
             reader = self.get_reader(varSpec['file_name'])
@@ -206,6 +209,9 @@ class FileLoader(protocols.vtkWebProtocol):
                 'data': axis.getData().tolist(),
                 'isTime': axis.isTime()
             }
+        if reader is not None:
+            reader.close()
+            del(self._file_cache[varSpec['file_name']])
         return [outVar, outAxes]
 
     @exportRpc('cdat.file.var.info')
@@ -228,8 +234,12 @@ class FileLoader(protocols.vtkWebProtocol):
                     result[variable] = get_var_info(variable)
                 except:
                     result[variable] = 'Error getting var info for %s' % variable
+            reader.close()
+            del(self._file_cache[file_name])
             return result
 
+        reader.close()
+        del(self._file_cache[file_name])
         return get_var_info(var_name)
 
     @exportRpc('cdat.file.can_open')

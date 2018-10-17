@@ -28,6 +28,7 @@ class Visualizer(protocols.vtkWebProtocol):
         all_vars = []
         for varSpec in varSpecs:
             if 'json' in varSpec:
+                f = None
                 var = compute_graph.loadjson(varSpec['json']).derive()
             else: 
                 f = cdms2.open(varSpec['uri'])
@@ -67,11 +68,13 @@ class Visualizer(protocols.vtkWebProtocol):
                 axisOrder = var.getAxisIds()
                 stringOrder = ''.join(["({})".format(axisOrder[i]) for i in indexOrder])
                 var = var(order=stringOrder)
-            all_vars.append(var)
+            all_vars.append(var())
         plot.loadVariable(all_vars)
         canvas = plot.getCanvas()
         windowId = self.getGlobalId(plot.getWindow())
         self._canvas[windowId] = canvas
+        if f is not None:
+            f.close()
         return [windowId]
 
     @exportRpc('vcs.canvas.clear')
