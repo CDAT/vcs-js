@@ -35,10 +35,16 @@ function connect(renderingType) {
   };
 }
 
-function variables(fileName) {
+function allvariables(fileName) {
   const { connection } = connect('server');
   return connection.vtkweb
-    .then((client) => { return client.pvw.session.call('cdat.file.variables', [fileName]); });
+    .then((client) => { return client.pvw.session.call('cdat.file.allvariables', [fileName]); });
+}
+
+function variable(varSpec) {
+  const { connection } = connect('server');
+  return connection.vtkweb
+    .then((client) => { return client.pvw.session.call('cdat.file.variable', [varSpec]); });
 }
 
 function getvarinfofromfile(fileName, variableName=null) {
@@ -154,6 +160,15 @@ function removecolormap(name) {
 
 // ======================================================================
 // Graphics method functionality
+
+function getallgraphicsmethods() {
+  const { connection } = connect('server');
+  return connection.vtkweb
+    .then((client) => {
+      return client.pvw.session.call('vcs.getallgraphicsmethods');
+    });
+}
+
 function getgraphicsmethod(typeName, name) {
   const { connection } = connect('server');
   return connection.vtkweb
@@ -208,9 +223,58 @@ function removegraphicsmethod(typeName, name) {
     });
 }
 
+function getalltemplatenames() {
+  const { connection } = connect('server');
+  return connection.vtkweb
+    .then((client) => {
+      return client.pvw.session.call('vcs.getalltemplatenames');
+    });
+}
+
+function gettemplate(templateName) {
+  const { connection } = connect('server');
+  return connection.vtkweb
+    .then((client) => {
+      return client.pvw.session.call('vcs.gettemplate', [templateName]);
+    });
+}
+
+function settemplate(templateName, templateData) {
+  const { connection } = connect('server');
+  return connection.vtkweb
+    .then((client) => {
+      return client.pvw.session.call('vcs.settemplate', [templateName, templateData]);
+    });
+}
+
+function createtemplate(templateName, nameSource) {
+  const { connection } = connect('server');
+  return connection.vtkweb
+    .then((client) => {
+      return client.pvw.session.call('vcs.createtemplate', [templateName, nameSource]);
+    });
+}
+
+function removetemplate(templateName) {
+  const { connection } = connect('server');
+  return connection.vtkweb
+    .then((client) => {
+      return client.pvw.session.call('vcs.removetemplate', [templateName]);
+    });
+}
+
+function calculate(new_operation){
+  const { connection } = connect('server');
+  return connection.vtkweb
+    .then((client) => {
+      return client.pvw.session.call('vcs.calculate', [new_operation]);
+    });
+}
+
 export {
   init,
-  variables,
+  allvariables,
+  variable,
   getvarinfofromfile,
   remoteRenderer,
   // Colormap functions
@@ -220,6 +284,7 @@ export {
   createcolormap,
   removecolormap,
   // Graphics method functions
+  getallgraphicsmethods,
   getgraphicsmethodtypes,
   getgraphicsmethodvariablecount,
   getgraphicsmethodnames,
@@ -227,4 +292,12 @@ export {
   setgraphicsmethod,
   creategraphicsmethod,
   removegraphicsmethod,
+  // Template method functions
+  getalltemplatenames,
+  gettemplate,
+  settemplate,
+  createtemplate,
+  removetemplate,
+  // Calculator API
+  calculate,
 };

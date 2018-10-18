@@ -17,10 +17,10 @@ conda config --set anaconda_upload no
 export CONDA_BLD_PATH=${HOME}/conda-bld
 export VERSION="*"
 echo "Cloning recipes"
-git clone git://github.com/UV-CDAT/conda-recipes
+git clone git://github.com/CDAT/conda-recipes
 cd conda-recipes
 python ./prep_for_build.py
 echo "Building now"
-conda build $PKG_NAME -c uvcdat/label/nightly -c conda-forge -c uvcdat 
+conda build $PKG_NAME -c cdat/label/nightly -c conda-forge -c cdat 
 anaconda -t $CONDA_UPLOAD_TOKEN upload -u $USER -l nightly $CONDA_BLD_PATH/$OS/$PKG_NAME-$VERSION.$(date +%Y)*_0.tar.bz2 --force
 
