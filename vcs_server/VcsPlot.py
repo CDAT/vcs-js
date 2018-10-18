@@ -1,4 +1,4 @@
-from PlotManager import PlotManager
+from .PlotManager import PlotManager
 import json
 import vcs
 import sys
@@ -100,7 +100,7 @@ class VcsPlot(object):
             return
         for t in vcs.listelements():
             if len(vcs.listelements(t)):
-                o = vcs.elements[t].values()[0]
+                o = list(vcs.elements[t].values())[0]
                 if hasattr(o, "g_name"):
                     if o.g_name == gm["g_name"]:
                         break
