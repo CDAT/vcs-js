@@ -5,6 +5,7 @@ import os
 
 
 # Build the JS so vcs.js is ready for packaging
+subprocess.check_call("npm install", shell=True)
 subprocess.check_call("npm run build", shell=True)
 
 scripts = ["js/vcs.js", "js/vcs.js.map"]

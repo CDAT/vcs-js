@@ -15,7 +15,7 @@ import traceback
 import numpy
 import compute_graph
 import cdat_compute_graph
-from VcsPlot import VcsPlot, updateGraphicsMethodProps
+from .VcsPlot import VcsPlot, updateGraphicsMethodProps
 
 
 class Visualizer(protocols.vtkWebProtocol):
@@ -32,6 +32,7 @@ class Visualizer(protocols.vtkWebProtocol):
         all_vars = []
         for varSpec in varSpecs:
             if 'json' in varSpec:
+                f = None
                 var = compute_graph.loadjson(varSpec['json']).derive()
             else: 
                 f = cdms2.open(varSpec['uri'])
@@ -45,7 +46,7 @@ class Visualizer(protocols.vtkWebProtocol):
                     elif ('subSlice' in op):
                         kargs = op['subSlice']
                         # fill in None with begin and end of the current axis
-                        for axis in kargs.keys():
+                        for axis in list(kargs.keys()):
                             values = kargs[axis]
                             newValues = values
                             axisIndex = var.getAxisIndex(axis)
@@ -65,17 +66,19 @@ class Visualizer(protocols.vtkWebProtocol):
                                 # var[:] turns var into a transientVariable which can be used in .std()
                                 var = genutil.statistics.std(var[:], axis="({})".format(axis))
                             else:
-                                print "Got {} as a transform method".format(method)
+                                print("Got {} as a transform method".format(method))
             if ('axis_order' in varSpec):
                 indexOrder = varSpec['axis_order']
                 axisOrder = var.getAxisIds()
                 stringOrder = ''.join(["({})".format(axisOrder[i]) for i in indexOrder])
                 var = var(order=stringOrder)
-            all_vars.append(var)
+            all_vars.append(var())
         plot.loadVariable(all_vars)
         canvas = plot.getCanvas()
         windowId = self.getGlobalId(plot.getWindow())
         self._canvas[windowId] = canvas
+        if f is not None:
+            f.close()
         return [windowId]
 
     @exportRpc('vcs.canvas.clear')
@@ -211,7 +214,7 @@ class Visualizer(protocols.vtkWebProtocol):
     def getcolormap(self, name):
         """Returns the color values in a colormap"""
         name = str(name)
-        return vcs.getcolormap(name).getindex().values()
+        return list(vcs.getcolormap(name).getindex().values())
 
     @exportRpc('vcs.setcolormap')
     def setcolormap(self, name, values):
@@ -230,7 +233,7 @@ class Visualizer(protocols.vtkWebProtocol):
         else:
             nameSource = str(nameSource)
         cm = vcs.createcolormap(name, nameSource)
-        return cm.getindex().values()
+        return list(cm.getindex().values())
 
     # ======================================================================
     # Graphics method routines
@@ -250,7 +253,7 @@ class Visualizer(protocols.vtkWebProtocol):
         _methods = {}
         for t in vcs.graphicsmethodlist():
             _methods[t] = {}
-            for m in vcs.elements[t].keys():
+            for m in list(vcs.elements[t].keys()):
                 gm = vcs.elements[t][m]
                 _methods[t][m] = vcs.dumpToDict(gm)[0]
                 if hasattr(gm, "levels"):
@@ -304,13 +307,13 @@ class Visualizer(protocols.vtkWebProtocol):
     @exportRpc('vcs.getalltemplatenames')
     def gettemplates(self):
         """Returns a list of all available template names in sorted order"""
-        template_list = sorted(vcs.elements['template'].keys(), key=lambda s: s.lower())
+        template_list = sorted(list(vcs.elements['template'].keys()), key=lambda s: s.lower())
         return template_list
 
     @exportRpc('vcs.gettemplate')
     def gettemplate(self, templateName):
         """Returns the template as an object if it exists. Returns None otherwise. (None becomes null in js)"""
-        if(templateName in vcs.elements['template'].keys()):
+        if(templateName in list(vcs.elements['template'].keys())):
             template = vcs.dumpToDict(vcs.elements['template'][templateName])[0]
             return template
         else:
@@ -383,7 +386,7 @@ class Visualizer(protocols.vtkWebProtocol):
         if new_operation['op'] == 'regrid':
             left_value = getVariableNode(new_operation['left_value'])
             right_value = getVariableNode(new_operation['right_value'])
-            if 'args' in new_operation and len(new_operation["args"].keys()) > 0:
+            if 'args' in new_operation and len(list(new_operation["args"].keys())) > 0:
                 node = cdat_compute_graph.RegridFunction(left_value, right_value, args=new_operation['args'])
             else:
                 node = cdat_compute_graph.RegridFunction(left_value, right_value)
@@ -407,7 +410,7 @@ def getVariableNode(variable_obj):
         return node
         
     elif variable_obj['type'] == "variable":
-        if "json" in variable_obj.keys():
+        if "json" in list(variable_obj.keys()):
             # If a json key exists, then this variable has already been loaded using cdat_compute_graph
             # All we need to do then is reconstruct the nodes from the json given,
             node = compute_graph.loadjson(variable_obj["json"])

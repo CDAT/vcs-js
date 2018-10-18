@@ -1,5 +1,5 @@
 import vcs
-
+import cdms2
 
 class PlotManager(object):
     def __init__(self, canvas):
