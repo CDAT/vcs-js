@@ -94,7 +94,7 @@ jobs:
     #  OS: "osx-64"
     #steps:
     #  - checkout
-      - run: *setup_miniconda
+    #      - run: *setup_miniconda
 #      - run: *create_conda_env
 #      - run: *setup_vcsjs
 #      - run: *run_vcsjs_tests
