@@ -225,7 +225,8 @@ class FileLoader(protocols.vtkWebProtocol):
         def get_var_info(var):
             self._infobuf.clear()
             reader(var).info(device=self._infobuf)
-            return self._infobuf.getbuffer()
+            out = self._infobuf.getbuffer()
+            return out
 
         if not var_name:
             result = {}
@@ -238,9 +239,10 @@ class FileLoader(protocols.vtkWebProtocol):
             del(self._file_cache[file_name])
             return result
 
+        out = get_var_info(var_name)
         reader.close()
         del(self._file_cache[file_name])
-        return get_var_info(var_name)
+        return out
 
     @exportRpc('cdat.file.can_open')
     def can_open(self, file_name):
