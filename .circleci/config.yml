@@ -125,7 +125,7 @@ workflows:
   version: 2
   vcsjs:
     jobs:
-      - macos_vcsjs
+        #      - macos_vcsjs
       - linux_vcsjs
 
 
