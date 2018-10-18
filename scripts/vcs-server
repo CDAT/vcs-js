@@ -88,7 +88,8 @@ if __name__ == "__main__":
         else:
             protocol = "ws://"
         url = protocol + args.host + ":%d" % args.port
-        f.write(js_file.replace("@@@URL@@@", url))
+        wrote = js_file.replace(b"@@@URL@@@", url.encode("utf-8"))
+        f.write(wrote.decode("utf-8"))
     # Start server
     server.start_webserver(options=args, protocol=_VCSApp)
     # Once we're done serving, clean up the cached JS
