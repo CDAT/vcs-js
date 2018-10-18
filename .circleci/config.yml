@@ -102,7 +102,7 @@ jobs:
 #      - store_artifacts:
 #          path: tests_html
 #          destination: tests_html
-
+#
   linux_vcsjs:
     machine:
       image: circleci/classic:latest
@@ -125,7 +125,6 @@ workflows:
   version: 2
   vcsjs:
     jobs:
-        #      - macos_vcsjs
       - linux_vcsjs
 
 
