@@ -30,9 +30,8 @@
 """
 
 import argparse
-
+import sys
 # import vtk modules.
-import vtk
 from vtk.web import protocols
 from vtk.web import wslink as vtk_wslink
 from wslink import server
@@ -81,15 +80,18 @@ if __name__ == "__main__":
     args.content = tempfile.mkdtemp()
     # Retrieve the JS contents to transform and cache in the tempdir
     js_file = pkg_resources.resource_string(vcs_server.__name__, "js/vcs.js")
-    with open(os.path.join(args.content, "vcs.js"), "w") as f:
+    with open(os.path.join(args.content, "vcs.js"), "wb") as f:
         if args.sslKey and args.sslCert:
             # Use wss
             protocol = "wss://"
         else:
             protocol = "ws://"
         url = protocol + args.host + ":%d" % args.port
-        wrote = js_file.replace(b"@@@URL@@@", url.encode("utf-8"))
-        f.write(wrote.decode("utf-8"))
+        if sys.version_info.major == 2:
+            wrote = js_file.replace(b"@@@URL@@@", url)
+        else:
+            wrote = js_file.replace(b"@@@URL@@@", url.encode())
+        f.write(wrote)
     # Start server
     server.start_webserver(options=args, protocol=_VCSApp)
     # Once we're done serving, clean up the cached JS
