@@ -9,6 +9,9 @@ import vcs
 import cdms2
 import genutil
 import cdutil
+import sys
+import base64, os, shutil, tempfile
+import traceback
 import numpy
 import compute_graph
 import cdat_compute_graph
@@ -17,6 +20,7 @@ from .VcsPlot import VcsPlot, updateGraphicsMethodProps
 
 class Visualizer(protocols.vtkWebProtocol):
 
+    _allowedScreenshotTypes = [ 'png', 'ps', 'pdf', 'svg' ]
     _canvas = {}
 
     @exportRpc('vcs.canvas.plot')
@@ -100,6 +104,94 @@ class Visualizer(protocols.vtkWebProtocol):
             del canvas
             return True
         return False
+
+    @exportRpc('vcs.canvas.screenshot')
+    def screenshot(self, windowId, saveType, local, remote,
+                   remotePath, width, height):
+        """ Save a screenshot of the current canvas
+
+        This method can be used to save a screenshot of the current canvas, as
+        long as the canvas has been plotted once before.
+
+        Arguments:
+        windowId -- Returned by 'plot' method, used to find associated canvas
+        saveType -- One of 'png', 'svg', 'pdf', or 'ps'
+        local -- Should screenshot be saved locally on the client
+        remote -- Should screenshot be save remotely on the server
+        remotePath -- Full path and filename to use when saving remotely
+        width -- Integer giving width of saved screenshot (if different than last plot)
+        height -- Integer giving height of saved screenshot (if different than last plot)
+
+        Returns:
+        A dictionary is returned, including indication of success or failure, as
+        well as any error message, e.g.
+
+            {
+                'success': True,
+                'msg': 'Screenshot successfully saved on server'   ,
+                'encodedImage': <base64-encoded-image-data>
+            }
+        """
+        if not windowId in self._canvas:
+            return {
+                'success': False,
+                'msg': 'windowId is required to find associated canvas'
+            }
+
+        if not saveType in self._allowedScreenshotTypes:
+            return {
+                'success': False,
+                'msg': '%s not in allowed screenshot types' % saveType
+            }
+
+        if remote and remotePath is None:
+            return {
+                'success': False,
+                'msg': 'Must have remotePath to save screenshot on server, none provided'
+            }
+
+        # If not saving remotely, we will need a temporary dir/file for
+        # saving the screenshot
+        if not remote:
+            temporaryDirectoryName = tempfile.mkdtemp()
+            remotePath = os.path.join(temporaryDirectoryName, 'tempscreenshot.%s' % saveType)
+            print('Using temporary location for saving image: %s' % remotePath)
+
+        canvas = self._canvas[windowId];
+
+        try:
+            if saveType == 'png':
+                canvas.png(remotePath, width=width, height=height)
+            elif saveType == 'svg':
+                canvas.svg(remotePath, width=width, height=height)
+            elif saveType == 'pdf':
+                canvas.pdf(remotePath, width=width, height=height)
+            elif saveType == 'ps':
+                canvas.postscript(remotePath, width=width, height=height)
+        except Exception as inst:
+            print('Caught exception saving screenshot on server:')
+            print(inst)
+            return {
+                'success': False,
+                'msg': 'Failed to save screenshot on server: %s' % remotePath
+            }
+
+        returnValue = {
+            'success': True,
+            'msg': 'Screenshot successfully saved on server'
+        }
+
+        if local:
+            with open(remotePath, 'rb') as f:
+                data = f.read()
+                encodedData = base64.b64encode(data)
+                returnValue['encodedImage'] = encodedData
+
+        # If not saving remotely, clean up the temporary directory
+        if not remote:
+            shutil.rmtree(temporaryDirectoryName)
+
+        return returnValue
 
     # ======================================================================
     # Common elements routines

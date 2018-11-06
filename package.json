@@ -51,6 +51,7 @@
   },
   "dependencies": {
     "axios": "0.17.1",
+    "b64-to-blob": "1.2.19",
     "css-element-queries": "1.0.1",
     "hammerjs": "2.0.8",
     "monologue.js": "0.3.5",

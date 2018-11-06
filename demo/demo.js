@@ -5,6 +5,9 @@ let canvas;
 let renderer;
 let boxfill;
 let variables;
+let pdfBlobUrl;
+let pngBlobUrl;
+
 
 // const { vcs } = window;
 
@@ -103,6 +106,63 @@ function vcsPlotMycolormap(evt) {
 function vcsBoxfillResize() {
   canvas.resize(600, 400);
   console.log('div resize');
+}
+
+function captureCanvasScreenshot() {
+  canvas.screenshot('pdf', true, false, null).then((result) => {
+    console.log('Got screenshot result:');
+    console.log(result);
+    const { blob, type } = result;
+    pdfBlobUrl = URL.createObjectURL(blob);
+    var link = document.createElement("a");
+    link.href = pdfBlobUrl;
+    const fname = `image.${type}`;
+    link.download = fname;
+    link.innerHTML = `Click here to download ${fname}`;
+    document.body.appendChild(link);
+  });
+
+  canvas.screenshot('png', true, false, null, 1024, 768).then((result) => {
+    console.log('Got screenshot result:');
+    console.log(result);
+    const { blob, type } = result;
+    pngBlobUrl = URL.createObjectURL(blob);
+
+    var img = document.createElement("img");
+    img.classList.add("obj");
+    img.file = blob;
+    img.width = 200;
+    img.height = 176;
+
+    var link = document.createElement("a");
+    link.href = pngBlobUrl;
+    const fname = `image.${type}`;
+    link.download = fname;
+    link.appendChild(img);
+    document.body.appendChild(link);
+
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(blob);
+  });
+}
+
+function cleanup() {
+  /*
+  According the to the documentation here:
+
+    https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL
+
+  the objectURLs will be revoked when the document is unloaded, so this
+  isn't technically needed in the case of this demo.  However it is
+  included as a reminder of the proper approach which should be taken
+  if necessary/possible on a case by case basis.
+  */
+  console.log('Cleaning up object URLs');
+  URL.revokeObjectURL(pdfBlobUrl);
+  URL.revokeObjectURL(pngBlobUrl);
 }
 
 /**
